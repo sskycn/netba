@@ -11,7 +11,8 @@ type Props = {
 
 const { title, description = site.description } = Astro.props;
 const pageTitle = title ? `${title} · ${site.name}` : `${site.name} · ${site.tagline}`;
-const canonical = Astro.url.pathname === "/" ? "/" : Astro.url.pathname.replace(/\/$/, "");
+const path = Astro.url.pathname === "/" ? "/" : Astro.url.pathname.replace(/\/$/, "");
+const canonical = new URL(path, Astro.site ?? site.url).href;
 ---
 
 <!doctype html>
@@ -24,6 +25,7 @@ const canonical = Astro.url.pathname === "/" ? "/" : Astro.url.pathname.replace(
     <meta name="theme-color" content="#0c0d0b" />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary" />
     <link rel="canonical" href={canonical} />

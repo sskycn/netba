@@ -22,7 +22,27 @@ pnpm build
 pnpm preview
 ```
 
-静态文件输出到 `dist/`。可以放到任意静态托管：GitHub Pages、Cloudflare Pages、Netlify，或自己的对象存储。
+静态文件输出到 `dist/`。生产站点由 GitHub Actions 发布到 GitHub Pages，域名是 [netba.net](https://netba.net)。
+
+推送到 `main` 会自动构建并部署。发布源是 **GitHub Actions**，不要改成 branch deploy。
+
+### 自定义域名
+
+`public/CNAME` 写的是 `netba.net`。域名当前由 Cloudflare 托管，apex 需要指到 GitHub Pages。记录用 **DNS only**（灰云），不要开代理，否则 GitHub 签不了 HTTPS 证书。
+
+| 类型 | 名称 | 内容 |
+| --- | --- | --- |
+| A | `@` | `185.199.108.153` |
+| A | `@` | `185.199.109.153` |
+| A | `@` | `185.199.110.153` |
+| A | `@` | `185.199.111.153` |
+| AAAA | `@` | `2606:50c0:8000::153` |
+| AAAA | `@` | `2606:50c0:8001::153` |
+| AAAA | `@` | `2606:50c0:8002::153` |
+| AAAA | `@` | `2606:50c0:8003::153` |
+| CNAME | `www` | `sskycn.github.io` |
+
+也可以在 Cloudflare 用 apex CNAME 扁平化到 `sskycn.github.io`，效果相同。DNS 生效后，在仓库 Settings → Pages 打开 **Enforce HTTPS**。
 
 ## 页面
 

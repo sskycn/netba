@@ -1,5 +1,6 @@
 export const site = {
   name: "NetbaDB",
+  url: "https://netba.net",
   tagline: "强类型关系型数据库核心",
   description:
     "NetbaDB 是用 Rust 写成的强类型关系型数据库核心。它用语言无关的 Canonical Schema IR 隔开应用语言与引擎，并提供一条从解析器到页、WAL 与崩溃恢复的真实垂直切片。",
