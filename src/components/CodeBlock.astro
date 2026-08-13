@@ -1,0 +1,14 @@
+---
+import { Code } from "astro:components";
+
+type Props = {
+  code: string;
+  lang?: "rust" | "sql" | "text" | "bash";
+};
+
+const { code, lang = "rust" } = Astro.props;
+---
+
+<div class="code-wrap">
+  <Code code={code} lang={lang} theme="gruvbox-dark-hard" />
+</div>

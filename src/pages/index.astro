@@ -1,0 +1,182 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageFrame from "../components/PageFrame.astro";
+import { crates } from "../data/crates";
+import { implemented, notImplemented, phases } from "../data/phases";
+import { site } from "../data/site";
+
+const nextPhases = phases.filter((phase) => phase.status !== "complete").slice(0, 4);
+const pipeline = [
+  { title: "Schema IR", text: "语言无关的表、列、物理 / 语义类型" },
+  { title: "Parser / HIR", text: "名字解析与名义类型检查" },
+  { title: "Relational IR", text: "逻辑计划，不含存储选择" },
+  { title: "Planner", text: "扫描、nested-loop、排序与聚合" },
+  { title: "Executor", text: "同步执行 + 三值逻辑" },
+  { title: "Storage", text: "事务、WAL、页、堆、B+Tree" },
+];
+---
+
+<BaseLayout>
+  <div class="wrap">
+    <section class="hero" style="padding-top: 3.4rem; padding-bottom: 1rem;">
+      <div>
+        <p class="eyebrow">
+          <span class="chip">Experimental</span>
+          <span class="chip teal">Rust embedded</span>
+          <span class="chip moss">AGPL-3.0</span>
+        </p>
+        <h1>把类型<br />一直做到<em>页里</em>。</h1>
+        <p class="lede">
+          {site.name} 是用 Rust 写的强类型关系型数据库核心。应用语言停在前端；引擎只消费
+          Canonical Schema IR，再从解析器走到槽页、WAL 与崩溃恢复。
+        </p>
+        <div class="actions">
+          <a class="btn btn-primary" href="/architecture">查看架构边界</a>
+          <a class="btn btn-ghost" href="/start">嵌入式起步</a>
+        </div>
+        <div class="hero-meta">
+          <div class="stat"><b>Phase {site.phase}</b><span>当前垂直切片</span></div>
+          <div class="stat"><b>Page {site.pageVersion}</b><span>{site.pageSize} 槽页</span></div>
+          <div class="stat"><b>WAL {site.walVersion}</b><span>record {site.recordVersion}</span></div>
+          <div class="stat"><b>MSRV {site.msrv}</b><span>dev {site.rustToolchain}</span></div>
+        </div>
+      </div>
+      <PageFrame />
+    </section>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Honest slice</p>
+          <h2>实验性，但不是空壳。</h2>
+        </div>
+        <p>
+          已实现的查询子集刻意很小。仓库里是一条可编译、可测试、可恢复的
+          Rust workspace，而不是一张画完的架构图。
+        </p>
+      </div>
+      <div class="grid-3">
+        <article class="card">
+          <h3>已经接通</h3>
+          <ul>
+            {implemented.slice(0, 6).map((item) => <li>{item}</li>)}
+          </ul>
+        </article>
+        <article class="card warn">
+          <h3>刻意没做</h3>
+          <ul>
+            {notImplemented.slice(0, 6).map((item) => <li>{item}</li>)}
+          </ul>
+        </article>
+        <article class="card next">
+          <h3>下一刀</h3>
+          <ul>
+            {nextPhases.map((phase) => <li>{phase.title} — {phase.summary}</li>)}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Pipeline</p>
+          <h2>稳定的架构边界。</h2>
+        </div>
+        <p>
+          应用语言不是数据库的持久含义。Rust 提供原生嵌入 API；Go 与未来语言应走生成
+          SDK 或版本化协议客户端。
+        </p>
+      </div>
+      <div class="pipeline">
+        {
+          pipeline.map((step) => (
+            <article class="pipe">
+              <b>{step.title}</b>
+              <span>{step.text}</span>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Nominal types</p>
+          <h2>同样的 <code>u64</code>，不是同一种东西。</h2>
+        </div>
+        <p>
+          <code>UserId</code> 与 <code>TeamId</code> 可以共享物理表示，但名义语义类型保持互斥。
+          存储只编码物理值；Canonical Schema 才是语义来源。
+        </p>
+      </div>
+      <div class="grid-2">
+        <article class="card">
+          <h3>物理 / 语义分离</h3>
+          <p>
+            内部标识全是 newtype：<code>TableId</code>、<code>RelationBindingId</code>、
+            <code>ColumnId</code>、<code>PageId</code>、<code>RowId</code>。自连接里，同一张表的两个别名仍是两个绑定。
+          </p>
+        </article>
+        <article class="card">
+          <h3>打开时核对指纹</h3>
+          <p>
+            每张通过校验的表都有版本化规范字节编码与 SHA-256 指纹。堆元数据会持久化它；
+            重开要求调用方给出完整表身份，包括语义类型与列顺序。
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">Workspace</p>
+          <h2>有向无环的 crate 图。</h2>
+        </div>
+        <p>
+          <code>A → B</code> 表示 A 依赖 B。存储不依赖规划器或执行器；执行器只消费物理计划与安全存储 API。
+        </p>
+      </div>
+      <div class="crate-grid">
+        {
+          crates.map((crate) => (
+            <article class="crate">
+              <h3>{crate.name}</h3>
+              <p>{crate.role}</p>
+              <div class="deps">
+                {crate.dependsOn.length ? `→ ${crate.dependsOn.join(" · ")}` : "叶子层"}
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="card">
+        <p class="kicker">Next</p>
+        <h2>从嵌入式 API 开始，或先把边界读完。</h2>
+        <p>
+          源码在 <a href={site.github}>github.com/sskycn/netbadb</a>。
+          站点只展示已经落地的切片，不把路线图写成现成功能。
+        </p>
+        <div class="actions" style="margin-top: 1rem;">
+          <a class="btn btn-primary" href="/start">嵌入式起步</a>
+          <a class="btn btn-ghost" href="/storage">存储与恢复</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

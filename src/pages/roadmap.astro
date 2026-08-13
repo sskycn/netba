@@ -1,0 +1,50 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { notImplemented, phases } from "../data/phases";
+
+const complete = phases.filter((phase) => phase.status === "complete").length;
+---
+
+<BaseLayout
+  title="路线图"
+  description="NetbaDB 从 Rust 基础到持久 B+Tree 的垂直切片，以及索引、服务器与 SDK 的下一步。"
+>
+  <div class="wrap content-page">
+    <p class="kicker">Roadmap</p>
+    <h1 class="page-title">先打穿一条竖井，<br />再横向加宽。</h1>
+    <p class="page-deck">
+      实现顺序是有意垂直的。{complete} 个阶段已经落地到 Phase 4C1。
+      隔离 / MVCC、B+Tree 删除、服务器网络与 Go 线协议仍是路线图，不是当前特性。
+    </p>
+
+    <div class="phases">
+      {
+        phases.map((phase) => (
+          <article class="phase">
+            <div class="id">{phase.id}</div>
+            <div>
+              <h3>{phase.title}</h3>
+              <p>{phase.summary}</p>
+            </div>
+            <span class:list={["badge", phase.status]}>
+              {phase.status === "complete" ? "完成" : phase.status === "next" ? "下一步" : "更后"}
+            </span>
+          </article>
+        ))
+      }
+    </div>
+
+    <div class="prose">
+      <h2>不要从站点里读出这些能力</h2>
+    </div>
+    <div class="grid-2" style="margin-top: 1rem;">
+      {
+        notImplemented.map((item) => (
+          <article class="card warn">
+            <p>{item}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>

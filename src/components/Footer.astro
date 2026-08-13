@@ -1,0 +1,17 @@
+---
+import { site } from "../data/site";
+---
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div>
+      <strong class="serif">{site.name}</strong>
+      {' '}是实验性软件。已实现的子集很小，但是一条真实的 parser-to-storage 垂直切片。
+    </div>
+    <div>
+      <a href={site.github}>sskycn/netbadb</a>
+      {' · '}{site.license}
+      {' · '}纯静态 Astro 站点
+    </div>
+  </div>
+</footer>

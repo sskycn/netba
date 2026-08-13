@@ -1,0 +1,26 @@
+---
+import { nav, site } from "../data/site";
+
+const path = Astro.url.pathname.replace(/\/$/, "") || "/";
+---
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">
+      <span class="brand-mark">Netba<span>DB</span></span>
+      <span class="brand-phase">Phase {site.phase}</span>
+    </a>
+    <input class="nav-toggle" id="nav-toggle" type="checkbox" />
+    <label class="menu-btn" for="nav-toggle">菜单</label>
+    <nav class="nav" aria-label="主导航">
+      {
+        nav.map((item) => (
+          <a href={item.href} aria-current={path === item.href ? "page" : undefined}>
+            {item.label}
+          </a>
+        ))
+      }
+      <a class="nav-github" href={site.github} rel="noreferrer">GitHub</a>
+    </nav>
+  </div>
+</header>

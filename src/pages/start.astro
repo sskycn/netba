@@ -1,0 +1,108 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CodeBlock from "../components/CodeBlock.astro";
+import { site } from "../data/site";
+
+const rustExample = `use netbadb_core::{Database, DatabaseError};
+use netbadb_schema::{ColumnDef, TableDef, TypeSpec};
+use netbadb_types::{ColumnId, PhysicalType, ScalarValue, TableId};
+
+fn users() -> TableDef {
+    TableDef::new(
+        TableId(1),
+        "users",
+        vec![
+            ColumnDef::new(
+                ColumnId(1),
+                "id",
+                TypeSpec::Semantic {
+                    name: "UserId".into(),
+                    physical: PhysicalType::UInt64,
+                },
+            ),
+            ColumnDef::new(ColumnId(2), "name", TypeSpec::Physical(PhysicalType::Text)),
+        ],
+    )
+}
+
+fn embed() -> Result<(), DatabaseError> {
+    let mut database = Database::create("users.db", users())?;
+    database.insert(&[
+        ScalarValue::UInt64(1),
+        ScalarValue::Text("Ada".into()),
+    ])?;
+    let _rows = database.query("SELECT id, name FROM users WHERE id = 1 LIMIT 1")?;
+    database.close()
+}`
+
+const make = `make fmt-check
+make check
+make clippy
+make test
+make msrv-check`;
+
+const cargo = `cargo fmt --all -- --check
+cargo check --workspace --all-targets
+cargo clippy --workspace --all-targets -- -D warnings
+cargo test --workspace
+cargo +1.85.0 check --workspace --all-targets`;
+---
+
+<BaseLayout
+  title="起步"
+  description="构建、测试并嵌入 NetbaDB。Rust 1.97.1 开发工具链，MSRV 1.85.0，AGPL-3.0-or-later。"
+>
+  <div class="wrap content-page">
+    <p class="kicker">Get started</p>
+    <h1 class="page-title">嵌入式、同步、<br />自己带着文件。</h1>
+    <p class="page-deck">
+      仓库钉住 Rust {site.rustToolchain}，并带 <code>rustfmt</code> 与 <code>clippy</code>。
+      workspace MSRV 是 {site.msrv}。应用侧入口是 <code>netbadb-core::Database</code>，或
+      <code>sdk/rust</code> 再导出。
+    </p>
+
+    <div class="actions" style="margin-bottom: 2rem;">
+      <a class="btn btn-primary" href={site.github}>打开 GitHub</a>
+      <a class="btn btn-ghost" href={`${site.github}/blob/main/README.md`}>阅读 README</a>
+    </div>
+
+    <div class="prose">
+      <h2>校验</h2>
+    </div>
+    <CodeBlock code={make} lang="bash" />
+    <p class="muted">等价的 cargo 命令：</p>
+    <CodeBlock code={cargo} lang="bash" />
+
+    <div class="prose">
+      <h2>最小嵌入循环</h2>
+      <p>
+        创建使用 create-new 语义，并拒绝覆盖已有数据库或 WAL 槽。
+        <code>Database::insert</code> 作为隐式事务运行。需要若干插入共享一条 WAL 链时，调用
+        <code>begin_transaction</code>、<code>insert_in</code> 与 <code>Transaction::commit</code>。
+      </p>
+    </div>
+    <CodeBlock code={rustExample} lang="rust" />
+
+    <div class="prose">
+      <h2>持久化契约</h2>
+      <ul>
+        <li>成功的提交表示其 Commit 记录已到达持久存储；堆页可能仍留在缓冲里，直到淘汰、<code>flush</code> 或 <code>close</code>。</li>
+        <li>每个打开的数据库对象允许一个写者。只读事务不预定写者。</li>
+        <li>读者不隔离，可能观察到活动写者的缓冲修改。</li>
+        <li>实验格式变更时拒绝旧版本，而不是猜测迁移。</li>
+      </ul>
+
+      <h2>Fuzz</h2>
+      <p>
+        <code>fuzz/</code> 为 WAL 恢复、Page v5 解码与 B+Tree 节点解码提供有界目标。
+        任意字节必须返回节点或类型化错误，而不能 panic、无限分配或开始遍历。
+      </p>
+
+      <h2>许可</h2>
+      <p>
+        NetbaDB 以 <a href={`${site.github}/blob/main/LICENSE`}>{site.license}</a> 授权。
+        这是一份 copyleft 许可：如果你修改程序并让用户通过网络与之交互，必须提供对应源代码。
+      </p>
+    </div>
+  </div>
+</BaseLayout>
