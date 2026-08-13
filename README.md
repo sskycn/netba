@@ -44,15 +44,19 @@ pnpm preview
 
 也可以在 Cloudflare 用 apex CNAME 扁平化到 `sskycn.github.io`，效果相同。DNS 生效后，在仓库 Settings → Pages 打开 **Enforce HTTPS**。
 
+## 语言
+
+站点默认英文。中文在 `/zh`。首次访问会读浏览器语言（`zh*` 进中文，其它进英文）；顶栏可切换，选择存在 `localStorage` 的 `netba-lang`。
+
 ## 页面
 
-| 路径 | 内容 |
-| --- | --- |
-| `/` | 定位、垂直切片现状、crate 图 |
-| `/architecture` | 语言边界、编译流水线、依赖方向 |
-| `/storage` | Page v5、WAL、恢复、检查点、B+Tree |
-| `/query` | 小型 SQL 子集、类型、NULL、DML |
-| `/roadmap` | 已完成阶段与下一步 |
-| `/start` | 构建命令与嵌入式 API |
+| 路径 | 中文 | 内容 |
+| --- | --- | --- |
+| `/` | `/zh` | 定位、垂直切片现状、crate 图 |
+| `/architecture` | `/zh/architecture` | 语言边界、编译流水线、依赖方向 |
+| `/storage` | `/zh/storage` | Page v5、WAL、恢复、检查点、B+Tree |
+| `/query` | `/zh/query` | 小型 SQL 子集、类型、NULL、DML |
+| `/roadmap` | `/zh/roadmap` | 已完成阶段与下一步 |
+| `/start` | `/zh/start` | 构建命令与嵌入式 API |
 
 文案与仓库文档对齐，并明确区分已实现与路线图。

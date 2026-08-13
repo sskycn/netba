@@ -1,0 +1,157 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageFrame from "../components/PageFrame.astro";
+import { crates } from "../data/crates";
+import { implemented, notImplemented, phases } from "../data/phases";
+import { site } from "../data/site";
+import { useCopy } from "../i18n/copy";
+import { localizePath } from "../i18n/locale";
+
+const { locale, t } = useCopy(Astro.url.pathname);
+const nextPhases = phases.filter((phase) => phase.status !== "complete").slice(0, 4);
+---
+
+<BaseLayout>
+  <div class="wrap">
+    <section class="hero" style="padding-top: 3.4rem; padding-bottom: 1rem;">
+      <div>
+        <p class="eyebrow">
+          <span class="chip">{locale === "zh" ? "实验性" : "Experimental"}</span>
+          <span class="chip teal">{locale === "zh" ? "Rust 嵌入式" : "Rust embedded"}</span>
+          <span class="chip moss">AGPL-3.0</span>
+        </p>
+        <h1 set:html={t.home.heroHtml} />
+        <p class="lede">{t.home.lede}</p>
+        <div class="actions">
+          <a class="btn btn-primary" href={localizePath("/architecture", locale)}>{t.home.ctaArchitecture}</a>
+          <a class="btn btn-ghost" href={localizePath("/start", locale)}>{t.home.ctaStart}</a>
+        </div>
+        <div class="hero-meta">
+          <div class="stat"><b>Phase {site.phase}</b><span>{t.home.statSlice}</span></div>
+          <div class="stat"><b>Page {site.pageVersion}</b><span>{site.pageSize} {t.home.statPages}</span></div>
+          <div class="stat"><b>WAL {site.walVersion}</b><span>record {site.recordVersion}</span></div>
+          <div class="stat"><b>MSRV {site.msrv}</b><span>dev {site.rustToolchain}</span></div>
+        </div>
+      </div>
+      <PageFrame />
+    </section>
+  </div>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">{t.home.honestKicker}</p>
+          <h2>{t.home.honestTitle}</h2>
+        </div>
+        <p>{t.home.honestDeck}</p>
+      </div>
+      <div class="grid-3">
+        <article class="card">
+          <h3>{t.home.done}</h3>
+          <ul>
+            {implemented[locale].slice(0, 6).map((item) => <li>{item}</li>)}
+          </ul>
+        </article>
+        <article class="card warn">
+          <h3>{t.home.notDone}</h3>
+          <ul>
+            {notImplemented[locale].slice(0, 6).map((item) => <li>{item}</li>)}
+          </ul>
+        </article>
+        <article class="card next">
+          <h3>{t.home.next}</h3>
+          <ul>
+            {nextPhases.map((phase) => <li>{phase.title[locale]} — {phase.summary[locale]}</li>)}
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">{t.home.pipelineKicker}</p>
+          <h2>{t.home.pipelineTitle}</h2>
+        </div>
+        <p>{t.home.pipelineDeck}</p>
+      </div>
+      <div class="pipeline">
+        {
+          t.home.pipeline.map((step) => (
+            <article class="pipe">
+              <b>{step.title}</b>
+              <span>{step.text}</span>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">{t.home.typesKicker}</p>
+          <h2 set:html={t.home.typesTitleHtml} />
+        </div>
+        <p>{t.home.typesDeck}</p>
+      </div>
+      <div class="grid-2">
+        <article class="card">
+          <h3>{t.home.typesSplitTitle}</h3>
+          <p>{t.home.typesSplitBody}</p>
+        </article>
+        <article class="card">
+          <h3>{t.home.typesFpTitle}</h3>
+          <p>{t.home.typesFpBody}</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">{t.home.cratesKicker}</p>
+          <h2>{t.home.cratesTitle}</h2>
+        </div>
+        <p>{t.home.cratesDeck}</p>
+      </div>
+      <div class="crate-grid">
+        {
+          crates.map((crate) => (
+            <article class="crate">
+              <h3>{crate.name}</h3>
+              <p>{crate.role[locale]}</p>
+              <div class="deps">
+                {crate.dependsOn.length ? `→ ${crate.dependsOn.join(" · ")}` : t.home.leaf}
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="card">
+        <p class="kicker">{t.home.ctaKicker}</p>
+        <h2>{t.home.ctaTitle}</h2>
+        <p>
+          {t.home.ctaBody}{" "}
+          <a href={site.github}>github.com/sskycn/netbadb</a>
+        </p>
+        <div class="actions" style="margin-top: 1rem;">
+          <a class="btn btn-primary" href={localizePath("/start", locale)}>{t.home.ctaStartAgain}</a>
+          <a class="btn btn-ghost" href={localizePath("/storage", locale)}>{t.home.ctaStorage}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

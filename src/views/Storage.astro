@@ -1,0 +1,111 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { useCopy } from "../i18n/copy";
+
+const { t } = useCopy(Astro.url.pathname);
+---
+
+<BaseLayout title={t.storage.title} description={t.storage.description}>
+  <div class="wrap content-page">
+    <p class="kicker">{t.storage.kicker}</p>
+    <h1 class="page-title" set:html={t.storage.heroHtml} />
+    <p class="page-deck">{t.storage.deck}</p>
+
+    <div class="diagram">
+      <pre>
+Executor
+    ↓
+HeapStorage
+    ↘ BTree persistence
+    ↓
+TransactionManager + WAL
+    ↓
+BufferPool + PageGuards
+    ↓
+PageManager
+    ↓
+Database file</pre>
+    </div>
+
+    <div class="prose">
+      <h2>{t.storage.pageTitle}</h2>
+      <p>{t.storage.pageIntro}</p>
+    </div>
+    <div class="layout-table">
+      <table>
+        <thead>
+          <tr>
+            <th>{t.storage.thOffset}</th>
+            <th>{t.storage.thField}</th>
+            <th>{t.storage.thMeaning}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>0..4</td><td>NBP1</td><td>{t.storage.pageMagic}</td></tr>
+          <tr><td>4..6</td><td>u16 version</td><td>{t.storage.pageVersion}</td></tr>
+          <tr><td>6</td><td>u8 type</td><td>{t.storage.pageType}</td></tr>
+          <tr><td>8..10</td><td>slot count</td><td>{t.storage.slotCount}</td></tr>
+          <tr><td>10..14</td><td>free bounds</td><td>{t.storage.freeBounds}</td></tr>
+          <tr><td>16..24</td><td>pageLSN</td><td>{t.storage.pageLsn}</td></tr>
+          <tr><td>24..28</td><td>CRC32C</td><td>{t.storage.crc}</td></tr>
+          <tr><td>28..</td><td>slots</td><td>{t.storage.slots}</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="prose">
+      <p>{t.storage.pageP1}</p>
+      <p>{t.storage.pageP2}</p>
+      <h2>{t.storage.bufferTitle}</h2>
+      <p>{t.storage.bufferBody}</p>
+    </div>
+    <div class="diagram">
+      <pre>
+construct after-image with pageLSN
+    → append PageUpdate
+    → publish dirty buffer frame
+    → flush WAL through pageLSN
+    → write data page</pre>
+    </div>
+
+    <div class="prose">
+      <h2>{t.storage.walTitle}</h2>
+      <p>{t.storage.walIntro}</p>
+    </div>
+    <div class="diagram">
+      <pre>logical LSN = generation base_lsn + (physical record offset - 48)</pre>
+    </div>
+    <div class="prose">
+      <p>{t.storage.walP1}</p>
+      <p>{t.storage.walP2}</p>
+      <h2>{t.storage.txnTitle}</h2>
+      <p>{t.storage.txnP1}</p>
+      <p>{t.storage.txnP2}</p>
+      <h2>{t.storage.recoveryTitle}</h2>
+    </div>
+    <div class="diagram">
+      <pre>
+Open data file + WAL
+    → Analysis
+         ├── Winners (Commit exists)
+         ├── Completed rollback (RollbackComplete)
+         └── Losers (incomplete or Abort-only)
+    → Redo non-rolled-back PageUpdates in ascending LSN
+    → Undo losers in descending global LSN
+    → Sync undo + durably finalize recovered losers</pre>
+    </div>
+    <div class="prose">
+      <p>{t.storage.recoveryBody}</p>
+      <h2>{t.storage.checkpointTitle}</h2>
+      <p>{t.storage.checkpointBody}</p>
+      <h2>{t.storage.btreeTitle}</h2>
+      <p>{t.storage.btreeP1}</p>
+      <p>{t.storage.btreeP2}</p>
+    </div>
+
+    <div class="callout note">
+      <h3>{t.storage.integrityTitle}</h3>
+      <p class="muted">{t.storage.integrityBody}</p>
+    </div>
+  </div>
+</BaseLayout>

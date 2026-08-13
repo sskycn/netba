@@ -1,0 +1,128 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { crates, layers } from "../data/crates";
+import { useCopy } from "../i18n/copy";
+
+const { locale, t } = useCopy(Astro.url.pathname);
+---
+
+<BaseLayout title={t.architecture.title} description={t.architecture.description}>
+  <div class="wrap content-page">
+    <p class="kicker">{t.architecture.kicker}</p>
+    <h1 class="page-title" set:html={t.architecture.heroHtml} />
+    <p class="page-deck">{t.architecture.deck}</p>
+
+    <div class="stack">
+      {
+        layers[locale].map((layer) => (
+          <div class="layer">
+            <strong>{layer.title}</strong>
+            <div>{layer.items.join(" → ")}</div>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="prose">
+      <h2>{t.architecture.durableTitle}</h2>
+      <p>{t.architecture.durableBody}</p>
+    </div>
+    <div class="diagram">
+      <pre>
+Application language schema
+        ↓
+Language frontend / SDK
+        ↓
+Canonical Schema IR
+        ↓
+Parser → HIR + type checking
+        ↓
+Typed Relational IR
+        ↓
+Optimizer / Planner
+        ↓
+Executor
+        ↓
+Transaction boundary
+        ↓
+Storage</pre>
+    </div>
+
+    <div class="prose">
+      <h2>{t.architecture.embeddedTitle}</h2>
+      <p>{t.architecture.embeddedBody}</p>
+    </div>
+    <div class="diagram">
+      <pre>
+Rust Schema API
+    ↓
+SELECT / JOIN / ORDER BY / GROUP BY + typed DML
+    ↓
+Typed HIR
+    ↓
+Logical query / DML statement plan
+    ↓
+Scan + nested-loop join + sort + grouped aggregate
+    ↓
+Join / filter / sort / aggregate / projection / limit + mutation
+    ↓
+Heap
+    ↓
+Transaction lifecycle + versioned WAL
+    ↓
+Buffer pool (guards, pinning, dirty writeback)
+    ↓
+Slotted pages
+    ↓
+Page manager / database file</pre>
+    </div>
+
+    <div class="prose">
+      <h2>{t.architecture.schemaTitle}</h2>
+      <p>{t.architecture.schemaP1}</p>
+      <p>{t.architecture.schemaP2}</p>
+      <p>{t.architecture.schemaP3}</p>
+      <h2>{t.architecture.stagesTitle}</h2>
+      <p>{t.architecture.stagesLead}</p>
+    </div>
+    <div class="diagram">
+      <pre>source → AST → resolved / type-checked HIR → logical plan → physical plan</pre>
+    </div>
+    <div class="prose">
+      <p>{t.architecture.stagesP1}</p>
+      <p>{t.architecture.stagesP2}</p>
+      <h2>{t.architecture.depsTitle}</h2>
+      <p>{t.architecture.depsBody}</p>
+    </div>
+
+    <div class="crate-grid">
+      {
+        crates.map((crate) => (
+          <article class="crate">
+            <h3>{crate.name}</h3>
+            <p>{crate.role[locale]}</p>
+            <div class="deps">{crate.path}</div>
+          </article>
+        ))
+      }
+    </div>
+
+    <div class="prose">
+      <h2>{t.architecture.langTitle}</h2>
+      <p>{t.architecture.langLead}</p>
+    </div>
+    <div class="diagram">
+      <pre>
+{t.architecture.langRust}
+{t.architecture.langGo}</pre>
+    </div>
+    <div class="prose">
+      <p>{t.architecture.langBody}</p>
+    </div>
+
+    <div class="callout note">
+      <h3>{t.architecture.decisionTitle}</h3>
+      <p class="muted">{t.architecture.decisionBody}</p>
+    </div>
+  </div>
+</BaseLayout>

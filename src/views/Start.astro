@@ -1,0 +1,95 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CodeBlock from "../components/CodeBlock.astro";
+import { site } from "../data/site";
+import { useCopy } from "../i18n/copy";
+
+const { t } = useCopy(Astro.url.pathname);
+
+const rustExample = `use netbadb_core::{Database, DatabaseError};
+use netbadb_schema::{ColumnDef, TableDef, TypeSpec};
+use netbadb_types::{ColumnId, PhysicalType, ScalarValue, TableId};
+
+fn users() -> TableDef {
+    TableDef::new(
+        TableId(1),
+        "users",
+        vec![
+            ColumnDef::new(
+                ColumnId(1),
+                "id",
+                TypeSpec::Semantic {
+                    name: "UserId".into(),
+                    physical: PhysicalType::UInt64,
+                },
+            ),
+            ColumnDef::new(ColumnId(2), "name", TypeSpec::Physical(PhysicalType::Text)),
+        ],
+    )
+}
+
+fn embed() -> Result<(), DatabaseError> {
+    let mut database = Database::create("users.db", users())?;
+    database.insert(&[
+        ScalarValue::UInt64(1),
+        ScalarValue::Text("Ada".into()),
+    ])?;
+    let _rows = database.query("SELECT id, name FROM users WHERE id = 1 LIMIT 1")?;
+    database.close()
+}`;
+
+const make = `make fmt-check
+make check
+make clippy
+make test
+make msrv-check`;
+
+const cargo = `cargo fmt --all -- --check
+cargo check --workspace --all-targets
+cargo clippy --workspace --all-targets -- -D warnings
+cargo test --workspace
+cargo +1.85.0 check --workspace --all-targets`;
+---
+
+<BaseLayout title={t.start.title} description={t.start.description}>
+  <div class="wrap content-page">
+    <p class="kicker">{t.start.kicker}</p>
+    <h1 class="page-title" set:html={t.start.heroHtml} />
+    <p class="page-deck">
+      {t.start.deck.replace("{toolchain}", site.rustToolchain).replace("{msrv}", site.msrv)}
+    </p>
+
+    <div class="actions" style="margin-bottom: 2rem;">
+      <a class="btn btn-primary" href={site.github}>{t.start.openGithub}</a>
+      <a class="btn btn-ghost" href={`${site.github}/blob/main/README.md`}>{t.start.readReadme}</a>
+    </div>
+
+    <div class="prose">
+      <h2>{t.start.validateTitle}</h2>
+    </div>
+    <CodeBlock code={make} lang="bash" />
+    <p class="muted">{t.start.cargoEquiv}</p>
+    <CodeBlock code={cargo} lang="bash" />
+
+    <div class="prose">
+      <h2>{t.start.embedTitle}</h2>
+      <p>{t.start.embedBody}</p>
+    </div>
+    <CodeBlock code={rustExample} lang="rust" />
+
+    <div class="prose">
+      <h2>{t.start.contractTitle}</h2>
+      <ul>
+        {t.start.contract.map((item) => <li>{item}</li>)}
+      </ul>
+      <h2>{t.start.fuzzTitle}</h2>
+      <p>{t.start.fuzzBody}</p>
+      <h2>{t.start.licenseTitle}</h2>
+      <p>
+        {t.start.licenseBody.split("{license}")[0]}
+        <a href={`${site.github}/blob/main/LICENSE`}>{site.license}</a>
+        {t.start.licenseBody.split("{license}")[1]}
+      </p>
+    </div>
+  </div>
+</BaseLayout>

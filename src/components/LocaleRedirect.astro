@@ -1,0 +1,27 @@
+---
+import { storageKey } from "../i18n/locale";
+---
+
+<script is:inline define:vars={{ storageKey }}>
+  (function () {
+    if (document.documentElement.hasAttribute("data-404")) return;
+    var path = location.pathname.replace(/\/$/, "") || "/";
+    var current = path === "/zh" || path.indexOf("/zh/") === 0 ? "zh" : "en";
+    var saved = localStorage.getItem(storageKey);
+    var target = saved === "en" || saved === "zh" ? saved : null;
+    if (!target) {
+      var langs = navigator.languages && navigator.languages.length
+        ? navigator.languages
+        : [navigator.language || "en"];
+      var zh = langs.some(function (item) {
+        var lang = String(item).toLowerCase();
+        return lang === "zh" || lang.indexOf("zh-") === 0;
+      });
+      target = zh ? "zh" : "en";
+    }
+    if (target === current) return;
+    var rest = current === "zh" ? (path === "/zh" ? "/" : path.slice(3) || "/") : path;
+    var next = target === "zh" ? (rest === "/" ? "/zh" : "/zh" + rest) : rest;
+    location.replace(next);
+  })();
+</script>

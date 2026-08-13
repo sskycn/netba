@@ -1,0 +1,32 @@
+---
+import { copy } from "../i18n/copy";
+import { locales, localeFromPath, localeLabel, localizePath, storageKey } from "../i18n/locale";
+
+const locale = localeFromPath(Astro.url.pathname);
+const t = copy[locale];
+---
+
+<nav class="lang-switch" aria-label={t.chrome.langAria}>
+  {
+    locales.map((item) => (
+      <a
+        href={localizePath(Astro.url.pathname, item)}
+        hreflang={item}
+        lang={item}
+        data-lang={item}
+        aria-current={item === locale ? "true" : undefined}
+      >
+        {item === "en" ? "EN" : "中文"}
+        <span class="visually-hidden">{localeLabel[item]}</span>
+      </a>
+    ))
+  }
+</nav>
+
+<script is:inline define:vars={{ storageKey }}>
+  document.querySelectorAll("[data-lang]").forEach(function (link) {
+    link.addEventListener("click", function () {
+      localStorage.setItem(storageKey, link.getAttribute("data-lang"));
+    });
+  });
+</script>

@@ -1,26 +1,38 @@
 ---
+import LangSwitch from "./LangSwitch.astro";
+import { useCopy } from "../i18n/copy";
+import { localizePath, stripLocale } from "../i18n/locale";
 import { nav, site } from "../data/site";
 
-const path = Astro.url.pathname.replace(/\/$/, "") || "/";
+const { locale, t } = useCopy(Astro.url.pathname);
+const current = stripLocale(Astro.url.pathname);
 ---
 
 <header class="site-header">
   <div class="wrap header-inner">
-    <a class="brand" href="/">
+    <a class="brand" data-home href={localizePath("/", locale)}>
       <span class="brand-mark">Netba<span>DB</span></span>
       <span class="brand-phase">Phase {site.phase}</span>
     </a>
     <input class="nav-toggle" id="nav-toggle" type="checkbox" />
-    <label class="menu-btn" for="nav-toggle">菜单</label>
-    <nav class="nav" aria-label="主导航">
+    <label class="menu-btn" for="nav-toggle">{t.chrome.menu}</label>
+    <nav class="nav" aria-label={t.chrome.navAria}>
       {
-        nav.map((item) => (
-          <a href={item.href} aria-current={path === item.href ? "page" : undefined}>
-            {item.label}
-          </a>
-        ))
+        nav.map((item) => {
+          const href = localizePath(item.href, locale);
+          return (
+            <a
+              href={href}
+              data-nav-key={item.key}
+              aria-current={current === item.href ? "page" : undefined}
+            >
+              {t.chrome.nav[item.key]}
+            </a>
+          );
+        })
       }
       <a class="nav-github" href={site.github} rel="noreferrer">GitHub</a>
+      <LangSwitch />
     </nav>
   </div>
 </header>

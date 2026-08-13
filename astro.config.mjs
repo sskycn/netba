@@ -7,4 +7,11 @@ export default defineConfig({
   output: 'static',
   trailingSlash: 'never',
   prefetch: false,
+  i18n: {
+    defaultLocale: 'en',
+    locales: ['en', 'zh'],
+    routing: {
+      prefixDefaultLocale: false,
+    },
+  },
 });

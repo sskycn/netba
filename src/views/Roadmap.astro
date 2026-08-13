@@ -1,0 +1,49 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { notImplemented, phases } from "../data/phases";
+import { useCopy } from "../i18n/copy";
+
+const { locale, t } = useCopy(Astro.url.pathname);
+const complete = phases.filter((phase) => phase.status === "complete").length;
+const statusLabel = {
+  complete: t.roadmap.complete,
+  next: t.roadmap.next,
+  later: t.roadmap.later,
+};
+---
+
+<BaseLayout title={t.roadmap.title} description={t.roadmap.description}>
+  <div class="wrap content-page">
+    <p class="kicker">{t.roadmap.kicker}</p>
+    <h1 class="page-title" set:html={t.roadmap.heroHtml} />
+    <p class="page-deck">{t.roadmap.deck.replace("{n}", String(complete))}</p>
+
+    <div class="phases">
+      {
+        phases.map((phase) => (
+          <article class="phase">
+            <div class="id">{phase.id}</div>
+            <div>
+              <h3>{phase.title[locale]}</h3>
+              <p>{phase.summary[locale]}</p>
+            </div>
+            <span class:list={["badge", phase.status]}>{statusLabel[phase.status]}</span>
+          </article>
+        ))
+      }
+    </div>
+
+    <div class="prose">
+      <h2>{t.roadmap.notTitle}</h2>
+    </div>
+    <div class="grid-2" style="margin-top: 1rem;">
+      {
+        notImplemented[locale].map((item) => (
+          <article class="card warn">
+            <p>{item}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>

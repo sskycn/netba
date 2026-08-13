@@ -1,15 +1,79 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { copy } from "../i18n/copy";
+import { htmlLang, storageKey } from "../i18n/locale";
+
+const en = copy.en.notFound;
+const zh = copy.zh.notFound;
+const chrome = {
+  en: { ...copy.en.chrome, home: "/", prefix: "" },
+  zh: { ...copy.zh.chrome, home: "/zh", prefix: "/zh" },
+};
 ---
 
-<BaseLayout title="未找到" description="没有这一页。">
+<BaseLayout title={en.title} description={en.description} notFound>
   <div class="wrap content-page">
-    <p class="kicker">404</p>
-    <h1 class="page-title">这一槽是空的。</h1>
-    <p class="page-deck">没有对应的页面。它可能被回收了，或者从未分配。</p>
-    <div class="actions">
-      <a class="btn btn-primary" href="/">回到首页</a>
-      <a class="btn btn-ghost" href="/architecture">查看架构</a>
+    <div data-404-copy="en">
+      <p class="kicker">{en.kicker}</p>
+      <h1 class="page-title">{en.hero}</h1>
+      <p class="page-deck">{en.deck}</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="/">{en.home}</a>
+        <a class="btn btn-ghost" href="/architecture">{en.architecture}</a>
+      </div>
+    </div>
+    <div data-404-copy="zh" hidden>
+      <p class="kicker">{zh.kicker}</p>
+      <h1 class="page-title">{zh.hero}</h1>
+      <p class="page-deck">{zh.deck}</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="/zh">{zh.home}</a>
+        <a class="btn btn-ghost" href="/zh/architecture">{zh.architecture}</a>
+      </div>
     </div>
   </div>
 </BaseLayout>
+
+<script is:inline define:vars={{ storageKey, htmlLang, chrome }}>
+  (function () {
+    var path = location.pathname.replace(/\/$/, "") || "/";
+    var fromPath = path === "/zh" || path.indexOf("/zh/") === 0 ? "zh" : null;
+    var saved = localStorage.getItem(storageKey);
+    var target = saved === "en" || saved === "zh" ? saved : fromPath;
+    if (!target) {
+      var langs = navigator.languages && navigator.languages.length
+        ? navigator.languages
+        : [navigator.language || "en"];
+      var preferZh = langs.some(function (item) {
+        var lang = String(item).toLowerCase();
+        return lang === "zh" || lang.indexOf("zh-") === 0;
+      });
+      target = preferZh ? "zh" : "en";
+    }
+    document.documentElement.lang = htmlLang[target] || "en";
+    document.querySelectorAll("[data-404-copy]").forEach(function (node) {
+      node.hidden = node.getAttribute("data-404-copy") !== target;
+    });
+    var ui = chrome[target];
+    if (!ui) return;
+    var skip = document.querySelector(".skip");
+    if (skip) skip.textContent = ui.skip;
+    var menu = document.querySelector(".menu-btn");
+    if (menu) menu.textContent = ui.menu;
+    var nav = document.querySelector(".nav");
+    if (nav) nav.setAttribute("aria-label", ui.navAria);
+    var home = document.querySelector("[data-home]");
+    if (home) home.setAttribute("href", ui.home);
+    document.querySelectorAll("[data-nav-key]").forEach(function (link) {
+      var key = link.getAttribute("data-nav-key");
+      if (key && ui.nav[key]) {
+        link.textContent = ui.nav[key];
+        link.setAttribute("href", (ui.prefix || "") + "/" + key);
+      }
+    });
+    document.querySelectorAll("[data-lang]").forEach(function (link) {
+      if (link.getAttribute("data-lang") === target) link.setAttribute("aria-current", "true");
+      else link.removeAttribute("aria-current");
+    });
+  })();
+</script>

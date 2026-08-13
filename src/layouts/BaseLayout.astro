@@ -1,34 +1,48 @@
 ---
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import LocaleRedirect from "../components/LocaleRedirect.astro";
+import { useCopy } from "../i18n/copy";
+import { htmlLang, localizePath } from "../i18n/locale";
 import { site } from "../data/site";
 import "../styles/global.css";
 
 type Props = {
   title?: string;
   description?: string;
+  notFound?: boolean;
 };
 
-const { title, description = site.description } = Astro.props;
-const pageTitle = title ? `${title} · ${site.name}` : `${site.name} · ${site.tagline}`;
+const { title, description, notFound = false } = Astro.props;
+const { locale, t } = useCopy(Astro.url.pathname);
+const pageTitle = title ? `${title} · ${site.name}` : `${site.name} · ${t.meta.tagline}`;
+const pageDescription = description ?? t.meta.description;
 const path = Astro.url.pathname === "/" ? "/" : Astro.url.pathname.replace(/\/$/, "");
 const canonical = new URL(path, Astro.site ?? site.url).href;
+const enUrl = new URL(localizePath(path, "en"), Astro.site ?? site.url).href;
+const zhUrl = new URL(localizePath(path, "zh"), Astro.site ?? site.url).href;
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html lang={htmlLang[locale]} data-404={notFound ? "true" : undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <LocaleRedirect />
     <meta name="generator" content={Astro.generator} />
-    <meta name="description" content={description} />
+    <meta name="description" content={pageDescription} />
     <meta name="theme-color" content="#0c0d0b" />
     <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={pageDescription} />
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content={htmlLang[locale]} />
+    <meta property="og:locale:alternate" content={locale === "en" ? "zh_CN" : "en"} />
     <meta name="twitter:card" content="summary" />
     <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="en" href={enUrl} />
+    <link rel="alternate" hreflang="zh" href={zhUrl} />
+    <link rel="alternate" hreflang="x-default" href={enUrl} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -39,7 +53,7 @@ const canonical = new URL(path, Astro.site ?? site.url).href;
     <title>{pageTitle}</title>
   </head>
   <body>
-    <a class="skip" href="#main">跳到正文</a>
+    <a class="skip" href="#main">{t.chrome.skip}</a>
     <Header />
     <main id="main">
       <slot />

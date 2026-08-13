@@ -1,0 +1,103 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CodeBlock from "../components/CodeBlock.astro";
+import { useCopy } from "../i18n/copy";
+
+const { t } = useCopy(Astro.url.pathname);
+
+const joinSql = `SELECT e.name, m.name
+FROM employees e
+JOIN employees m ON e.manager_id = m.id
+WHERE e.active IS NOT NULL
+ORDER BY e.name ASC NULLS LAST
+LIMIT 20`;
+
+const groupSql = `SELECT team_id, COUNT(*), SUM(score), MAX(score)
+FROM scores
+GROUP BY team_id`;
+
+const dmlSql = `INSERT INTO users (id, name) VALUES (1, 'Ada');
+UPDATE users SET name = 'Ada Lovelace' WHERE id = 1;
+DELETE FROM users WHERE name IS NULL;`;
+---
+
+<BaseLayout title={t.query.title} description={t.query.description}>
+  <div class="wrap content-page">
+    <p class="kicker">{t.query.kicker}</p>
+    <h1 class="page-title" set:html={t.query.heroHtml} />
+    <p class="page-deck">{t.query.deck}</p>
+
+    <div class="layout-table">
+      <table>
+        <thead>
+          <tr>
+            <th>{t.query.thKind}</th>
+            <th>{t.query.thNow}</th>
+            <th>{t.query.thNot}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            t.query.rows.map((row) => (
+              <tr>
+                <td>{row.kind}</td>
+                <td>{row.now}</td>
+                <td>{row.not}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="prose">
+      <h2>{t.query.nominalTitle}</h2>
+      <p>{t.query.nominalBody}</p>
+    </div>
+    <div class="diagram">
+      <pre>
+physical: UINT64
+semantic: UserId
+
+UserId ≠ TeamId   even when both are u64</pre>
+    </div>
+
+    <div class="prose">
+      <h2>{t.query.nullTitle}</h2>
+      <p>{t.query.nullBody}</p>
+    </div>
+    <div class="diagram">
+      <pre>
+Bool(true)  → TRUE
+Bool(false) → FALSE
+NULL        → UNKNOWN
+
+NULL = NULL     → UNKNOWN
+NULL IS NULL    → TRUE</pre>
+    </div>
+
+    <div class="prose">
+      <h2>{t.query.joinTitle}</h2>
+      <p>{t.query.joinBody}</p>
+    </div>
+    <CodeBlock code={joinSql} lang="sql" />
+
+    <div class="prose">
+      <h2>{t.query.dmlTitle}</h2>
+      <p>{t.query.dmlBody}</p>
+    </div>
+    <CodeBlock code={dmlSql} lang="sql" />
+
+    <div class="prose">
+      <h2>{t.query.sortTitle}</h2>
+      <p>{t.query.sortP1}</p>
+      <p>{t.query.sortP2}</p>
+    </div>
+    <CodeBlock code={groupSql} lang="sql" />
+
+    <div class="callout note">
+      <h3>{t.query.multiTitle}</h3>
+      <p class="muted">{t.query.multiBody}</p>
+    </div>
+  </div>
+</BaseLayout>
