@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PageFrame from "../components/PageFrame.astro";
-import { crates } from "../data/crates";
 import { implemented, notImplemented, phases } from "../data/phases";
 import { site } from "../data/site";
 import { useCopy } from "../i18n/copy";
@@ -17,19 +16,19 @@ const nextPhases = phases.filter((phase) => phase.status !== "complete").slice(0
       <div>
         <p class="eyebrow">
           <span class="chip">{locale === "zh" ? "实验性" : "Experimental"}</span>
-          <span class="chip teal">{locale === "zh" ? "Rust 嵌入式" : "Rust embedded"}</span>
+          <span class="chip teal">{locale === "zh" ? "嵌入式与远程" : "Embedded and remote"}</span>
           <span class="chip moss">AGPL-3.0</span>
         </p>
         <h1 set:html={t.home.heroHtml} />
         <p class="lede">{t.home.lede}</p>
         <div class="actions">
-          <a class="btn btn-primary" href={localizePath("/architecture", locale)}>{t.home.ctaArchitecture}</a>
-          <a class="btn btn-ghost" href={localizePath("/start", locale)}>{t.home.ctaStart}</a>
+          <a class="btn btn-primary" href={localizePath("/start", locale)}>{t.home.ctaStart}</a>
+          <a class="btn btn-ghost" href={localizePath("/architecture", locale)}>{t.home.ctaArchitecture}</a>
         </div>
         <div class="hero-meta">
           <div class="stat"><b>Phase {site.phase}</b><span>{t.home.statSlice}</span></div>
-          <div class="stat"><b>Page {site.pageVersion}</b><span>{site.pageSize} {t.home.statPages}</span></div>
-          <div class="stat"><b>WAL {site.walVersion}</b><span>record {site.recordVersion}</span></div>
+          <div class="stat"><b>Protocol {site.protocolVersion}</b><span>{t.home.statProtocol}</span></div>
+          <div class="stat"><b>IndexScan</b><span>{t.home.statIndexes}</span></div>
           <div class="stat"><b>MSRV {site.msrv}</b><span>dev {site.rustToolchain}</span></div>
         </div>
       </div>
@@ -65,6 +64,33 @@ const nextPhases = phases.filter((phase) => phase.status !== "complete").slice(0
             {nextPhases.map((phase) => <li>{phase.title[locale]} — {phase.summary[locale]}</li>)}
           </ul>
         </article>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">{t.home.pathsKicker}</p>
+          <h2>{t.home.pathsTitle}</h2>
+        </div>
+        <p>{t.home.pathsDeck}</p>
+      </div>
+      <div class="grid-3">
+        {
+          t.home.paths.map((path, index) => (
+            <article class="card">
+              <h3>{path.title}</h3>
+              <p>{path.text}</p>
+              <p>
+                <a href={`${localizePath("/start", locale)}${["#embedded", "#server", "#cli"][index]}`}>
+                  {t.home.ctaStart}
+                </a>
+              </p>
+            </article>
+          ))
+        }
       </div>
     </div>
   </section>
@@ -115,31 +141,6 @@ const nextPhases = phases.filter((phase) => phase.status !== "complete").slice(0
 
   <section>
     <div class="wrap">
-      <div class="section-head">
-        <div>
-          <p class="kicker">{t.home.cratesKicker}</p>
-          <h2>{t.home.cratesTitle}</h2>
-        </div>
-        <p>{t.home.cratesDeck}</p>
-      </div>
-      <div class="crate-grid">
-        {
-          crates.map((crate) => (
-            <article class="crate">
-              <h3>{crate.name}</h3>
-              <p>{crate.role[locale]}</p>
-              <div class="deps">
-                {crate.dependsOn.length ? `→ ${crate.dependsOn.join(" · ")}` : t.home.leaf}
-              </div>
-            </article>
-          ))
-        }
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="wrap">
       <div class="card">
         <p class="kicker">{t.home.ctaKicker}</p>
         <h2>{t.home.ctaTitle}</h2>
@@ -149,7 +150,7 @@ const nextPhases = phases.filter((phase) => phase.status !== "complete").slice(0
         </p>
         <div class="actions" style="margin-top: 1rem;">
           <a class="btn btn-primary" href={localizePath("/start", locale)}>{t.home.ctaStartAgain}</a>
-          <a class="btn btn-ghost" href={localizePath("/storage", locale)}>{t.home.ctaStorage}</a>
+          <a class="btn btn-ghost" href={localizePath("/query", locale)}>{t.home.ctaStorage}</a>
         </div>
       </div>
     </div>

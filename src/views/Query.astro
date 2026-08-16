@@ -95,6 +95,20 @@ NULL IS NULL    → TRUE</pre>
     </div>
     <CodeBlock code={groupSql} lang="sql" />
 
+    <div class="prose">
+      <h2>{t.query.indexTitle}</h2>
+      <p>{t.query.indexBody}</p>
+    </div>
+    <div class="diagram">
+      <pre>
+create_index(table, column)
+    → transactional backfill
+    → register in IndexCatalog
+    → DML maintains the index
+    → ANALYZE writes a cost snapshot
+    → planner may choose IndexScan</pre>
+    </div>
+
     <div class="callout note">
       <h3>{t.query.multiTitle}</h3>
       <p class="muted">{t.query.multiBody}</p>

@@ -3,7 +3,7 @@ import { Code } from "astro:components";
 
 type Props = {
   code: string;
-  lang?: "rust" | "sql" | "text" | "bash";
+  lang?: "rust" | "sql" | "text" | "bash" | "toml" | "json" | "go";
 };
 
 const { code, lang = "rust" } = Astro.props;

@@ -6,9 +6,16 @@ import { useCopy } from "../i18n/copy";
 
 const { t } = useCopy(Astro.url.pathname);
 
-const rustExample = `use netbadb_core::{Database, DatabaseError};
-use netbadb_schema::{ColumnDef, TableDef, TypeSpec};
-use netbadb_types::{ColumnId, PhysicalType, ScalarValue, TableId};
+const cargoToml = `[dependencies]
+netbadb-sdk = { git = "https://github.com/sskycn/netbadb" }`;
+
+const cargoTomlRemote = `[dependencies]
+netbadb-sdk = { git = "https://github.com/sskycn/netbadb", default-features = false, features = ["remote"] }`;
+
+const rustExample = `use netbadb_sdk::{
+    ColumnDef, ColumnId, Database, DatabaseError, PhysicalType, ScalarValue, TableDef, TableId,
+    TypeSpec,
+};
 
 fn users() -> TableDef {
     TableDef::new(
@@ -28,27 +35,82 @@ fn users() -> TableDef {
     )
 }
 
-fn embed() -> Result<(), DatabaseError> {
+fn main() -> Result<(), DatabaseError> {
     let mut database = Database::create("users.db", users())?;
     database.insert(&[
         ScalarValue::UInt64(1),
         ScalarValue::Text("Ada".into()),
     ])?;
-    let _rows = database.query("SELECT id, name FROM users WHERE id = 1 LIMIT 1")?;
+    database.create_index(TableId(1), ColumnId(1))?;
+    database.analyze(TableId(1))?;
+    let _rows = database.query("SELECT id, name FROM users WHERE id = 1")?;
     database.close()
 }`;
 
-const make = `make fmt-check
-make check
-make clippy
-make test
-make msrv-check`;
+const inspectExample = `use netbadb_sdk::inspection;
 
-const cargo = `cargo fmt --all -- --check
-cargo check --workspace --all-targets
-cargo clippy --workspace --all-targets -- -D warnings
-cargo test --workspace
-cargo +1.85.0 check --workspace --all-targets`;
+let catalog = database.inspect_catalog()?;
+println!("{}", inspection::render_catalog(&catalog));
+
+let statement = database.inspect_statement(
+    "SELECT id FROM users WHERE id = 1",
+)?;
+println!("{}", inspection::render_statement(&statement));`;
+
+const manifest = `{
+  "version": 4,
+  "listen": "127.0.0.1:7878",
+  "authorization": {
+    "local_plaintext": {
+      "tables": [
+        { "table_id": 1, "read": true, "write": true, "transaction": true, "analyze": true }
+      ]
+    },
+    "clients": []
+  },
+  "tables": [
+    {
+      "path": "users.db",
+      "id": 1,
+      "name": "users",
+      "columns": [
+        { "id": 1, "name": "id", "physical_type": "uint64", "semantic_type": "UserId", "nullable": false },
+        { "id": 2, "name": "name", "physical_type": "text", "nullable": false }
+      ]
+    }
+  ]
+}`;
+
+const serverCmd = `cargo run -p netbadbd -- --manifest server.json`;
+
+const remoteExample = `use netbadb_sdk::remote;
+
+let mut client = remote::Client::connect(
+    remote::Config::new("127.0.0.1:7878"),
+)?;
+client.ping()?;
+let mut rows = client.query("SELECT id, name FROM users ORDER BY id")?;
+while let Some(values) = rows.next_row()? {
+    println!("{values:?}");
+}`;
+
+const cli = `cargo run -p netbadb -- inspect catalog --manifest server.json
+
+cargo run -p netbadb -- inspect statement \\
+  --manifest server.json \\
+  --sql "SELECT id FROM users WHERE id = 1"`;
+
+const goExample = `client, err := netbadb.Dial(ctx, netbadb.Config{
+    Address: "localhost:7878",
+})
+if err != nil { /* handle */ }
+defer client.Close()
+
+rows, err := client.Query(ctx, "SELECT id, name FROM users ORDER BY id")`;
+
+const fromSource = `git clone https://github.com/sskycn/netbadb.git
+cd netbadb
+make test`;
 ---
 
 <BaseLayout title={t.start.title} description={t.start.description}>
@@ -61,15 +123,15 @@ cargo +1.85.0 check --workspace --all-targets`;
 
     <div class="actions" style="margin-bottom: 2rem;">
       <a class="btn btn-primary" href={site.github}>{t.start.openGithub}</a>
-      <a class="btn btn-ghost" href={`${site.github}/blob/main/README.md`}>{t.start.readReadme}</a>
+      <a class="btn btn-ghost" href={`${site.github}/blob/main/sdk/rust/README.md`}>{t.start.readReadme}</a>
     </div>
 
-    <div class="prose">
-      <h2>{t.start.validateTitle}</h2>
+    <div class="prose" id="embedded">
+      <h2>{t.start.depTitle}</h2>
+      <p>{t.start.depBody}</p>
     </div>
-    <CodeBlock code={make} lang="bash" />
-    <p class="muted">{t.start.cargoEquiv}</p>
-    <CodeBlock code={cargo} lang="bash" />
+    <CodeBlock code={cargoToml} lang="toml" />
+    <CodeBlock code={cargoTomlRemote} lang="toml" />
 
     <div class="prose">
       <h2>{t.start.embedTitle}</h2>
@@ -78,12 +140,46 @@ cargo +1.85.0 check --workspace --all-targets`;
     <CodeBlock code={rustExample} lang="rust" />
 
     <div class="prose">
+      <h2>{t.start.inspectTitle}</h2>
+      <p>{t.start.inspectBody}</p>
+    </div>
+    <CodeBlock code={inspectExample} lang="rust" />
+
+    <div class="prose" id="server">
+      <h2>{t.start.serverTitle}</h2>
+      <p>{t.start.serverBody}</p>
+    </div>
+    <CodeBlock code={manifest} lang="json" />
+    <CodeBlock code={serverCmd} lang="bash" />
+
+    <div class="prose">
+      <h2>{t.start.remoteTitle}</h2>
+      <p>{t.start.remoteBody}</p>
+    </div>
+    <CodeBlock code={remoteExample} lang="rust" />
+
+    <div class="prose" id="cli">
+      <h2>{t.start.cliTitle}</h2>
+      <p>{t.start.cliBody}</p>
+    </div>
+    <CodeBlock code={cli} lang="bash" />
+
+    <div class="prose">
+      <h2>{t.start.goTitle}</h2>
+      <p>{t.start.goBody}</p>
+    </div>
+    <CodeBlock code={goExample} lang="go" />
+
+    <div class="prose">
+      <h2>{t.start.sourceTitle}</h2>
+    </div>
+    <CodeBlock code={fromSource} lang="bash" />
+
+    <div class="prose">
       <h2>{t.start.contractTitle}</h2>
       <ul>
         {t.start.contract.map((item) => <li>{item}</li>)}
       </ul>
-      <h2>{t.start.fuzzTitle}</h2>
-      <p>{t.start.fuzzBody}</p>
       <h2>{t.start.licenseTitle}</h2>
       <p>
         {t.start.licenseBody.split("{license}")[0]}

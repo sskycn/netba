@@ -4,7 +4,7 @@ const en = {
   meta: {
     tagline: "A strongly typed relational database core",
     description:
-      "NetbaDB is a strongly typed relational database core written in Rust. Application languages remain behind a language-independent Canonical Schema IR. The current release implements a documented path from the parser to pages, WAL, and crash recovery.",
+      "NetbaDB is a strongly typed relational database core written in Rust. Use the embedded SDK in-process, or connect to netbadbd over Protocol v1.",
   },
   chrome: {
     skip: "Skip to content",
@@ -25,10 +25,12 @@ const en = {
   home: {
     heroHtml: "A strongly typed<br />relational <em>database core</em>.",
     lede:
-      "NetbaDB is a strongly typed relational database core written in Rust. Application languages remain at the frontend. The engine consumes Canonical Schema IR and executes a complete path from the parser through slotted pages, WAL, and crash recovery.",
+      "NetbaDB is a strongly typed relational database core written in Rust. Create a local file with the embedded SDK, or start netbadbd and connect with the Rust or Go Protocol v1 client.",
     ctaArchitecture: "Architecture",
     ctaStart: "Get started",
-    statSlice: "Current release scope",
+    statSlice: "Current release",
+    statProtocol: "Remote protocol",
+    statIndexes: "Registered indexes",
     statPages: "slotted pages",
     honestKicker: "Current status",
     honestTitle: "Experimental, with a defined implementation scope.",
@@ -40,14 +42,32 @@ const en = {
     pipelineKicker: "Architecture",
     pipelineTitle: "Stable layer boundaries.",
     pipelineDeck:
-      "Application languages are not part of the database's persistent meaning. Rust provides the native embedded API. Go and other languages are intended to use a generated SDK or a versioned protocol client.",
+      "Application languages are not part of the database's persistent meaning. Rust provides embedded and remote APIs. Go uses an independent Protocol v1 client and generated typed bindings.",
+    pathsKicker: "Get started",
+    pathsTitle: "Three supported entry points.",
+    pathsDeck:
+      "Most applications should start with the embedded SDK. Use netbadbd when another process needs a Protocol v1 connection. Use the CLI to inspect catalogs and plans without executing SQL.",
+    paths: [
+      {
+        title: "Embedded Rust",
+        text: "Add netbadb-sdk, create a table file, insert rows, and run SQL in-process.",
+      },
+      {
+        title: "Server and remote client",
+        text: "Start netbadbd from a deployment manifest, then connect with Rust or Go.",
+      },
+      {
+        title: "Offline inspection",
+        text: "Open existing files with the netbadb CLI to print catalog metadata or a physical plan.",
+      },
+    ],
     pipeline: [
       { title: "Schema IR", text: "Language-independent tables, columns, physical / semantic types" },
       { title: "Parser / HIR", text: "Name resolution and nominal type checking" },
-      { title: "Relational IR", text: "Logical plans without storage choices" },
-      { title: "Planner", text: "Scans, nested-loop, sort, and aggregates" },
+      { title: "Planner", text: "SeqScan, IndexScan, nested-loop, sort, aggregates" },
       { title: "Executor", text: "Synchronous execution + three-valued logic" },
-      { title: "Storage", text: "Transactions, WAL, pages, heap, B+Tree" },
+      { title: "Storage", text: "Transactions, WAL, heap, registered B+Trees" },
+      { title: "Protocol", text: "netbadbd, Protocol v1, TLS, authorization" },
     ],
     typesKicker: "Nominal types",
     typesTitleHtml: "Identical <code>u64</code> encodings remain distinct types.",
@@ -65,11 +85,11 @@ const en = {
       "A → B means A depends on B. Storage does not depend on the planner or executor; the executor consumes a physical plan and a safe storage API.",
     leaf: "No dependencies",
     ctaKicker: "Documentation",
-    ctaTitle: "Begin with the embedded API.",
+    ctaTitle: "Create a database in a few lines.",
     ctaBody:
-      "This website documents implemented capabilities only. Roadmap items are identified separately. Source code:",
+      "The Get started page covers the embedded SDK, indexes, netbadbd, and remote clients. Source code:",
     ctaStartAgain: "Get started",
-    ctaStorage: "Storage and recovery",
+    ctaStorage: "Query language",
   },
   architecture: {
     title: "Architecture",
@@ -101,11 +121,11 @@ const en = {
     depsBody:
       "In the graph, A → B means A depends on B. Lower layers must not depend on higher-level policy. In particular, storage must not depend on the planner or executor, and the executor must not depend on an SDK.",
     langTitle: "Cross-language strategy",
-    langLead: "Go is no longer treated as the database implementation language. The intended support boundary is:",
-    langRust: "Rust: native core and embedded SDK",
-    langGo: "Go: generated SDK and NetbaDB protocol client",
+    langLead: "Go is an application language, not an implementation language. The support boundary is:",
+    langRust: "Rust: native core, embedded SDK, and Protocol v1 remote client",
+    langGo: "Go: independent Protocol v1 client and generated typed bindings",
     langBody:
-      "sdk/go currently documents the intended boundary. A Go runtime and protocol wire format are not included in this release. A future netbadbd server must define a versioned, language-neutral protocol before a Go client is generated.",
+      "sdk/go is an independent standard-library client. Generated bindings validate result order, names, physical and semantic types, and nullability. They do not generate SQL or query-builder APIs.",
     decisionTitle: "Design priorities",
     decisionBody:
       "Correctness, explicit invariants, and type safety take precedence over convenience. Features are introduced as complete, testable vertical slices. Unimplemented components are not represented as finished APIs.",
@@ -161,7 +181,7 @@ const en = {
     btreeP1:
       "Heap and B+Tree pages share one database file, buffer pool, transaction chain, WAL, recovery pass, and checkpoint. Index pages are ordinary checksummed Page v5 pages with exactly one generation-1 payload slot.",
     btreeP2:
-      "netbadb-index owns ordering, nodes, and versioned codecs, with no dependency on storage, SQL, or the executor. BTreeHandle is a stable metadata-page identity; a root split can replace the root without changing the handle. This API is storage-only: it does not automatically maintain indexes for heap DML, expose SQL index DDL, or add IndexScan.",
+      "netbadb-index owns ordering, nodes, and versioned codecs, with no dependency on storage, SQL, or the executor. BTreeHandle is a stable metadata-page identity; a root split can replace the root without changing the handle. Registered indexes are backfilled by create_index, maintained by heap and SQL DML, and visible to the planner as IndexScan. SQL index DDL is not available.",
     integrityTitle: "Integrity, not authentication",
     integrityBody:
       "Page CRC and WAL CRC detect persistent corruption. They neither repair it nor provide cryptographic authentication. Decoder fuzzing covers WAL recovery, Page v5, and B+Tree nodes.",
@@ -228,49 +248,69 @@ const en = {
       "COUNT(*) counts rows; COUNT(column) ignores NULL. Numeric SUM uses checked arithmetic and strips nominal meaning. MIN / MAX preserve the input SemanticType. NULLs at a grouping key share one group, unlike expression NULL = NULL, which remains UNKNOWN. Grouped queries currently reject ORDER BY.",
     multiTitle: "Multi-table writes are still unsupported",
     multiBody:
-      "The core composes unchanged one-table heap files with create_tables / open_tables. JOIN did not change the page, WAL, recovery, or transaction format. Cross-table write transactions remain on the roadmap.",
+      "The core composes unchanged one-table heap files with create_tables / open_tables. JOIN did not change the page, WAL, recovery, or transaction format. Cross-table write transactions remain unsupported.",
+    indexTitle: "Indexes and ANALYZE",
+    indexBody:
+      "create_index registers a non-unique single-column index after a transactional backfill. Subsequent heap and SQL DML maintains registered indexes. Eligible equality and IS NULL predicates can select a point IndexScan; analyzed two-sided Int64/UInt64 bounds can select a range IndexScan. ANALYZE is explicit and is not maintained by DML. SQL index DDL is not available.",
   },
   roadmap: {
     title: "Roadmap",
     description:
-      "NetbaDB's vertical slice from the Rust foundation through a persistent B+Tree, and the next work on indexes, a server, and SDKs.",
+      "NetbaDB's implemented phases through Protocol v1, netbadbd, SDKs, and RangeIndexScan.",
     kicker: "Roadmap",
     heroHtml: "Implemented vertically,<br />then extended by phase.",
     deck:
-      "Development follows a vertical sequence. {n} phases are complete through Phase 4C1. Isolation and MVCC, B+Tree deletion, server networking, and a Go wire protocol remain planned work and are not available in the current release.",
+      "Development follows a vertical sequence. {n} phases are complete through Phase 7B. Isolation and MVCC, index joins, and MCP remain planned work.",
     complete: "Complete",
     next: "Next",
     later: "Later",
     notTitle: "Not included in the current release",
   },
   start: {
-    title: "Start",
+    title: "Get started",
     description:
-      "Build, test, and embed NetbaDB. Rust 1.97.1 development toolchain, MSRV 1.85.0, AGPL-3.0-or-later.",
+      "Add the Rust SDK, create a local NetbaDB file, run SQL, register an index, or start netbadbd.",
     kicker: "Get started",
-    heroHtml: "Synchronous embedded<br />database API.",
+    heroHtml: "Add the SDK,<br />then create a database.",
     deck:
-      "The repository pins Rust {toolchain} with rustfmt and clippy. The workspace MSRV is {msrv}. Applications use netbadb-core::Database or the sdk/rust re-exports.",
+      "The supported application crate is netbadb-sdk. The default feature is embedded. Disable default features and enable remote for a Protocol v1 client only. Toolchain {toolchain}; MSRV {msrv}.",
     openGithub: "View on GitHub",
     readReadme: "Read the README",
-    validateTitle: "Validation",
-    cargoEquiv: "Equivalent cargo commands:",
-    embedTitle: "Minimal embedded example",
+    depTitle: "1. Add the dependency",
+    depBody:
+      "The crate is published from the workspace repository. Cargo resolves the netbadb-sdk package in that git workspace.",
+    embedTitle: "2. Embedded create, insert, and query",
     embedBody:
-      "Creation uses create-new semantics and refuses to overwrite an existing database or WAL slot. Database::insert runs as an implicit transaction. When several inserts must share one WAL chain, call begin_transaction, insert_in, and Transaction::commit.",
-    contractTitle: "Durability contract",
+      "Database::create refuses to overwrite an existing database or WAL slot. insert and execute run as implicit transactions. create_index backfills current rows and registers a non-unique single-column index. analyze writes a fresh optimizer snapshot; DML does not refresh it automatically.",
+    inspectTitle: "3. Inspect the catalog and plan",
+    inspectBody:
+      "Inspection compiles and plans a statement without executing it. It does not scan heaps, refresh ANALYZE, acquire the writer, or append WAL.",
+    serverTitle: "4. Start netbadbd",
+    serverBody:
+      "The server opens existing heap files declared by deployment manifest v4. Loopback plaintext requires exactly one local_plaintext principal. Non-loopback listening requires mutual TLS.",
+    remoteTitle: "5. Connect a remote client",
+    remoteBody:
+      "Plaintext is accepted only when the resolved TCP peer is loopback. Remote deployments require verified mutual TLS. There is no connection pool, automatic retry, or multiplexing.",
+    cliTitle: "6. Inspect files from the command line",
+    cliBody:
+      "Stop netbadbd and any embedded process using the same files first. The CLI opens tables with normal startup recovery and never executes the inspected SQL.",
+    goTitle: "Go client",
+    goBody:
+      "The Go module is an independent Protocol v1 client. It uses no cgo or Rust FFI. Dial performs Hello automatically.",
+    sourceTitle: "Build from source",
+    cargoEquiv: "Equivalent cargo commands:",
+    contractTitle: "Operating constraints",
     contract: [
-      "A successful commit means its Commit record has reached durable storage; heap pages may remain buffered until eviction, flush, or close.",
-      "Each open database object allows one writer. Read-only transactions do not reserve it.",
+      "One writer per open database object. Read-only transactions do not reserve the writer.",
       "Readers are not isolated and may observe an active writer's buffered changes.",
-      "Experimental format changes reject older versions rather than guessing a migration.",
+      "A successful commit means the Commit record is durable; heap pages may remain buffered until flush or close.",
+      "SQL index DDL is not available. Call create_index from the embedded API.",
+      "Cross-table write transactions are not supported.",
+      "Experimental on-disk formats reject older versions. There is no migration path.",
     ],
-    fuzzTitle: "Fuzz",
-    fuzzBody:
-      "fuzz/ provides bounded targets for WAL recovery, Page v5 decoding, and B+Tree node decoding. Arbitrary bytes must return a node or a typed error — not a panic, unbounded allocation, or a traversal.",
     licenseTitle: "License",
     licenseBody:
-      "NetbaDB is licensed under {license}. It is a copyleft license: if you modify the program and let users interact with it over a network, you must provide the corresponding source.",
+      "NetbaDB is licensed under {license}. If you modify the program and let users interact with it over a network, you must provide the corresponding source.",
   },
   notFound: {
     title: "Page not found",
@@ -287,7 +327,7 @@ const zh: typeof en = {
   meta: {
     tagline: "强类型关系型数据库核心",
     description:
-      "NetbaDB 是用 Rust 实现的强类型关系型数据库核心。应用语言通过语言无关的 Canonical Schema IR 与引擎隔离。当前版本实现了从解析器到页、WAL 与崩溃恢复的文档化路径。",
+      "NetbaDB 是用 Rust 实现的强类型关系型数据库核心。可在进程内使用嵌入式 SDK，或通过 Protocol v1 连接 netbadbd。",
   },
   chrome: {
     skip: "跳到正文",
@@ -308,10 +348,12 @@ const zh: typeof en = {
   home: {
     heroHtml: "强类型<br />关系型<em>数据库核心</em>。",
     lede:
-      "NetbaDB 是用 Rust 实现的强类型关系型数据库核心。应用语言停留在前端。引擎消费 Canonical Schema IR，并提供从解析器到槽页、WAL 与崩溃恢复的完整路径。",
+      "NetbaDB 是用 Rust 实现的强类型关系型数据库核心。使用嵌入式 SDK 创建本地文件，或启动 netbadbd 后通过 Rust / Go 的 Protocol v1 客户端连接。",
     ctaArchitecture: "架构",
     ctaStart: "开始使用",
-    statSlice: "当前版本范围",
+    statSlice: "当前版本",
+    statProtocol: "远程协议",
+    statIndexes: "已注册索引",
     statPages: "槽页",
     honestKicker: "当前状态",
     honestTitle: "实验性软件，实现范围已明确界定。",
@@ -323,14 +365,32 @@ const zh: typeof en = {
     pipelineKicker: "架构",
     pipelineTitle: "稳定的分层边界。",
     pipelineDeck:
-      "应用语言不属于数据库的持久语义。Rust 提供原生嵌入式 API。Go 及其他语言计划通过生成 SDK 或版本化协议客户端接入。",
+      "应用语言不属于数据库的持久语义。Rust 提供嵌入式与远程 API。Go 使用独立的 Protocol v1 客户端及生成的类型化绑定。",
+    pathsKicker: "开始使用",
+    pathsTitle: "三条受支持的接入路径。",
+    pathsDeck:
+      "大多数应用应从嵌入式 SDK 开始。当另一进程需要 Protocol v1 连接时使用 netbadbd。使用 CLI 可在不执行 SQL 的情况下检查目录与计划。",
+    paths: [
+      {
+        title: "嵌入式 Rust",
+        text: "添加 netbadb-sdk，创建表文件，插入行，并在进程内运行 SQL。",
+      },
+      {
+        title: "服务器与远程客户端",
+        text: "用部署清单启动 netbadbd，然后通过 Rust 或 Go 连接。",
+      },
+      {
+        title: "离线检查",
+        text: "用 netbadb CLI 打开已有文件，输出目录元数据或物理计划。",
+      },
+    ],
     pipeline: [
       { title: "Schema IR", text: "语言无关的表、列、物理 / 语义类型" },
       { title: "Parser / HIR", text: "名字解析与名义类型检查" },
-      { title: "Relational IR", text: "逻辑计划，不含存储选择" },
-      { title: "Planner", text: "扫描、nested-loop、排序与聚合" },
+      { title: "Planner", text: "SeqScan、IndexScan、nested-loop、排序与聚合" },
       { title: "Executor", text: "同步执行 + 三值逻辑" },
-      { title: "Storage", text: "事务、WAL、页、堆、B+Tree" },
+      { title: "Storage", text: "事务、WAL、堆、已注册 B+Tree" },
+      { title: "Protocol", text: "netbadbd、Protocol v1、TLS、授权" },
     ],
     typesKicker: "名义类型",
     typesTitleHtml: "相同的 <code>u64</code> 编码仍是不同的类型。",
@@ -348,10 +408,10 @@ const zh: typeof en = {
       "A → B 表示 A 依赖 B。存储层不依赖规划器或执行器；执行器消费物理计划与安全存储 API。",
     leaf: "无上游依赖",
     ctaKicker: "文档",
-    ctaTitle: "从嵌入式 API 开始。",
-    ctaBody: "本网站仅描述已实现能力。路线图项目单独标明。源代码：",
+    ctaTitle: "用少量代码创建数据库。",
+    ctaBody: "「开始使用」页面覆盖嵌入式 SDK、索引、netbadbd 与远程客户端。源代码：",
     ctaStartAgain: "开始使用",
-    ctaStorage: "存储与恢复",
+    ctaStorage: "查询语言",
   },
   architecture: {
     title: "架构",
@@ -381,11 +441,11 @@ const zh: typeof en = {
     depsBody:
       "图中 A → B 表示 A 依赖 B。下层不得依赖上层策略。尤其是存储不得依赖规划器或执行器，执行器不得依赖 SDK。",
     langTitle: "跨语言策略",
-    langLead: "Go 不再被当作数据库实现语言。预定的支持边界是：",
-    langRust: "Rust: 原生核心与嵌入式 SDK",
-    langGo: "Go:   生成 SDK 与 NetbaDB 协议客户端",
+    langLead: "Go 是应用语言，不是实现语言。支持边界如下：",
+    langRust: "Rust: 原生核心、嵌入式 SDK 与 Protocol v1 远程客户端",
+    langGo: "Go: 独立 Protocol v1 客户端与生成的类型化绑定",
     langBody:
-      "sdk/go 目前记录预定边界。本版本不包含 Go 运行时与协议线格式。未来的 netbadbd 须先定义版本化、语言中立的协议，再据此生成 Go 客户端。",
+      "sdk/go 是独立的标准库客户端。生成绑定会校验结果顺序、名称、物理 / 语义类型与可空性，但不生成 SQL 或查询构建 API。",
     decisionTitle: "设计优先级",
     decisionBody:
       "正确性、显式不变量与类型安全优先于便利性。功能以完整、可测试的垂直切片引入。未实现的组件不以完成 API 的形式呈现。",
@@ -440,7 +500,7 @@ const zh: typeof en = {
     btreeP1:
       "堆页与 B+Tree 页共享同一个数据库文件、缓冲池、事务链、WAL、恢复趟与检查点。索引页是普通的、带校验的 Page v5，恰好一个 generation-1 的 payload 槽。",
     btreeP2:
-      "netbadb-index 拥有排序、节点与版本化编解码，不依赖存储、SQL 或执行器。BTreeHandle 是稳定的元数据页身份；根分裂可以替换根而不改变句柄。当前 API 只到存储层：不自动为堆 DML 维护索引，不暴露 SQL 索引 DDL，也不增加 IndexScan。",
+      "netbadb-index 拥有排序、节点与版本化编解码，不依赖存储、SQL 或执行器。BTreeHandle 是稳定的元数据页身份；根分裂可以替换根而不改变句柄。已注册索引由 create_index 回填，由堆与 SQL DML 维护，并作为 IndexScan 对规划器可见。不提供 SQL 索引 DDL。",
     integrityTitle: "完整性，不是认证",
     integrityBody:
       "页 CRC 与 WAL CRC 检测持久损坏。它们既不修复损坏，也不提供密码学认证。解码 fuzz 覆盖 WAL 恢复、Page v5 与 B+Tree 节点。",
@@ -506,15 +566,18 @@ const zh: typeof en = {
       "COUNT(*) 计行；COUNT(column) 忽略 NULL。数值 SUM 使用受检算术，并剥去名义含义。MIN / MAX 保留输入 SemanticType。分组键上的 NULL 共享一组，这与表达式里 NULL = NULL 仍为 UNKNOWN 不同。带 GROUP BY 的查询当前拒绝 ORDER BY。",
     multiTitle: "多表写入仍未支持",
     multiBody:
-      "核心用 create_tables / open_tables 组合多张未改动的单表堆文件。JOIN 没有改页、WAL、恢复或事务格式。跨表写事务仍是路线图。",
+      "核心用 create_tables / open_tables 组合多张未改动的单表堆文件。JOIN 没有改页、WAL、恢复或事务格式。跨表写事务仍不受支持。",
+    indexTitle: "索引与 ANALYZE",
+    indexBody:
+      "create_index 在事务性回填后注册非唯一单列索引。随后的堆与 SQL DML 会维护已注册索引。符合条件的等值与 IS NULL 谓词可选择点查 IndexScan；经过分析的双侧 Int64/UInt64 边界可选择范围 IndexScan。ANALYZE 为显式操作，DML 不会自动维护统计。不提供 SQL 索引 DDL。",
   },
   roadmap: {
     title: "路线图",
-    description: "NetbaDB 从 Rust 基础到持久 B+Tree 的垂直切片，以及索引、服务器与 SDK 的下一步。",
+    description: "NetbaDB 已完成至 Protocol v1、netbadbd、SDK 与 RangeIndexScan 的阶段划分。",
     kicker: "路线图",
     heroHtml: "按垂直切片实现，<br />再分阶段扩展。",
     deck:
-      "实现顺序为垂直推进。截至 Phase 4C1，已完成 {n} 个阶段。隔离与 MVCC、B+Tree 删除、服务器网络以及 Go 线协议属于规划内容，当前版本不可用。",
+      "实现顺序为垂直推进。截至 Phase 7B，已完成 {n} 个阶段。隔离与 MVCC、索引连接以及 MCP 仍属规划内容。",
     complete: "已完成",
     next: "下一步",
     later: "后续",
@@ -522,31 +585,49 @@ const zh: typeof en = {
   },
   start: {
     title: "开始使用",
-    description: "构建、测试并嵌入 NetbaDB。Rust 1.97.1 开发工具链，MSRV 1.85.0，AGPL-3.0-or-later。",
+    description:
+      "添加 Rust SDK，创建本地 NetbaDB 文件，运行 SQL，注册索引，或启动 netbadbd。",
     kicker: "开始使用",
-    heroHtml: "同步嵌入式<br />数据库 API。",
+    heroHtml: "添加 SDK，<br />然后创建数据库。",
     deck:
-      "仓库固定使用 Rust {toolchain}，并包含 rustfmt 与 clippy。workspace MSRV 为 {msrv}。应用程序通过 netbadb-core::Database 或 sdk/rust 再导出接入。",
+      "受支持的应用 crate 是 netbadb-sdk。默认特性为 embedded。仅使用 Protocol v1 客户端时，请关闭默认特性并启用 remote。工具链 {toolchain}；MSRV {msrv}。",
     openGithub: "在 GitHub 上查看",
     readReadme: "阅读 README",
-    validateTitle: "校验",
-    cargoEquiv: "等价的 cargo 命令：",
-    embedTitle: "最小嵌入式示例",
+    depTitle: "1. 添加依赖",
+    depBody:
+      "该 crate 来自工作区仓库。Cargo 会在该 git workspace 中解析名为 netbadb-sdk 的包。",
+    embedTitle: "2. 嵌入式创建、插入与查询",
     embedBody:
-      "创建使用 create-new 语义，并拒绝覆盖已有数据库或 WAL 槽。Database::insert 作为隐式事务运行。需要若干插入共享一条 WAL 链时，调用 begin_transaction、insert_in 与 Transaction::commit。",
-    contractTitle: "持久化契约",
+      "Database::create 拒绝覆盖已有数据库或 WAL 槽。insert 与 execute 作为隐式事务运行。create_index 回填当前行并注册非唯一单列索引。analyze 写入新的优化器快照；DML 不会自动刷新该快照。",
+    inspectTitle: "3. 检查目录与计划",
+    inspectBody:
+      "检查会编译并规划语句，但不会执行。它不会扫描堆、刷新 ANALYZE、获取写者或追加 WAL。",
+    serverTitle: "4. 启动 netbadbd",
+    serverBody:
+      "服务器打开部署清单 v4 声明的已有堆文件。回环明文要求恰好一个 local_plaintext 主体。非回环监听要求双向 TLS。",
+    remoteTitle: "5. 连接远程客户端",
+    remoteBody:
+      "仅当解析后的 TCP 对端为回环地址时才接受明文。远程部署要求经过校验的双向 TLS。不提供连接池、自动重试或多路复用。",
+    cliTitle: "6. 使用命令行检查文件",
+    cliBody:
+      "请先停止 netbadbd 以及任何使用同一文件的嵌入式进程。CLI 通过正常启动恢复打开表，并且不会执行被检查的 SQL。",
+    goTitle: "Go 客户端",
+    goBody:
+      "Go 模块是独立的 Protocol v1 客户端，不使用 cgo 或 Rust FFI。Dial 会自动完成 Hello。",
+    sourceTitle: "从源码构建",
+    cargoEquiv: "等价的 cargo 命令：",
+    contractTitle: "运行约束",
     contract: [
-      "成功的提交表示其 Commit 记录已到达持久存储；堆页可能仍留在缓冲里，直到淘汰、flush 或 close。",
       "每个打开的数据库对象允许一个写者。只读事务不预定写者。",
       "读者不隔离，可能观察到活动写者的缓冲修改。",
-      "实验格式变更时将拒绝旧版本，不提供自动迁移。",
+      "成功的提交表示 Commit 记录已持久化；堆页可能仍留在缓冲中，直到 flush 或 close。",
+      "不提供 SQL 索引 DDL。请通过嵌入式 API 调用 create_index。",
+      "不支持跨表写事务。",
+      "实验性磁盘格式会拒绝旧版本，不提供迁移路径。",
     ],
-    fuzzTitle: "Fuzz",
-    fuzzBody:
-      "fuzz/ 为 WAL 恢复、Page v5 解码与 B+Tree 节点解码提供有界目标。任意字节必须返回节点或类型化错误，而不能 panic、无限分配或开始遍历。",
     licenseTitle: "许可",
     licenseBody:
-      "NetbaDB 以 {license} 授权。这是一份 copyleft 许可：如果你修改程序并让用户通过网络与之交互，必须提供对应源代码。",
+      "NetbaDB 以 {license} 授权。如果修改程序并让用户通过网络与之交互，必须提供对应源代码。",
   },
   notFound: {
     title: "页面不存在",

@@ -68,10 +68,73 @@ export const crates: Crate[] = [
     name: "netbadb-planner",
     path: "crates/netbadb-planner",
     role: {
-      en: "Logical plan → physical plan",
-      zh: "逻辑计划 → 物理计划",
+      en: "Logical plan → physical plan, including IndexScan",
+      zh: "逻辑计划 → 物理计划，含 IndexScan",
     },
-    dependsOn: ["rel", "types"],
+    dependsOn: ["index", "rel", "types"],
+  },
+  {
+    name: "netbadb-schema-spec",
+    path: "crates/netbadb-schema-spec",
+    role: {
+      en: "SDK Schema Spec v1 parsing and fingerprints",
+      zh: "SDK Schema Spec v1 解析与指纹",
+    },
+    dependsOn: ["schema", "types"],
+  },
+  {
+    name: "netbadb-tooling",
+    path: "crates/netbadb-tooling",
+    role: {
+      en: "Stable schema-driven SQL diagnostics",
+      zh: "稳定的、由 schema 驱动的 SQL 诊断",
+    },
+    dependsOn: ["compiler", "hir", "parser", "schema"],
+  },
+  {
+    name: "netbadb-inspect",
+    path: "crates/netbadb-inspect",
+    role: {
+      en: "Catalog and plan inspection DTOs",
+      zh: "目录与计划检查 DTO",
+    },
+    dependsOn: ["schema", "types"],
+  },
+  {
+    name: "netbadb-protocol",
+    path: "crates/netbadb-protocol",
+    role: {
+      en: "Protocol v1 binary wire contract",
+      zh: "Protocol v1 二进制线协议",
+    },
+    dependsOn: ["types"],
+  },
+  {
+    name: "netbadb-client",
+    path: "crates/netbadb-client",
+    role: {
+      en: "Synchronous Protocol v1 remote client",
+      zh: "同步 Protocol v1 远程客户端",
+    },
+    dependsOn: ["protocol", "schema", "types"],
+  },
+  {
+    name: "netbadb-server",
+    path: "crates/netbadb-server",
+    role: {
+      en: "Sessions, authorization, and blocking TCP runtime",
+      zh: "会话、授权与阻塞式 TCP 运行时",
+    },
+    dependsOn: ["core", "protocol", "schema", "types"],
+  },
+  {
+    name: "netbadb-codegen",
+    path: "crates/netbadb-codegen",
+    role: {
+      en: "Schema Spec validation and Go source generation",
+      zh: "Schema Spec 校验与 Go 源码生成",
+    },
+    dependsOn: ["schema-spec", "schema", "types"],
   },
   {
     name: "netbadb-index",
@@ -107,16 +170,34 @@ export const crates: Crate[] = [
       en: "Native embedded Database API",
       zh: "原生嵌入式 Database API",
     },
-    dependsOn: ["compiler", "planner", "executor", "storage", "schema", "types"],
+    dependsOn: ["compiler", "inspect", "planner", "executor", "storage", "schema", "types"],
   },
   {
     name: "netbadb-sdk",
     path: "sdk/rust",
     role: {
-      en: "Application-facing re-export surface",
-      zh: "面向应用的稳定再导出表面",
+      en: "Embedded and remote application façade",
+      zh: "嵌入式与远程应用门面",
     },
-    dependsOn: ["core", "executor", "schema", "types"],
+    dependsOn: ["core", "client", "inspect", "schema", "types"],
+  },
+  {
+    name: "netbadbd",
+    path: "cmd/netbadbd",
+    role: {
+      en: "Standalone manifest-driven TCP server",
+      zh: "由清单驱动的独立 TCP 服务器",
+    },
+    dependsOn: ["server"],
+  },
+  {
+    name: "netbadb",
+    path: "cmd/netbadb",
+    role: {
+      en: "Offline local inspection CLI",
+      zh: "离线本地检查 CLI",
+    },
+    dependsOn: ["sdk", "server"],
   },
 ];
 
@@ -124,7 +205,7 @@ export const layers: Localized<{ title: string; items: string[] }[]> = {
   en: [
     {
       title: "Application edge",
-      items: ["Rust Schema API / SDK", "Later: Go SDK and NetbaDB protocol client"],
+      items: ["Rust embedded SDK", "Rust remote client", "Go Protocol v1 client", "netbadbd"],
     },
     {
       title: "Compile",
@@ -142,7 +223,7 @@ export const layers: Localized<{ title: string; items: string[] }[]> = {
   zh: [
     {
       title: "应用边界",
-      items: ["Rust Schema API / SDK", "未来：Go SDK 与 NetbaDB 协议客户端"],
+      items: ["Rust 嵌入式 SDK", "Rust 远程客户端", "Go Protocol v1 客户端", "netbadbd"],
     },
     {
       title: "编译",

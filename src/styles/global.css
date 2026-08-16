@@ -634,6 +634,11 @@ section {
   max-width: var(--narrow);
 }
 
+.prose h2,
+.prose[id] {
+  scroll-margin-top: 5.2rem;
+}
+
 .prose h2 {
   margin: 2.4rem 0 0.7rem;
 }

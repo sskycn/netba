@@ -57,6 +57,6 @@ pnpm preview
 | `/storage` | `/zh/storage` | Page v5、WAL、恢复、检查点、B+Tree |
 | `/query` | `/zh/query` | 小型 SQL 子集、类型、NULL、DML |
 | `/roadmap` | `/zh/roadmap` | 已完成阶段与下一步 |
-| `/start` | `/zh/start` | 构建命令与嵌入式 API |
+| `/start` | `/zh/start` | 嵌入式 SDK、索引、netbadbd、远程客户端与 CLI |
 
 文案与仓库文档对齐，并明确区分已实现与路线图。
