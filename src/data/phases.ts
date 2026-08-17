@@ -255,6 +255,15 @@ export const phases: Phase[] = [
     },
   },
   {
+    id: "7A",
+    status: "complete",
+    title: { en: "Performance baseline", zh: "性能基线" },
+    summary: {
+      en: "Reproducible warm-cache benchmarks without changing engine behavior.",
+      zh: "可复现的热缓存基准，不改变引擎行为。",
+    },
+  },
+  {
     id: "7B",
     status: "complete",
     title: { en: "Range IndexScan", zh: "范围 IndexScan" },
@@ -264,12 +273,57 @@ export const phases: Phase[] = [
     },
   },
   {
-    id: "6E2",
-    status: "next",
-    title: { en: "MCP and extra adapters", zh: "MCP 与其他适配器" },
+    id: "7C",
+    status: "complete",
+    title: { en: "Predicate-first NestedLoopJoin", zh: "谓词优先 NestedLoopJoin" },
     summary: {
-      en: "MCP and additional tooling adapters.",
-      zh: "MCP 以及其他工具适配器。",
+      en: "Rejected join pairs allocate no combined row.",
+      zh: "被拒绝的连接候选不再分配合并行。",
+    },
+  },
+  {
+    id: "7D",
+    status: "complete",
+    title: { en: "Costed HashJoin", zh: "带代价的 HashJoin" },
+    summary: {
+      en: "Analyzed Scan × Scan INNER JOIN may select a simple equi HashJoin.",
+      zh: "经过分析的 Scan × Scan INNER JOIN 可选择简单等值 HashJoin。",
+    },
+  },
+  {
+    id: "7E",
+    status: "complete",
+    title: { en: "Validate-once heap scan", zh: "一次校验的堆扫描" },
+    summary: {
+      en: "Each immutable heap page is fully validated once per sequential scan.",
+      zh: "顺序扫描中每个不可变堆页只做一次完整校验。",
+    },
+  },
+  {
+    id: "7F",
+    status: "complete",
+    title: { en: "Join predicate prebinding", zh: "连接谓词预绑定" },
+    summary: {
+      en: "NLJ and HashJoin bind column positions once before candidate loops.",
+      zh: "NLJ 与 HashJoin 在候选循环前一次性绑定列位置。",
+    },
+  },
+  {
+    id: "7G",
+    status: "next",
+    title: { en: "Borrowed join evaluation", zh: "借用式连接求值" },
+    summary: {
+      en: "Selected next: join-only borrowed-value predicate evaluation.",
+      zh: "下一步：仅针对连接的借用值谓词求值。",
+    },
+  },
+  {
+    id: "6E2",
+    status: "later",
+    title: { en: "MCP adapter", zh: "MCP 适配器" },
+    summary: {
+      en: "Deferred: official MCP SDKs currently exceed the Rust 1.85 MSRV.",
+      zh: "暂缓：官方 MCP SDK 目前超过 Rust 1.85 MSRV。",
     },
   },
   {
@@ -277,8 +331,8 @@ export const phases: Phase[] = [
     status: "later",
     title: { en: "Further optimization", zh: "后续优化" },
     summary: {
-      en: "Index joins, one-sided/Text range costing, and benchmark-driven work.",
-      zh: "索引连接、单侧 / Text 范围代价，以及由基准驱动的后续工作。",
+      en: "Index joins, one-sided/Text range costing, and broader HashJoin eligibility.",
+      zh: "索引连接、单侧 / Text 范围代价，以及更广的 HashJoin 适用范围。",
     },
   },
 ];
@@ -287,18 +341,18 @@ export const implemented: Localized<string[]> = {
   en: [
     "Embedded Database API and netbadb-sdk re-exports",
     "SELECT, INNER JOIN, INSERT / UPDATE / DELETE, ORDER BY, GROUP BY, aggregates",
-    "Registered indexes, DML maintenance, point IndexScan, ANALYZE, range IndexScan",
+    "Registered indexes, DML maintenance, point and range IndexScan, ANALYZE",
+    "Costed HashJoin for analyzed Scan × Scan INNER JOIN; NestedLoopJoin otherwise",
     "WAL, crash recovery, checkpoints, and generation-safe RowIds",
-    "netbadbd TCP server with Protocol v1, mutual TLS, and per-table authorization",
-    "Rust remote client, Go Protocol v1 client, inspect CLI, and diagnostics LSP",
+    "netbadbd, Protocol v1, Rust/Go clients, inspect CLI (JSON v3), and diagnostics LSP",
   ],
   zh: [
     "嵌入式 Database API 与 netbadb-sdk 再导出",
     "SELECT、INNER JOIN、INSERT / UPDATE / DELETE、ORDER BY、GROUP BY、聚合",
-    "已注册索引、DML 维护、点查 IndexScan、ANALYZE、范围 IndexScan",
+    "已注册索引、DML 维护、点查与范围 IndexScan、ANALYZE",
+    "经过分析的 Scan × Scan INNER JOIN 可选用 HashJoin，否则使用 NestedLoopJoin",
     "WAL、崩溃恢复、检查点与 generation 安全的 RowId",
-    "netbadbd TCP 服务器、Protocol v1、双向 TLS 与按表授权",
-    "Rust 远程客户端、Go Protocol v1 客户端、检查 CLI 与诊断 LSP",
+    "netbadbd、Protocol v1、Rust/Go 客户端、检查 CLI（JSON v3）与诊断 LSP",
   ],
 };
 
@@ -306,17 +360,17 @@ export const notImplemented: Localized<string[]> = {
   en: [
     "MVCC and read isolation: readers may observe an active writer's buffered changes",
     "Concurrent writers and cross-process file locking",
-    "SQL index DDL, uniqueness enforcement, index-only scans, and index joins",
+    "SQL index DDL, uniqueness enforcement, index-only scans, and index nested-loop joins",
     "Full SQL: outer joins, subqueries, HAVING, DISTINCT, window functions",
     "Multi-table write transactions",
-    "MCP adapters and migrations between experimental on-disk formats",
+    "MCP adapter (deferred past MSRV), SQL EXPLAIN, and on-disk format migrations",
   ],
   zh: [
     "MVCC 与读隔离：读者可能观察到活动写者的缓冲修改",
     "并发写者与跨进程文件锁",
-    "SQL 索引 DDL、唯一性约束、仅索引扫描与索引连接",
+    "SQL 索引 DDL、唯一性约束、仅索引扫描与索引嵌套循环连接",
     "完整 SQL：外连接、子查询、HAVING、DISTINCT、窗口函数",
     "跨表写事务",
-    "MCP 适配器，以及实验性磁盘格式之间的迁移",
+    "MCP 适配器（受 MSRV 限制暂缓）、SQL EXPLAIN，以及磁盘格式迁移",
   ],
 };

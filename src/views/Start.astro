@@ -98,7 +98,8 @@ const cli = `cargo run -p netbadb -- inspect catalog --manifest server.json
 
 cargo run -p netbadb -- inspect statement \\
   --manifest server.json \\
-  --sql "SELECT id FROM users WHERE id = 1"`;
+  --sql "SELECT id FROM users WHERE id = 1" \\
+  --format json`;
 
 const goExample = `client, err := netbadb.Dial(ctx, netbadb.Config{
     Address: "localhost:7878",
@@ -169,6 +170,12 @@ make test`;
       <p>{t.start.goBody}</p>
     </div>
     <CodeBlock code={goExample} lang="go" />
+
+    <div class="prose">
+      <h2>{t.start.lspTitle}</h2>
+      <p>{t.start.lspBody}</p>
+    </div>
+    <CodeBlock code={"netbadb-lsp --schema schema.json"} lang="bash" />
 
     <div class="prose">
       <h2>{t.start.sourceTitle}</h2>

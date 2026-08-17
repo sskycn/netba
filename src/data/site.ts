@@ -4,7 +4,7 @@ export const site = {
   github: "https://github.com/sskycn/netbadb",
   license: "AGPL-3.0-or-later",
   version: "0.1.0",
-  phase: "7B",
+  phase: "7F",
   rustToolchain: "1.97.1",
   msrv: "1.85.0",
   pageSize: "4 KiB",

@@ -64,7 +64,7 @@ const en = {
     pipeline: [
       { title: "Schema IR", text: "Language-independent tables, columns, physical / semantic types" },
       { title: "Parser / HIR", text: "Name resolution and nominal type checking" },
-      { title: "Planner", text: "SeqScan, IndexScan, nested-loop, sort, aggregates" },
+      { title: "Planner", text: "SeqScan, IndexScan, NestedLoopJoin, HashJoin, sort, aggregates" },
       { title: "Executor", text: "Synchronous execution + three-valued logic" },
       { title: "Storage", text: "Transactions, WAL, heap, registered B+Trees" },
       { title: "Protocol", text: "netbadbd, Protocol v1, TLS, authorization" },
@@ -114,7 +114,7 @@ const en = {
     stagesTitle: "Compiler stages",
     stagesLead: "The current query subset is compiled as follows:",
     stagesP1:
-      "HIR owns source-level resolution and semantic type checking. Relational IR owns relational meaning and column provenance. The planner selects sequential scans and a correctness-first nested-loop for logical INNER JOIN. The executor evaluates typed expressions against rows from storage.",
+      "HIR owns source-level resolution and semantic type checking. Relational IR owns relational meaning and column provenance. The planner selects sequential or index scans, NestedLoopJoin, or a costed HashJoin for analyzed Scan × Scan INNER JOIN. The executor evaluates typed expressions against rows from storage.",
     stagesP2:
       "Layers pass IDs and owned values. They do not spread long-lived references to pages, frames, or tuples into the planner, executor, or catalog.",
     depsTitle: "Dependency direction",
@@ -205,8 +205,8 @@ const en = {
       },
       {
         kind: "FROM / JOIN",
-        now: "AS and shorthand aliases, chained INNER JOIN … ON, self joins",
-        not: "Outer joins, USING, join reordering, hash / merge join",
+        now: "AS and shorthand aliases, chained INNER JOIN … ON, self joins, NestedLoopJoin, costed HashJoin",
+        not: "Outer joins, USING, join reordering, merge join, index nested-loop join",
       },
       {
         kind: "Predicates",
@@ -237,7 +237,7 @@ const en = {
       "Database NULL is an explicit ScalarValue::Null. Rust Option remains reserved for absent clauses or metadata. Comparisons with NULL yield UNKNOWN; IS NULL / IS NOT NULL are the explicit tests. AND / OR / NOT use SQL three-valued logic. WHERE and JOIN ON keep only TRUE; FALSE and UNKNOWN are rejected.",
     joinTitle: "JOIN",
     joinBody:
-      "An alias hides the underlying table name. Qualified columns resolve through the exposed relation name; unqualified columns are accepted only when exactly one visible relation provides the name. Each ON can see the complete left subtree and its current right relation, but not later joins. Nested-loop execution preserves duplicates in deterministic left-major, right-minor order.",
+      "An alias hides the underlying table name. Qualified columns resolve through the exposed relation name; unqualified columns are accepted only when exactly one visible relation provides the name. Each ON can see the complete left subtree and its current right relation, but not later joins. NestedLoopJoin is the default. After ANALYZE, a simple equi INNER JOIN of two scans may select HashJoin when that cost is strictly lower. Both operators preserve duplicates in deterministic left-major, right-minor order.",
     dmlTitle: "DML",
     dmlBody:
       "Typed DML uses the same compiler, transaction, full-page WAL, rollback, and recovery path as heap writes. Database::execute returns query rows or an explicit AffectedRows(u64); query rejects mutating statements. Omitted nullable INSERT columns become NULL; omitted non-nullable columns are rejected. UPDATE evaluates every right-hand side against the original row, so SET a = b, b = a swaps.",
@@ -256,11 +256,11 @@ const en = {
   roadmap: {
     title: "Roadmap",
     description:
-      "NetbaDB's implemented phases through Protocol v1, netbadbd, SDKs, and RangeIndexScan.",
+      "NetbaDB's implemented phases through Protocol v1, HashJoin, and join-predicate prebinding.",
     kicker: "Roadmap",
     heroHtml: "Implemented vertically,<br />then extended by phase.",
     deck:
-      "Development follows a vertical sequence. {n} phases are complete through Phase 7B. Isolation and MVCC, index joins, and MCP remain planned work.",
+      "Development follows a vertical sequence. {n} phases are complete through Phase 7F. Isolation and MVCC, borrowed join evaluation, and MCP remain planned or deferred work.",
     complete: "Complete",
     next: "Next",
     later: "Later",
@@ -293,10 +293,13 @@ const en = {
       "Plaintext is accepted only when the resolved TCP peer is loopback. Remote deployments require verified mutual TLS. There is no connection pool, automatic retry, or multiplexing.",
     cliTitle: "6. Inspect files from the command line",
     cliBody:
-      "Stop netbadbd and any embedded process using the same files first. The CLI opens tables with normal startup recovery and never executes the inspected SQL.",
+      "Stop netbadbd and any embedded process using the same files first. The CLI opens tables with normal startup recovery and never executes the inspected SQL. JSON output uses Inspection JSON v3.",
     goTitle: "Go client",
     goBody:
       "The Go module is an independent Protocol v1 client. It uses no cgo or Rust FFI. Dial performs Hello automatically.",
+    lspTitle: "Editor diagnostics",
+    lspBody:
+      "netbadb-lsp --schema schema.json is a diagnostics-only stdio language server. It does not open database files or report physical plans.",
     sourceTitle: "Build from source",
     cargoEquiv: "Equivalent cargo commands:",
     contractTitle: "Operating constraints",
@@ -387,7 +390,7 @@ const zh: typeof en = {
     pipeline: [
       { title: "Schema IR", text: "语言无关的表、列、物理 / 语义类型" },
       { title: "Parser / HIR", text: "名字解析与名义类型检查" },
-      { title: "Planner", text: "SeqScan、IndexScan、nested-loop、排序与聚合" },
+      { title: "Planner", text: "SeqScan、IndexScan、NestedLoopJoin、HashJoin、排序与聚合" },
       { title: "Executor", text: "同步执行 + 三值逻辑" },
       { title: "Storage", text: "事务、WAL、堆、已注册 B+Tree" },
       { title: "Protocol", text: "netbadbd、Protocol v1、TLS、授权" },
@@ -435,7 +438,7 @@ const zh: typeof en = {
     stagesTitle: "编译阶段",
     stagesLead: "当前查询子集按以下阶段编译：",
     stagesP1:
-      "HIR 拥有源级解析与语义类型检查。关系 IR 拥有关系含义与列出处。规划器选择顺序扫描，以及正确性优先的 nested-loop 来实现逻辑 INNER JOIN。执行器对存储返回的行求值类型化表达式。",
+      "HIR 拥有源级解析与语义类型检查。关系 IR 拥有关系含义与列出处。规划器选择顺序扫描或索引扫描，以及 NestedLoopJoin；经过分析的 Scan × Scan INNER JOIN 可选择带代价的 HashJoin。执行器对存储返回的行求值类型化表达式。",
     stagesP2: "层与层之间传递标识符与所有权值，不会将页、帧或元组的长生命周期引用传入规划器、执行器或目录。",
     depsTitle: "依赖方向",
     depsBody:
@@ -523,8 +526,8 @@ const zh: typeof en = {
       },
       {
         kind: "FROM / JOIN",
-        now: "AS 与简写别名、链式 INNER JOIN … ON、自连接",
-        not: "外连接、USING、连接重排、hash / merge join",
+        now: "AS 与简写别名、链式 INNER JOIN … ON、自连接、NestedLoopJoin、带代价 HashJoin",
+        not: "外连接、USING、连接重排、merge join、索引嵌套循环连接",
       },
       {
         kind: "谓词",
@@ -555,7 +558,7 @@ const zh: typeof en = {
       "数据库 NULL 是显式的 ScalarValue::Null。Rust Option 留给缺席的子句或元数据。比较遇到 NULL 得到 UNKNOWN；IS NULL / IS NOT NULL 才是显式测试。AND / OR / NOT 使用 SQL 三值逻辑。WHERE 与 JOIN 的 ON 只保留 TRUE，FALSE 与 UNKNOWN 都被拒绝。",
     joinTitle: "JOIN",
     joinBody:
-      "别名会隐藏底层表名。限定列经由暴露的关系名解析；非限定列仅在恰好一个可见关系提供该名时被接受。每个 ON 能看见完整左子树与当前右关系，但不能看见更后的连接。执行时 nested-loop 按确定性的左主、右次顺序保留重复。",
+      "别名会隐藏底层表名。限定列经由暴露的关系名解析；非限定列仅在恰好一个可见关系提供该名时被接受。每个 ON 能看见完整左子树与当前右关系，但不能看见更后的连接。默认算子为 NestedLoopJoin。ANALYZE 之后，两个扫描上的简单等值 INNER JOIN 在代价严格更低时可选 HashJoin。两种算子均按确定性的左主、右次顺序保留重复。",
     dmlTitle: "DML",
     dmlBody:
       "类型化 DML 使用与堆写入相同的编译器、事务、整页 WAL、回滚与恢复路径。Database::execute 返回查询行或显式 AffectedRows(u64)；query 拒绝变更语句。省略的可空 INSERT 列赋值为 NULL；省略的非空列将被拒绝。UPDATE 基于原始行求值全部右侧，因此 SET a = b, b = a 会交换两列。",
@@ -573,11 +576,11 @@ const zh: typeof en = {
   },
   roadmap: {
     title: "路线图",
-    description: "NetbaDB 已完成至 Protocol v1、netbadbd、SDK 与 RangeIndexScan 的阶段划分。",
+    description: "NetbaDB 已完成至 Protocol v1、HashJoin 与连接谓词预绑定的阶段划分。",
     kicker: "路线图",
     heroHtml: "按垂直切片实现，<br />再分阶段扩展。",
     deck:
-      "实现顺序为垂直推进。截至 Phase 7B，已完成 {n} 个阶段。隔离与 MVCC、索引连接以及 MCP 仍属规划内容。",
+      "实现顺序为垂直推进。截至 Phase 7F，已完成 {n} 个阶段。隔离与 MVCC、借用式连接求值以及 MCP 仍属规划或暂缓内容。",
     complete: "已完成",
     next: "下一步",
     later: "后续",
@@ -610,10 +613,13 @@ const zh: typeof en = {
       "仅当解析后的 TCP 对端为回环地址时才接受明文。远程部署要求经过校验的双向 TLS。不提供连接池、自动重试或多路复用。",
     cliTitle: "6. 使用命令行检查文件",
     cliBody:
-      "请先停止 netbadbd 以及任何使用同一文件的嵌入式进程。CLI 通过正常启动恢复打开表，并且不会执行被检查的 SQL。",
+      "请先停止 netbadbd 以及任何使用同一文件的嵌入式进程。CLI 通过正常启动恢复打开表，并且不会执行被检查的 SQL。JSON 输出使用 Inspection JSON v3。",
     goTitle: "Go 客户端",
     goBody:
       "Go 模块是独立的 Protocol v1 客户端，不使用 cgo 或 Rust FFI。Dial 会自动完成 Hello。",
+    lspTitle: "编辑器诊断",
+    lspBody:
+      "netbadb-lsp --schema schema.json 是仅提供诊断的 stdio 语言服务器。它不会打开数据库文件，也不报告物理计划。",
     sourceTitle: "从源码构建",
     cargoEquiv: "等价的 cargo 命令：",
     contractTitle: "运行约束",

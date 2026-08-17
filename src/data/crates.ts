@@ -68,8 +68,8 @@ export const crates: Crate[] = [
     name: "netbadb-planner",
     path: "crates/netbadb-planner",
     role: {
-      en: "Logical plan → physical plan, including IndexScan",
-      zh: "逻辑计划 → 物理计划，含 IndexScan",
+      en: "Logical plan → physical plan, including IndexScan and HashJoin",
+      zh: "逻辑计划 → 物理计划，含 IndexScan 与 HashJoin",
     },
     dependsOn: ["index", "rel", "types"],
   },
@@ -199,6 +199,15 @@ export const crates: Crate[] = [
     },
     dependsOn: ["sdk", "server"],
   },
+  {
+    name: "netbadb-lsp",
+    path: "cmd/netbadb-lsp",
+    role: {
+      en: "Diagnostics-only stdio language server",
+      zh: "仅诊断的 stdio 语言服务器",
+    },
+    dependsOn: ["tooling", "schema-spec"],
+  },
 ];
 
 export const layers: Localized<{ title: string; items: string[] }[]> = {
@@ -213,7 +222,7 @@ export const layers: Localized<{ title: string; items: string[] }[]> = {
     },
     {
       title: "Plan and execute",
-      items: ["Optimizer / Planner", "Synchronous executor"],
+      items: ["Optimizer / Planner", "IndexScan / HashJoin / NestedLoopJoin", "Synchronous executor"],
     },
     {
       title: "Transactions and storage",
@@ -231,7 +240,7 @@ export const layers: Localized<{ title: string; items: string[] }[]> = {
     },
     {
       title: "计划与执行",
-      items: ["Optimizer / Planner", "同步 Executor"],
+      items: ["Optimizer / Planner", "IndexScan / HashJoin / NestedLoopJoin", "同步 Executor"],
     },
     {
       title: "事务与存储",
