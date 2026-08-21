@@ -245,7 +245,7 @@ const en = {
     sortP1:
       "The ordinary plan is Scan/Join → Filter → Sort → Project → Limit. The aggregate plan is Scan/Join → Filter → Aggregate → Limit. Keys resolve against the complete FROM / JOIN scope before projection, so a query may sort by a column it does not return.",
     sortP2:
-      "COUNT(*) counts rows; COUNT(column) ignores NULL. Numeric SUM uses checked arithmetic and strips nominal meaning. MIN / MAX preserve the input SemanticType. NULLs at a grouping key share one group, unlike expression NULL = NULL, which remains UNKNOWN. Grouped queries currently reject ORDER BY.",
+      "COUNT(*) counts rows; COUNT(column) ignores NULL. A lone global COUNT(column) over SeqScan can count presence without materializing rows. Numeric SUM uses checked arithmetic and strips nominal meaning. MIN / MAX preserve the input SemanticType. NULLs at a grouping key share one group, unlike expression NULL = NULL, which remains UNKNOWN. Grouped queries currently reject ORDER BY.",
     multiTitle: "Multi-table writes are still unsupported",
     multiBody:
       "The core composes unchanged one-table heap files with create_tables / open_tables. JOIN did not change the page, WAL, recovery, or transaction format. Cross-table write transactions remain unsupported.",
@@ -256,11 +256,11 @@ const en = {
   roadmap: {
     title: "Roadmap",
     description:
-      "NetbaDB's implemented phases through Protocol v1, HashJoin, and join-predicate prebinding.",
+      "NetbaDB's implemented phases through Protocol v1, HashJoin, required-column decode, and direct COUNT(column).",
     kicker: "Roadmap",
     heroHtml: "Implemented vertically,<br />then extended by phase.",
     deck:
-      "Development follows a vertical sequence. {n} phases are complete through Phase 7F. Isolation and MVCC, borrowed join evaluation, and MCP remain planned or deferred work.",
+      "Development follows a vertical sequence. {n} phases are complete through Phase 7L. Isolation and MVCC, multi-COUNT scans, and MCP remain planned or deferred work.",
     complete: "Complete",
     next: "Next",
     later: "Later",
@@ -566,7 +566,7 @@ const zh: typeof en = {
     sortP1:
       "普通计划是 Scan/Join → Filter → Sort → Project → Limit。聚合计划是 Scan/Join → Filter → Aggregate → Limit。键在投影之前、对着完整 FROM / JOIN 作用域解析，所以查询可以按它不返回的列排序。",
     sortP2:
-      "COUNT(*) 计行；COUNT(column) 忽略 NULL。数值 SUM 使用受检算术，并剥去名义含义。MIN / MAX 保留输入 SemanticType。分组键上的 NULL 共享一组，这与表达式里 NULL = NULL 仍为 UNKNOWN 不同。带 GROUP BY 的查询当前拒绝 ORDER BY。",
+      "COUNT(*) 计行；COUNT(column) 忽略 NULL。单独的全局 COUNT(column) 在 SeqScan 上可统计存在性而不物化行。数值 SUM 使用受检算术，并剥去名义含义。MIN / MAX 保留输入 SemanticType。分组键上的 NULL 共享一组，这与表达式里 NULL = NULL 仍为 UNKNOWN 不同。带 GROUP BY 的查询当前拒绝 ORDER BY。",
     multiTitle: "多表写入仍未支持",
     multiBody:
       "核心用 create_tables / open_tables 组合多张未改动的单表堆文件。JOIN 没有改页、WAL、恢复或事务格式。跨表写事务仍不受支持。",
@@ -576,11 +576,11 @@ const zh: typeof en = {
   },
   roadmap: {
     title: "路线图",
-    description: "NetbaDB 已完成至 Protocol v1、HashJoin 与连接谓词预绑定的阶段划分。",
+    description: "NetbaDB 已完成至 Protocol v1、HashJoin、按需列解码与直接 COUNT(column) 的阶段划分。",
     kicker: "路线图",
     heroHtml: "按垂直切片实现，<br />再分阶段扩展。",
     deck:
-      "实现顺序为垂直推进。截至 Phase 7F，已完成 {n} 个阶段。隔离与 MVCC、借用式连接求值以及 MCP 仍属规划或暂缓内容。",
+      "实现顺序为垂直推进。截至 Phase 7L，已完成 {n} 个阶段。隔离与 MVCC、多 COUNT 扫描以及 MCP 仍属规划或暂缓内容。",
     complete: "已完成",
     next: "下一步",
     later: "后续",

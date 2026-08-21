@@ -310,11 +310,65 @@ export const phases: Phase[] = [
   },
   {
     id: "7G",
-    status: "next",
+    status: "complete",
     title: { en: "Borrowed join evaluation", zh: "借用式连接求值" },
     summary: {
-      en: "Selected next: join-only borrowed-value predicate evaluation.",
-      zh: "下一步：仅针对连接的借用值谓词求值。",
+      en: "Join predicates borrow column and literal scalars; only computed results are owned.",
+      zh: "连接谓词借用列与字面量标量，仅计算结果为自有值。",
+    },
+  },
+  {
+    id: "7H",
+    status: "complete",
+    title: { en: "Inequality bound rejection", zh: "不等式边界拒绝" },
+    summary: {
+      en: "NestedLoopJoin skips left probes that cannot match any right row.",
+      zh: "NestedLoopJoin 跳过不可能匹配任何右行的左探测。",
+    },
+  },
+  {
+    id: "7I",
+    status: "complete",
+    title: { en: "Adaptive inequality sweep", zh: "自适应不等式扫描" },
+    summary: {
+      en: "Exact candidate counting can replace a full NestedLoopJoin inner loop.",
+      zh: "精确候选计数可替代完整 NestedLoopJoin 内层循环。",
+    },
+  },
+  {
+    id: "7J",
+    status: "complete",
+    title: { en: "Required-column decode", zh: "按需列解码" },
+    summary: {
+      en: "Query plans decode only required heap columns; DML still uses full rows.",
+      zh: "查询计划仅解码所需堆列；DML 仍使用完整行。",
+    },
+  },
+  {
+    id: "7K",
+    status: "complete",
+    title: { en: "Move-aware projection", zh: "移动感知投影" },
+    summary: {
+      en: "Identity and unique projections move owned values instead of cloning them.",
+      zh: "恒等与唯一投影移动已有值，而不是克隆。",
+    },
+  },
+  {
+    id: "7L",
+    status: "complete",
+    title: { en: "Direct COUNT(column) scan", zh: "直接 COUNT(column) 扫描" },
+    summary: {
+      en: "A lone global COUNT(column) over SeqScan counts presence without materializing rows.",
+      zh: "单独的全局 COUNT(column) 在 SeqScan 上统计存在性，不物化行。",
+    },
+  },
+  {
+    id: "7M",
+    status: "next",
+    title: { en: "Direct multi-COUNT scan", zh: "直接多 COUNT 扫描" },
+    summary: {
+      en: "Selected next: share one heap validation pass across multiple COUNT outputs.",
+      zh: "下一步：多个 COUNT 输出共享一次堆校验遍历。",
     },
   },
   {
@@ -343,6 +397,7 @@ export const implemented: Localized<string[]> = {
     "SELECT, INNER JOIN, INSERT / UPDATE / DELETE, ORDER BY, GROUP BY, aggregates",
     "Registered indexes, DML maintenance, point and range IndexScan, ANALYZE",
     "Costed HashJoin for analyzed Scan × Scan INNER JOIN; NestedLoopJoin otherwise",
+    "Required-column heap decode, move-aware projection, and direct COUNT(column) seqscan",
     "WAL, crash recovery, checkpoints, and generation-safe RowIds",
     "netbadbd, Protocol v1, Rust/Go clients, inspect CLI (JSON v3), and diagnostics LSP",
   ],
@@ -351,6 +406,7 @@ export const implemented: Localized<string[]> = {
     "SELECT、INNER JOIN、INSERT / UPDATE / DELETE、ORDER BY、GROUP BY、聚合",
     "已注册索引、DML 维护、点查与范围 IndexScan、ANALYZE",
     "经过分析的 Scan × Scan INNER JOIN 可选用 HashJoin，否则使用 NestedLoopJoin",
+    "按需堆列解码、移动感知投影，以及直接 COUNT(column) 顺序扫描",
     "WAL、崩溃恢复、检查点与 generation 安全的 RowId",
     "netbadbd、Protocol v1、Rust/Go 客户端、检查 CLI（JSON v3）与诊断 LSP",
   ],
