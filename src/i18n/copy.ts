@@ -25,7 +25,7 @@ const en = {
   home: {
     heroHtml: "A strongly typed<br />relational <em>database core</em>.",
     lede:
-      "NetbaDB is a strongly typed relational database core written in Rust. Create a local file with the embedded SDK, or start netbadbd and connect with the Rust or Go Protocol v1 client.",
+      "NetbaDB is a strongly typed relational database core written in Rust. Create a local Heap or LSM file with the embedded SDK, or start netbadbd and connect with Protocol v1 or the experimental PostgreSQL endpoint.",
     ctaArchitecture: "Architecture",
     ctaStart: "Get started",
     statSlice: "Current release",
@@ -64,10 +64,10 @@ const en = {
     pipeline: [
       { title: "Schema IR", text: "Language-independent tables, columns, physical / semantic types" },
       { title: "Parser / HIR", text: "Name resolution and nominal type checking" },
-      { title: "Planner", text: "SeqScan, IndexScan, NestedLoopJoin, HashJoin, sort, aggregates" },
-      { title: "Executor", text: "Synchronous execution + three-valued logic" },
-      { title: "Storage", text: "Transactions, WAL, heap, registered B+Trees" },
-      { title: "Protocol", text: "netbadbd, Protocol v1, TLS, authorization" },
+      { title: "Planner", text: "SeqScan, IndexScan, NestedLoopJoin, HashJoin, IndexJoin" },
+      { title: "Executor", text: "Synchronous and bounded-batch execution" },
+      { title: "Storage", text: "Heap MVCC, LSM, partitions, WAL, coordinator" },
+      { title: "Protocol", text: "netbadbd, Protocol v1, experimental PostgreSQL v3" },
     ],
     typesKicker: "Nominal types",
     typesTitleHtml: "Identical <code>u64</code> encodings remain distinct types.",
@@ -114,7 +114,7 @@ const en = {
     stagesTitle: "Compiler stages",
     stagesLead: "The current query subset is compiled as follows:",
     stagesP1:
-      "HIR owns source-level resolution and semantic type checking. Relational IR owns relational meaning and column provenance. The planner selects sequential or index scans, NestedLoopJoin, or a costed HashJoin for analyzed Scan × Scan INNER JOIN. The executor evaluates typed expressions against rows from storage.",
+      "HIR owns source-level resolution and semantic type checking. Relational IR owns relational meaning and column provenance. The planner selects sequential or index scans, NestedLoopJoin, HashJoin, or Index Nested-Loop Join for analyzed Scan × Scan INNER JOIN. The executor evaluates typed expressions against rows from storage.",
     stagesP2:
       "Layers pass IDs and owned values. They do not spread long-lived references to pages, frames, or tuples into the planner, executor, or catalog.",
     depsTitle: "Dependency direction",
@@ -163,12 +163,12 @@ const en = {
     walIntro:
       "Each database uses two alternating slots: <database>-wal and <database>-wal.next. Logical LSNs and physical offsets are deliberately different:",
     walP1:
-      "The WAL header is 48 bytes, format version 3, with a whole-header CRC32C. Record headers are 40 bytes, format version 2; the type determines the only valid total length. Record types are Begin, PageUpdate, Commit, Abort, and RollbackComplete. PageUpdate carries complete 4 KiB before/after images.",
+      "The WAL header is 48 bytes, format version 3, with a whole-header CRC32C. Record headers are 40 bytes, format version 2; the type determines the only valid total length. Record types include Begin, PageUpdate, Prepare, Commit, Abort, and RollbackComplete. PageUpdate carries complete 4 KiB before/after images.",
     walP2:
       "A physically complete record whose checksum fails is corruption and is never truncated as a crash tail, even at EOF. Only an incomplete final record whose available header passes structural checks may be discarded at the recovery boundary.",
-    txnTitle: "Transactions and the single writer",
+    txnTitle: "Transactions, isolation, and the single writer",
     txnP1:
-      "Writer ownership is acquired lazily on the first write; read-only transactions do not reserve it. Commit releases ownership only after the Commit record reaches durable storage. Rollback first makes Abort durable, follows the prevLSN chain backward, installs validated before-images, then durably records RollbackComplete.",
+      "Explicit transactions support Read Committed and Repeatable Read. Implicit statements use Read Committed. Writer ownership is acquired lazily on the first write; read-only transactions do not reserve it. Multi-storage commits use WAL Prepare plus a coordinator CommitDecision. vacuum reclaims Heap versions that no active snapshot can see.",
     txnP2:
       "Dropping an unfinished dirty writer does not silently release it: later writes require recovery, and close reports an error. flush remains legal during an active transaction because the engine uses STEAL and WAL-orders every page write; flush success is not commit.",
     recoveryTitle: "Startup recovery",
@@ -205,8 +205,8 @@ const en = {
       },
       {
         kind: "FROM / JOIN",
-        now: "AS and shorthand aliases, chained INNER JOIN … ON, self joins, NestedLoopJoin, costed HashJoin",
-        not: "Outer joins, USING, join reordering, merge join, index nested-loop join",
+        now: "AS and shorthand aliases, chained INNER JOIN … ON, NestedLoopJoin, HashJoin, IndexJoin",
+        not: "Outer joins, USING, join reordering, merge join",
       },
       {
         kind: "Predicates",
@@ -237,7 +237,7 @@ const en = {
       "Database NULL is an explicit ScalarValue::Null. Rust Option remains reserved for absent clauses or metadata. Comparisons with NULL yield UNKNOWN; IS NULL / IS NOT NULL are the explicit tests. AND / OR / NOT use SQL three-valued logic. WHERE and JOIN ON keep only TRUE; FALSE and UNKNOWN are rejected.",
     joinTitle: "JOIN",
     joinBody:
-      "An alias hides the underlying table name. Qualified columns resolve through the exposed relation name; unqualified columns are accepted only when exactly one visible relation provides the name. Each ON can see the complete left subtree and its current right relation, but not later joins. NestedLoopJoin is the default. After ANALYZE, a simple equi INNER JOIN of two scans may select HashJoin when that cost is strictly lower. Both operators preserve duplicates in deterministic left-major, right-minor order.",
+      "An alias hides the underlying table name. Qualified columns resolve through the exposed relation name; unqualified columns are accepted only when exactly one visible relation provides the name. Each ON can see the complete left subtree and its current right relation, but not later joins. NestedLoopJoin is the default. After ANALYZE, a simple equi INNER JOIN of two scans may select HashJoin or Index Nested-Loop Join when that cost is strictly lower. Operators preserve duplicates in deterministic left-major, right-minor order.",
     dmlTitle: "DML",
     dmlBody:
       "Typed DML uses the same compiler, transaction, full-page WAL, rollback, and recovery path as heap writes. Database::execute returns query rows or an explicit AffectedRows(u64); query rejects mutating statements. Omitted nullable INSERT columns become NULL; omitted non-nullable columns are rejected. UPDATE evaluates every right-hand side against the original row, so SET a = b, b = a swaps.",
@@ -246,9 +246,9 @@ const en = {
       "The ordinary plan is Scan/Join → Filter → Sort → Project → Limit. The aggregate plan is Scan/Join → Filter → Aggregate → Limit. Keys resolve against the complete FROM / JOIN scope before projection, so a query may sort by a column it does not return.",
     sortP2:
       "COUNT(*) counts rows; COUNT(column) ignores NULL. A lone global COUNT(column) over SeqScan can count presence without materializing rows. Numeric SUM uses checked arithmetic and strips nominal meaning. MIN / MAX preserve the input SemanticType. NULLs at a grouping key share one group, unlike expression NULL = NULL, which remains UNKNOWN. Grouped queries currently reject ORDER BY.",
-    multiTitle: "Multi-table writes are still unsupported",
+    multiTitle: "Writes across storages",
     multiBody:
-      "The core composes unchanged one-table heap files with create_tables / open_tables. JOIN did not change the page, WAL, recovery, or transaction format. Cross-table write transactions remain unsupported.",
+      "create_tables still composes one heap file per table. Range-partitioned tables and mixed Heap+LSM catalogs commit through the coordinator log. Concurrent writers are not available. Serializable isolation is not available.",
     indexTitle: "Indexes and ANALYZE",
     indexBody:
       "create_index registers a non-unique single-column index after a transactional backfill. Subsequent heap and SQL DML maintains registered indexes. Eligible equality and IS NULL predicates can select a point IndexScan; analyzed two-sided Int64/UInt64 bounds can select a range IndexScan. ANALYZE is explicit and is not maintained by DML. SQL index DDL is not available.",
@@ -256,11 +256,11 @@ const en = {
   roadmap: {
     title: "Roadmap",
     description:
-      "NetbaDB's implemented phases through Protocol v1, HashJoin, required-column decode, and direct COUNT(column).",
+      "NetbaDB's implemented phases through isolation, partitions, LSM, IndexJoin, and experimental PostgreSQL wire.",
     kicker: "Roadmap",
     heroHtml: "Implemented vertically,<br />then extended by phase.",
     deck:
-      "Development follows a vertical sequence. {n} phases are complete through Phase 7L. Isolation and MVCC, multi-COUNT scans, and MCP remain planned or deferred work.",
+      "Development follows a vertical sequence. {n} phases are complete through item 73. Serializable isolation, concurrent writers, and MCP remain planned or deferred work.",
     complete: "Complete",
     next: "Next",
     later: "Later",
@@ -291,9 +291,18 @@ const en = {
     remoteTitle: "5. Connect a remote client",
     remoteBody:
       "Plaintext is accepted only when the resolved TCP peer is loopback. Remote deployments require verified mutual TLS. There is no connection pool, automatic retry, or multiplexing.",
+    isolationTitle: "Isolation",
+    isolationBody:
+      "begin_transaction uses Read Committed. Repeatable Read is available through begin_transaction_with_isolation. IsolationLevel is exported by netbadb-core. Serializable isolation is not available.",
+    extraStorageTitle: "LSM, partitions, and vacuum",
+    extraStorageBody:
+      "Database::create_storages can create Heap or LSM tables. create_with_placements attaches RANGE partitions. vacuum reclaims dead Heap versions that no active snapshot can see.",
+    pgTitle: "Experimental PostgreSQL endpoint",
+    pgBody:
+      "netbadbd --manifest server.json --postgres serves Simple Query and Extended Query on the manifest listen address. This is not general PostgreSQL compatibility. Migration execution, PostgreSQL DDL, complete catalogs, and password authentication are unsupported.",
     cliTitle: "6. Inspect files from the command line",
     cliBody:
-      "Stop netbadbd and any embedded process using the same files first. The CLI opens tables with normal startup recovery and never executes the inspected SQL. JSON output uses Inspection JSON v3.",
+      "Stop netbadbd and any embedded process using the same files first. The CLI opens tables with normal startup recovery and never executes the inspected SQL. JSON output uses Inspection JSON v5.",
     goTitle: "Go client",
     goBody:
       "The Go module is an independent Protocol v1 client. It uses no cgo or Rust FFI. Dial performs Hello automatically.",
@@ -305,10 +314,10 @@ const en = {
     contractTitle: "Operating constraints",
     contract: [
       "One writer per open database object. Read-only transactions do not reserve the writer.",
-      "Readers are not isolated and may observe an active writer's buffered changes.",
-      "A successful commit means the Commit record is durable; heap pages may remain buffered until flush or close.",
+      "Explicit transactions support Read Committed and Repeatable Read. Implicit statements use Read Committed. Serializable isolation is not available.",
+      "A successful commit means the Commit record is durable; heap pages may remain buffered until flush, vacuum, or close.",
       "SQL index DDL is not available. Call create_index from the embedded API.",
-      "Cross-table write transactions are not supported.",
+      "Multi-storage writes commit through the coordinator log. Concurrent writers and cross-process file locks are not available.",
       "Experimental on-disk formats reject older versions. There is no migration path.",
     ],
     licenseTitle: "License",
@@ -351,7 +360,7 @@ const zh: typeof en = {
   home: {
     heroHtml: "强类型<br />关系型<em>数据库核心</em>。",
     lede:
-      "NetbaDB 是用 Rust 实现的强类型关系型数据库核心。使用嵌入式 SDK 创建本地文件，或启动 netbadbd 后通过 Rust / Go 的 Protocol v1 客户端连接。",
+      "NetbaDB 是用 Rust 实现的强类型关系型数据库核心。使用嵌入式 SDK 创建本地 Heap 或 LSM 文件，或启动 netbadbd 后通过 Protocol v1 或实验性 PostgreSQL 端点连接。",
     ctaArchitecture: "架构",
     ctaStart: "开始使用",
     statSlice: "当前版本",
@@ -390,10 +399,10 @@ const zh: typeof en = {
     pipeline: [
       { title: "Schema IR", text: "语言无关的表、列、物理 / 语义类型" },
       { title: "Parser / HIR", text: "名字解析与名义类型检查" },
-      { title: "Planner", text: "SeqScan、IndexScan、NestedLoopJoin、HashJoin、排序与聚合" },
-      { title: "Executor", text: "同步执行 + 三值逻辑" },
-      { title: "Storage", text: "事务、WAL、堆、已注册 B+Tree" },
-      { title: "Protocol", text: "netbadbd、Protocol v1、TLS、授权" },
+      { title: "Planner", text: "SeqScan、IndexScan、NestedLoopJoin、HashJoin、IndexJoin" },
+      { title: "Executor", text: "同步与有界批执行" },
+      { title: "Storage", text: "堆 MVCC、LSM、分区、WAL、协调器" },
+      { title: "Protocol", text: "netbadbd、Protocol v1、实验性 PostgreSQL v3" },
     ],
     typesKicker: "名义类型",
     typesTitleHtml: "相同的 <code>u64</code> 编码仍是不同的类型。",
@@ -438,7 +447,7 @@ const zh: typeof en = {
     stagesTitle: "编译阶段",
     stagesLead: "当前查询子集按以下阶段编译：",
     stagesP1:
-      "HIR 拥有源级解析与语义类型检查。关系 IR 拥有关系含义与列出处。规划器选择顺序扫描或索引扫描，以及 NestedLoopJoin；经过分析的 Scan × Scan INNER JOIN 可选择带代价的 HashJoin。执行器对存储返回的行求值类型化表达式。",
+      "HIR 拥有源级解析与语义类型检查。关系 IR 拥有关系含义与列出处。规划器选择顺序扫描或索引扫描，以及 NestedLoopJoin；经过分析的 Scan × Scan INNER JOIN 可选择 HashJoin 或 Index Nested-Loop Join。执行器对存储返回的行求值类型化表达式。",
     stagesP2: "层与层之间传递标识符与所有权值，不会将页、帧或元组的长生命周期引用传入规划器、执行器或目录。",
     depsTitle: "依赖方向",
     depsBody:
@@ -485,12 +494,12 @@ const zh: typeof en = {
     walIntro:
       "每个数据库使用两个交替槽：<database>-wal 与 <database>-wal.next。逻辑 LSN 与物理偏移刻意分开：",
     walP1:
-      "WAL 头是 48 字节，格式版本 3，并带整头 CRC32C。记录头 40 字节，格式版本 2；类型决定唯一合法总长。记录类型为 Begin、PageUpdate、Commit、Abort 与 RollbackComplete。PageUpdate 携带完整 4 KiB before / after 镜像。",
+      "WAL 头是 48 字节，格式版本 3，并带整头 CRC32C。记录头 40 字节，格式版本 2；类型决定唯一合法总长。记录类型包括 Begin、PageUpdate、Prepare、Commit、Abort 与 RollbackComplete。PageUpdate 携带完整 4 KiB before / after 镜像。",
     walP2:
       "结构完整但校验失败的记录是损坏，即使位于 EOF 也不会被当成崩溃尾截断。只有可用头通过结构校验的、物理不完整的最后一条记录，才可以在恢复边界丢弃。",
-    txnTitle: "事务与单写者",
+    txnTitle: "事务、隔离与单写者",
     txnP1:
-      "写者所有权由第一次写入惰性获取，只读事务不预定它。提交只在 Commit 记录到达持久存储后释放所有权。回滚先让 Abort 持久，再沿 prevLSN 链反向安装经验证的 before-image，然后持久记录 RollbackComplete。",
+      "显式事务支持读已提交与可重复读。隐式语句使用读已提交。写者所有权由第一次写入惰性获取，只读事务不预定它。多存储提交使用 WAL Prepare 与协调器 CommitDecision。vacuum 回收活动快照不可见的堆版本。",
     txnP2:
       "丢弃未完成的脏写者不会隐式释放写所有权：后续写入将要求恢复，close 亦会返回错误。活动事务期间仍允许 flush，因为引擎采用 STEAL，并对每次页写进行 WAL 排序；flush 成功并不表示提交完成。",
     recoveryTitle: "启动恢复",
@@ -526,8 +535,8 @@ const zh: typeof en = {
       },
       {
         kind: "FROM / JOIN",
-        now: "AS 与简写别名、链式 INNER JOIN … ON、自连接、NestedLoopJoin、带代价 HashJoin",
-        not: "外连接、USING、连接重排、merge join、索引嵌套循环连接",
+        now: "AS 与简写别名、链式 INNER JOIN … ON、NestedLoopJoin、HashJoin、IndexJoin",
+        not: "外连接、USING、连接重排、merge join",
       },
       {
         kind: "谓词",
@@ -558,7 +567,7 @@ const zh: typeof en = {
       "数据库 NULL 是显式的 ScalarValue::Null。Rust Option 留给缺席的子句或元数据。比较遇到 NULL 得到 UNKNOWN；IS NULL / IS NOT NULL 才是显式测试。AND / OR / NOT 使用 SQL 三值逻辑。WHERE 与 JOIN 的 ON 只保留 TRUE，FALSE 与 UNKNOWN 都被拒绝。",
     joinTitle: "JOIN",
     joinBody:
-      "别名会隐藏底层表名。限定列经由暴露的关系名解析；非限定列仅在恰好一个可见关系提供该名时被接受。每个 ON 能看见完整左子树与当前右关系，但不能看见更后的连接。默认算子为 NestedLoopJoin。ANALYZE 之后，两个扫描上的简单等值 INNER JOIN 在代价严格更低时可选 HashJoin。两种算子均按确定性的左主、右次顺序保留重复。",
+      "别名会隐藏底层表名。限定列经由暴露的关系名解析；非限定列仅在恰好一个可见关系提供该名时被接受。每个 ON 能看见完整左子树与当前右关系，但不能看见更后的连接。默认算子为 NestedLoopJoin。ANALYZE 之后，两个扫描上的简单等值 INNER JOIN 在代价严格更低时可选 HashJoin 或 Index Nested-Loop Join。算子均按确定性的左主、右次顺序保留重复。",
     dmlTitle: "DML",
     dmlBody:
       "类型化 DML 使用与堆写入相同的编译器、事务、整页 WAL、回滚与恢复路径。Database::execute 返回查询行或显式 AffectedRows(u64)；query 拒绝变更语句。省略的可空 INSERT 列赋值为 NULL；省略的非空列将被拒绝。UPDATE 基于原始行求值全部右侧，因此 SET a = b, b = a 会交换两列。",
@@ -567,20 +576,20 @@ const zh: typeof en = {
       "普通计划是 Scan/Join → Filter → Sort → Project → Limit。聚合计划是 Scan/Join → Filter → Aggregate → Limit。键在投影之前、对着完整 FROM / JOIN 作用域解析，所以查询可以按它不返回的列排序。",
     sortP2:
       "COUNT(*) 计行；COUNT(column) 忽略 NULL。单独的全局 COUNT(column) 在 SeqScan 上可统计存在性而不物化行。数值 SUM 使用受检算术，并剥去名义含义。MIN / MAX 保留输入 SemanticType。分组键上的 NULL 共享一组，这与表达式里 NULL = NULL 仍为 UNKNOWN 不同。带 GROUP BY 的查询当前拒绝 ORDER BY。",
-    multiTitle: "多表写入仍未支持",
+    multiTitle: "跨存储写入",
     multiBody:
-      "核心用 create_tables / open_tables 组合多张未改动的单表堆文件。JOIN 没有改页、WAL、恢复或事务格式。跨表写事务仍不受支持。",
+      "create_tables 仍按表组合一个堆文件。范围分区表以及混合 Heap+LSM 目录经协调日志提交。不提供并发写者。不提供可串行化隔离。",
     indexTitle: "索引与 ANALYZE",
     indexBody:
       "create_index 在事务性回填后注册非唯一单列索引。随后的堆与 SQL DML 会维护已注册索引。符合条件的等值与 IS NULL 谓词可选择点查 IndexScan；经过分析的双侧 Int64/UInt64 边界可选择范围 IndexScan。ANALYZE 为显式操作，DML 不会自动维护统计。不提供 SQL 索引 DDL。",
   },
   roadmap: {
     title: "路线图",
-    description: "NetbaDB 已完成至 Protocol v1、HashJoin、按需列解码与直接 COUNT(column) 的阶段划分。",
+    description: "NetbaDB 已完成至隔离级别、分区、LSM、IndexJoin 与实验性 PostgreSQL 协议的阶段划分。",
     kicker: "路线图",
     heroHtml: "按垂直切片实现，<br />再分阶段扩展。",
     deck:
-      "实现顺序为垂直推进。截至 Phase 7L，已完成 {n} 个阶段。隔离与 MVCC、多 COUNT 扫描以及 MCP 仍属规划或暂缓内容。",
+      "实现顺序为垂直推进。截至第 73 项，已完成 {n} 个阶段。可串行化隔离、并发写者以及 MCP 仍属规划或暂缓内容。",
     complete: "已完成",
     next: "下一步",
     later: "后续",
@@ -611,9 +620,18 @@ const zh: typeof en = {
     remoteTitle: "5. 连接远程客户端",
     remoteBody:
       "仅当解析后的 TCP 对端为回环地址时才接受明文。远程部署要求经过校验的双向 TLS。不提供连接池、自动重试或多路复用。",
+    isolationTitle: "隔离级别",
+    isolationBody:
+      "begin_transaction 使用读已提交。可重复读通过 begin_transaction_with_isolation 提供。IsolationLevel 由 netbadb-core 导出。不提供可串行化隔离。",
+    extraStorageTitle: "LSM、分区与 vacuum",
+    extraStorageBody:
+      "Database::create_storages 可创建 Heap 或 LSM 表。create_with_placements 挂载 RANGE 分区。vacuum 回收活动快照不可见的死亡堆版本。",
+    pgTitle: "实验性 PostgreSQL 端点",
+    pgBody:
+      "netbadbd --manifest server.json --postgres 在清单监听地址上提供 Simple Query 与 Extended Query。这不是通用 PostgreSQL 兼容声明。不支持迁移执行、PostgreSQL DDL、完整系统目录以及口令认证。",
     cliTitle: "6. 使用命令行检查文件",
     cliBody:
-      "请先停止 netbadbd 以及任何使用同一文件的嵌入式进程。CLI 通过正常启动恢复打开表，并且不会执行被检查的 SQL。JSON 输出使用 Inspection JSON v3。",
+      "请先停止 netbadbd 以及任何使用同一文件的嵌入式进程。CLI 通过正常启动恢复打开表，并且不会执行被检查的 SQL。JSON 输出使用 Inspection JSON v5。",
     goTitle: "Go 客户端",
     goBody:
       "Go 模块是独立的 Protocol v1 客户端，不使用 cgo 或 Rust FFI。Dial 会自动完成 Hello。",
@@ -625,10 +643,10 @@ const zh: typeof en = {
     contractTitle: "运行约束",
     contract: [
       "每个打开的数据库对象允许一个写者。只读事务不预定写者。",
-      "读者不隔离，可能观察到活动写者的缓冲修改。",
-      "成功的提交表示 Commit 记录已持久化；堆页可能仍留在缓冲中，直到 flush 或 close。",
+      "显式事务支持读已提交与可重复读。隐式语句使用读已提交。不提供可串行化隔离。",
+      "成功的提交表示 Commit 记录已持久化；堆页可能仍留在缓冲中，直到 flush、vacuum 或 close。",
       "不提供 SQL 索引 DDL。请通过嵌入式 API 调用 create_index。",
-      "不支持跨表写事务。",
+      "多存储写入经协调日志提交。不提供并发写者与跨进程文件锁。",
       "实验性磁盘格式会拒绝旧版本，不提供迁移路径。",
     ],
     licenseTitle: "许可",

@@ -364,11 +364,101 @@ export const phases: Phase[] = [
   },
   {
     id: "7M",
-    status: "next",
+    status: "complete",
     title: { en: "Direct multi-COUNT scan", zh: "直接多 COUNT 扫描" },
     summary: {
-      en: "Selected next: share one heap validation pass across multiple COUNT outputs.",
-      zh: "下一步：多个 COUNT 输出共享一次堆校验遍历。",
+      en: "One exact heap pass shares live-row counts across multiple COUNT outputs.",
+      zh: "一次精确堆扫描可在多个 COUNT 输出间共享存活行计数。",
+    },
+  },
+  {
+    id: "7N-7V",
+    status: "complete",
+    title: { en: "Filter and COUNT streaming", zh: "Filter 与 COUNT 流式执行" },
+    summary: {
+      en: "Borrowed Filter evaluation, streamed SeqScan/Filter/Project, and COUNT specializations.",
+      zh: "借用式 Filter 求值、流式 SeqScan/Filter/Project，以及 COUNT 特化路径。",
+    },
+  },
+  {
+    id: "51",
+    status: "complete",
+    title: { en: "Multi-storage atomic commit", zh: "多存储原子提交" },
+    summary: {
+      en: "WAL Prepare plus an independent coordinator log for two or more local write storages.",
+      zh: "WAL Prepare 与独立协调日志，用于两个及以上本地写存储。",
+    },
+  },
+  {
+    id: "52",
+    status: "complete",
+    title: { en: "Range partitions", zh: "范围分区" },
+    summary: {
+      en: "PartitionCatalog v1 RANGE partitioning with exact pruning and atomic row movement.",
+      zh: "PartitionCatalog v1 范围分区，支持精确裁剪与原子行迁移。",
+    },
+  },
+  {
+    id: "53",
+    status: "complete",
+    title: { en: "LSM storage", zh: "LSM 存储" },
+    summary: {
+      en: "Synchronous LSM table storage with MVCC, SSTables, flush, and leveled compaction.",
+      zh: "同步 LSM 表存储，含 MVCC、SSTable、flush 与分层 compaction。",
+    },
+  },
+  {
+    id: "55",
+    status: "complete",
+    title: { en: "Batch execution", zh: "批执行" },
+    summary: {
+      en: "Bounded 256-row batches for SeqScan, Filter, Project, Limit, Aggregate, and HashJoin probe.",
+      zh: "至多 256 行的批处理，覆盖 SeqScan、Filter、Project、Limit、Aggregate 与 HashJoin 探测。",
+    },
+  },
+  {
+    id: "isolation",
+    status: "complete",
+    title: { en: "Read Committed and Repeatable Read", zh: "读已提交与可重复读" },
+    summary: {
+      en: "Explicit isolation handles; implicit statements use Read Committed. Serializable is not available.",
+      zh: "显式隔离句柄；隐式语句使用读已提交。不提供可串行化。",
+    },
+  },
+  {
+    id: "72",
+    status: "complete",
+    title: { en: "Index nested-loop join", zh: "索引嵌套循环连接" },
+    summary: {
+      en: "Analyzed Scan × Scan INNER equality joins may point-probe an ordered right index.",
+      zh: "经过分析的 Scan × Scan 等值 INNER JOIN 可对右侧有序索引做点探测。",
+    },
+  },
+  {
+    id: "pgwire",
+    status: "complete",
+    title: { en: "Experimental PostgreSQL v3 wire", zh: "实验性 PostgreSQL v3 协议" },
+    summary: {
+      en: "netbadbd --postgres accepts Simple and Extended Query on the manifest listen address.",
+      zh: "netbadbd --postgres 在清单监听地址上接受 Simple 与 Extended Query。",
+    },
+  },
+  {
+    id: "73",
+    status: "complete",
+    title: { en: "IndexJoin cost calibration", zh: "IndexJoin 代价校准" },
+    summary: {
+      en: "Heap point-probe costs stay aligned with managed_page_count SeqScan comparison.",
+      zh: "堆点探测代价与 managed_page_count 顺序扫描比较保持一致。",
+    },
+  },
+  {
+    id: "next",
+    status: "next",
+    title: { en: "Serializable isolation", zh: "可串行化隔离" },
+    summary: {
+      en: "Serializable isolation, concurrent writers, and broader join enumeration remain later work.",
+      zh: "可串行化隔离、并发写者与更广的连接枚举仍属后续工作。",
     },
   },
   {
@@ -396,37 +486,39 @@ export const implemented: Localized<string[]> = {
     "Embedded Database API and netbadb-sdk re-exports",
     "SELECT, INNER JOIN, INSERT / UPDATE / DELETE, ORDER BY, GROUP BY, aggregates",
     "Registered indexes, DML maintenance, point and range IndexScan, ANALYZE",
-    "Costed HashJoin for analyzed Scan × Scan INNER JOIN; NestedLoopJoin otherwise",
-    "Required-column heap decode, move-aware projection, and direct COUNT(column) seqscan",
-    "WAL, crash recovery, checkpoints, and generation-safe RowIds",
-    "netbadbd, Protocol v1, Rust/Go clients, inspect CLI (JSON v3), and diagnostics LSP",
+    "HashJoin, NestedLoopJoin, and costed Index Nested-Loop Join after ANALYZE",
+    "Read Committed and Repeatable Read; heap MVCC, vacuum, and multi-storage atomic commit",
+    "RANGE partitions and synchronous LSM table storage",
+    "WAL, crash recovery, checkpoints, and generation-safe locators",
+    "netbadbd, Protocol v1, experimental PostgreSQL v3, inspect CLI (JSON v5), and diagnostics LSP",
   ],
   zh: [
     "嵌入式 Database API 与 netbadb-sdk 再导出",
     "SELECT、INNER JOIN、INSERT / UPDATE / DELETE、ORDER BY、GROUP BY、聚合",
     "已注册索引、DML 维护、点查与范围 IndexScan、ANALYZE",
-    "经过分析的 Scan × Scan INNER JOIN 可选用 HashJoin，否则使用 NestedLoopJoin",
-    "按需堆列解码、移动感知投影，以及直接 COUNT(column) 顺序扫描",
-    "WAL、崩溃恢复、检查点与 generation 安全的 RowId",
-    "netbadbd、Protocol v1、Rust/Go 客户端、检查 CLI（JSON v3）与诊断 LSP",
+    "ANALYZE 之后可选用 HashJoin、NestedLoopJoin 或带代价的 Index Nested-Loop Join",
+    "读已提交与可重复读；堆 MVCC、vacuum 与多存储原子提交",
+    "RANGE 分区与同步 LSM 表存储",
+    "WAL、崩溃恢复、检查点与 generation 安全的定位符",
+    "netbadbd、Protocol v1、实验性 PostgreSQL v3、检查 CLI（JSON v5）与诊断 LSP",
   ],
 };
 
 export const notImplemented: Localized<string[]> = {
   en: [
-    "MVCC and read isolation: readers may observe an active writer's buffered changes",
-    "Concurrent writers and cross-process file locking",
-    "SQL index DDL, uniqueness enforcement, index-only scans, and index nested-loop joins",
+    "Serializable isolation, concurrent writers, and cross-process file locking",
+    "SQL index DDL, uniqueness enforcement, and index-only scans",
     "Full SQL: outer joins, subqueries, HAVING, DISTINCT, window functions",
-    "Multi-table write transactions",
+    "External sort spill, simultaneous native and PostgreSQL listeners",
+    "PostgreSQL DDL, complete pg_catalog, and password/TLS authentication for pgwire",
     "MCP adapter (deferred past MSRV), SQL EXPLAIN, and on-disk format migrations",
   ],
   zh: [
-    "MVCC 与读隔离：读者可能观察到活动写者的缓冲修改",
-    "并发写者与跨进程文件锁",
-    "SQL 索引 DDL、唯一性约束、仅索引扫描与索引嵌套循环连接",
+    "可串行化隔离、并发写者与跨进程文件锁",
+    "SQL 索引 DDL、唯一性约束与仅索引扫描",
     "完整 SQL：外连接、子查询、HAVING、DISTINCT、窗口函数",
-    "跨表写事务",
+    "外部排序落盘，以及同时开启原生与 PostgreSQL 监听",
+    "PostgreSQL DDL、完整 pg_catalog，以及 pgwire 的口令 / TLS 认证",
     "MCP 适配器（受 MSRV 限制暂缓）、SQL EXPLAIN，以及磁盘格式迁移",
   ],
 };

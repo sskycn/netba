@@ -68,8 +68,8 @@ export const crates: Crate[] = [
     name: "netbadb-planner",
     path: "crates/netbadb-planner",
     role: {
-      en: "Logical plan → physical plan, including IndexScan and HashJoin",
-      zh: "逻辑计划 → 物理计划，含 IndexScan 与 HashJoin",
+      en: "Logical plan → physical plan, including IndexScan, HashJoin, and IndexJoin",
+      zh: "逻辑计划 → 物理计划，含 IndexScan、HashJoin 与 IndexJoin",
     },
     dependsOn: ["index", "rel", "types"],
   },
@@ -110,6 +110,15 @@ export const crates: Crate[] = [
     dependsOn: ["types"],
   },
   {
+    name: "netbadb-pgwire",
+    path: "crates/netbadb-pgwire",
+    role: {
+      en: "Bounded PostgreSQL v3 codecs and OID adaptation",
+      zh: "有界 PostgreSQL v3 编解码与 OID 适配",
+    },
+    dependsOn: ["types"],
+  },
+  {
     name: "netbadb-client",
     path: "crates/netbadb-client",
     role: {
@@ -122,10 +131,10 @@ export const crates: Crate[] = [
     name: "netbadb-server",
     path: "crates/netbadb-server",
     role: {
-      en: "Sessions, authorization, and blocking TCP runtime",
-      zh: "会话、授权与阻塞式 TCP 运行时",
+      en: "Sessions, authorization, blocking TCP, and experimental PostgreSQL wire",
+      zh: "会话、授权、阻塞式 TCP 与实验性 PostgreSQL 协议",
     },
-    dependsOn: ["core", "protocol", "schema", "types"],
+    dependsOn: ["core", "protocol", "pgwire", "schema", "types"],
   },
   {
     name: "netbadb-codegen",
@@ -149,8 +158,8 @@ export const crates: Crate[] = [
     name: "netbadb-storage",
     path: "crates/netbadb-storage",
     role: {
-      en: "Transactions, WAL, pages, buffer pool, heap, and persistent B+Tree",
-      zh: "事务、WAL、页、缓冲池、堆与持久 B+Tree",
+      en: "Heap MVCC, LSM, WAL, pages, buffer pool, and persistent B+Tree",
+      zh: "堆 MVCC、LSM、WAL、页、缓冲池与持久 B+Tree",
     },
     dependsOn: ["index", "schema", "types"],
   },
@@ -214,7 +223,7 @@ export const layers: Localized<{ title: string; items: string[] }[]> = {
   en: [
     {
       title: "Application edge",
-      items: ["Rust embedded SDK", "Rust remote client", "Go Protocol v1 client", "netbadbd"],
+      items: ["Rust embedded SDK", "Rust remote client", "Go Protocol v1 client", "netbadbd", "experimental PostgreSQL v3"],
     },
     {
       title: "Compile",
@@ -222,17 +231,17 @@ export const layers: Localized<{ title: string; items: string[] }[]> = {
     },
     {
       title: "Plan and execute",
-      items: ["Optimizer / Planner", "IndexScan / HashJoin / NestedLoopJoin", "Synchronous executor"],
+      items: ["Optimizer / Planner", "IndexScan / HashJoin / NestedLoopJoin / IndexJoin", "Synchronous executor"],
     },
     {
       title: "Transactions and storage",
-      items: ["Transaction boundary", "WAL + recovery", "Buffer pool + slotted pages + heap / B+Tree"],
+      items: ["Transaction boundary", "WAL + recovery", "Heap MVCC / LSM / partitions"],
     },
   ],
   zh: [
     {
       title: "应用边界",
-      items: ["Rust 嵌入式 SDK", "Rust 远程客户端", "Go Protocol v1 客户端", "netbadbd"],
+      items: ["Rust 嵌入式 SDK", "Rust 远程客户端", "Go Protocol v1 客户端", "netbadbd", "实验性 PostgreSQL v3"],
     },
     {
       title: "编译",
@@ -240,11 +249,11 @@ export const layers: Localized<{ title: string; items: string[] }[]> = {
     },
     {
       title: "计划与执行",
-      items: ["Optimizer / Planner", "IndexScan / HashJoin / NestedLoopJoin", "同步 Executor"],
+      items: ["Optimizer / Planner", "IndexScan / HashJoin / NestedLoopJoin / IndexJoin", "同步 Executor"],
     },
     {
       title: "事务与存储",
-      items: ["事务边界", "WAL + 恢复", "缓冲池 + 槽页 + 堆 / B+Tree"],
+      items: ["事务边界", "WAL + 恢复", "堆 MVCC / LSM / 分区"],
     },
   ],
 };
