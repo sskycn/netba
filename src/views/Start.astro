@@ -173,17 +173,33 @@ let mut tx = database.begin_transaction_with_isolation(
     />
 
     <div class="prose">
+      <h2>{t.start.ddlTitle}</h2>
+      <p>{t.start.ddlBody}</p>
+    </div>
+    <CodeBlock
+      code={`CREATE TABLE projects (
+    id BIGINT NOT NULL,
+    name TEXT,
+    active BOOLEAN NOT NULL
+);
+CREATE INDEX projects_id_idx ON projects (id);
+DROP INDEX projects_id_idx;
+DROP TABLE projects;`}
+      lang="sql"
+    />
+
+    <div class="prose">
       <h2>{t.start.extraStorageTitle}</h2>
       <p>{t.start.extraStorageBody}</p>
     </div>
     <CodeBlock
-      code={`use netbadb_core::{Database, TableStorageCreateSpec};
-use netbadb_sdk::{ColumnId, TableDef};
+      code={`use netbadb_sdk::{ColumnId, Database, TableStorageCreateSpec};
 
-Database::create_storages(vec![
+let mut database = Database::create_storages(vec![
     TableStorageCreateSpec::lsm("users-lsm", users(), ColumnId(1)),
 ])?;
-database.vacuum(TableId(1))?;`}
+database.vacuum(TableId(1))?;
+let mut reopened = Database::open_catalog("catalog")?;`}
       lang="rust"
     />
 

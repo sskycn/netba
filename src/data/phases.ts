@@ -453,6 +453,42 @@ export const phases: Phase[] = [
     },
   },
   {
+    id: "R17",
+    status: "complete",
+    title: { en: "Runtime schema catalog", zh: "运行时 schema catalog" },
+    summary: {
+      en: "Database::open_catalog reconstructs the full schema without external TableDefs.",
+      zh: "Database::open_catalog 无需外部 TableDef 即可重建完整 schema。",
+    },
+  },
+  {
+    id: "R19",
+    status: "complete",
+    title: { en: "SQL CREATE TABLE", zh: "SQL CREATE TABLE" },
+    summary: {
+      en: "Transactional Heap CREATE TABLE over native SQL and PostgreSQL.",
+      zh: "在原生 SQL 与 PostgreSQL 上提供事务性 Heap CREATE TABLE。",
+    },
+  },
+  {
+    id: "R21",
+    status: "complete",
+    title: { en: "SQL DROP TABLE", zh: "SQL DROP TABLE" },
+    summary: {
+      en: "Exact prepared DROP TABLE name over native and PostgreSQL frontends.",
+      zh: "原生与 PostgreSQL 前端支持精确预备的 DROP TABLE name。",
+    },
+  },
+  {
+    id: "R7",
+    status: "complete",
+    title: { en: "SQL CREATE / DROP INDEX", zh: "SQL CREATE / DROP INDEX" },
+    summary: {
+      en: "Single-column non-unique Heap BTree CREATE INDEX and DROP INDEX.",
+      zh: "单列非唯一 Heap BTree 的 CREATE INDEX 与 DROP INDEX。",
+    },
+  },
+  {
     id: "next",
     status: "next",
     title: { en: "Serializable isolation", zh: "可串行化隔离" },
@@ -475,8 +511,8 @@ export const phases: Phase[] = [
     status: "later",
     title: { en: "Further optimization", zh: "后续优化" },
     summary: {
-      en: "Index joins, one-sided/Text range costing, and broader HashJoin eligibility.",
-      zh: "索引连接、单侧 / Text 范围代价，以及更广的 HashJoin 适用范围。",
+      en: "SQL ALTER TABLE, one-sided/Text range costing, and broader HashJoin eligibility.",
+      zh: "SQL ALTER TABLE、单侧 / Text 范围代价，以及更广的 HashJoin 适用范围。",
     },
   },
 ];
@@ -484,7 +520,7 @@ export const phases: Phase[] = [
 export const implemented: Localized<string[]> = {
   en: [
     "Embedded Database API and netbadb-sdk re-exports",
-    "SELECT, INNER JOIN, INSERT / UPDATE / DELETE, ORDER BY, GROUP BY, aggregates",
+    "SELECT, INNER JOIN, INSERT / UPDATE / DELETE, ORDER BY, GROUP BY, aggregates, CREATE/DROP TABLE, CREATE/DROP INDEX",
     "Registered indexes, DML maintenance, point and range IndexScan, ANALYZE",
     "HashJoin, NestedLoopJoin, and costed Index Nested-Loop Join after ANALYZE",
     "Read Committed and Repeatable Read; heap MVCC, vacuum, and multi-storage atomic commit",
@@ -494,7 +530,7 @@ export const implemented: Localized<string[]> = {
   ],
   zh: [
     "嵌入式 Database API 与 netbadb-sdk 再导出",
-    "SELECT、INNER JOIN、INSERT / UPDATE / DELETE、ORDER BY、GROUP BY、聚合",
+    "SELECT、INNER JOIN、INSERT / UPDATE / DELETE、ORDER BY、GROUP BY、聚合、CREATE/DROP TABLE、CREATE/DROP INDEX",
     "已注册索引、DML 维护、点查与范围 IndexScan、ANALYZE",
     "ANALYZE 之后可选用 HashJoin、NestedLoopJoin 或带代价的 Index Nested-Loop Join",
     "读已提交与可重复读；堆 MVCC、vacuum 与多存储原子提交",
@@ -507,18 +543,18 @@ export const implemented: Localized<string[]> = {
 export const notImplemented: Localized<string[]> = {
   en: [
     "Serializable isolation, concurrent writers, and cross-process file locking",
-    "SQL index DDL, uniqueness enforcement, and index-only scans",
+    "SQL ALTER TABLE, PRIMARY KEY / UNIQUE / FK constraints, and index-only scans",
     "Full SQL: outer joins, subqueries, HAVING, DISTINCT, window functions",
     "External sort spill, simultaneous native and PostgreSQL listeners",
-    "PostgreSQL DDL, complete pg_catalog, and password/TLS authentication for pgwire",
+    "PostgreSQL ALTER TABLE, complete pg_catalog, and password/TLS authentication for pgwire",
     "MCP adapter (deferred past MSRV), SQL EXPLAIN, and on-disk format migrations",
   ],
   zh: [
     "可串行化隔离、并发写者与跨进程文件锁",
-    "SQL 索引 DDL、唯一性约束与仅索引扫描",
+    "SQL ALTER TABLE、PRIMARY KEY / UNIQUE / FK 约束，以及仅索引扫描",
     "完整 SQL：外连接、子查询、HAVING、DISTINCT、窗口函数",
     "外部排序落盘，以及同时开启原生与 PostgreSQL 监听",
-    "PostgreSQL DDL、完整 pg_catalog，以及 pgwire 的口令 / TLS 认证",
+    "PostgreSQL ALTER TABLE、完整 pg_catalog，以及 pgwire 的口令 / TLS 认证",
     "MCP 适配器（受 MSRV 限制暂缓）、SQL EXPLAIN，以及磁盘格式迁移",
   ],
 };

@@ -215,8 +215,8 @@ const en = {
       },
       {
         kind: "DML",
-        now: "Single-row INSERT with an explicit column list, UPDATE, DELETE, optional WHERE",
-        not: "Defaults, RETURNING, UPSERT, multi-table writes",
+        now: "Single-row INSERT with an explicit column list or declaration order, UPDATE, DELETE, optional WHERE",
+        not: "Defaults, RETURNING, UPSERT",
       },
       {
         kind: "ORDER BY",
@@ -227,6 +227,11 @@ const en = {
         kind: "Aggregates",
         now: "COUNT(*) / COUNT / SUM / MIN / MAX, source-column GROUP BY",
         not: "HAVING, DISTINCT aggregates, grouping expressions, ROLLUP",
+      },
+      {
+        kind: "DDL",
+        now: "CREATE TABLE, DROP TABLE, CREATE INDEX, DROP INDEX on Heap",
+        not: "ALTER TABLE, PRIMARY KEY, IF EXISTS, qualified names, LSM/range DROP",
       },
     ],
     nominalTitle: "Nominal types",
@@ -251,12 +256,12 @@ const en = {
       "create_tables still composes one heap file per table. Range-partitioned tables and mixed Heap+LSM catalogs commit through the coordinator log. Concurrent writers are not available. Serializable isolation is not available.",
     indexTitle: "Indexes and ANALYZE",
     indexBody:
-      "create_index registers a non-unique single-column index after a transactional backfill. Subsequent heap and SQL DML maintains registered indexes. Eligible equality and IS NULL predicates can select a point IndexScan; analyzed two-sided Int64/UInt64 bounds can select a range IndexScan. ANALYZE is explicit and is not maintained by DML. SQL index DDL is not available.",
+      "create_index and SQL CREATE INDEX register a non-unique single-column Heap BTree after a transactional backfill. DROP INDEX retires that registration. Subsequent heap and SQL DML maintains registered indexes. Eligible equality and IS NULL predicates can select a point IndexScan; analyzed two-sided Int64/UInt64 bounds can select a range IndexScan. ANALYZE is explicit and is not maintained by DML.",
   },
   roadmap: {
     title: "Roadmap",
     description:
-      "NetbaDB's implemented phases through isolation, partitions, LSM, IndexJoin, and experimental PostgreSQL wire.",
+      "NetbaDB's implemented phases through isolation, partitions, LSM, IndexJoin, SQL DDL, and experimental PostgreSQL wire.",
     kicker: "Roadmap",
     heroHtml: "Implemented vertically,<br />then extended by phase.",
     deck:
@@ -294,12 +299,15 @@ const en = {
     isolationTitle: "Isolation",
     isolationBody:
       "begin_transaction uses Read Committed. Repeatable Read is available through begin_transaction_with_isolation. IsolationLevel is exported by netbadb-core. Serializable isolation is not available.",
-    extraStorageTitle: "LSM, partitions, and vacuum",
+    extraStorageTitle: "LSM, partitions, catalog, and vacuum",
     extraStorageBody:
-      "Database::create_storages can create Heap or LSM tables. create_with_placements attaches RANGE partitions. vacuum reclaims dead Heap versions that no active snapshot can see.",
+      "Database::create_storages can create Heap or LSM tables. create_with_placements attaches RANGE partitions. open_catalog reopens a published schema catalog without external TableDefs. vacuum reclaims dead Heap versions that no active snapshot can see.",
+    ddlTitle: "SQL DDL",
+    ddlBody:
+      "Heap CREATE TABLE supports BOOLEAN/BOOL, BIGINT/INT64, TEXT, and native UINT64. DROP TABLE binds identity at prepare time. CREATE INDEX / DROP INDEX manage a single-column non-unique Heap BTree. Network DDL requires schema_admin.",
     pgTitle: "Experimental PostgreSQL endpoint",
     pgBody:
-      "netbadbd --manifest server.json --postgres serves Simple Query and Extended Query on the manifest listen address. This is not general PostgreSQL compatibility. Migration execution, PostgreSQL DDL, complete catalogs, and password authentication are unsupported.",
+      "netbadbd --manifest server.json --postgres serves Simple Query and Extended Query on the manifest listen address. Heap CREATE TABLE, DROP TABLE, and CREATE/DROP INDEX work through that endpoint when schema_admin is granted. This is not general PostgreSQL compatibility. ALTER TABLE, complete catalogs, and password authentication are unsupported.",
     cliTitle: "6. Inspect files from the command line",
     cliBody:
       "Stop netbadbd and any embedded process using the same files first. The CLI opens tables with normal startup recovery and never executes the inspected SQL. JSON output uses Inspection JSON v5.",
@@ -316,7 +324,7 @@ const en = {
       "One writer per open database object. Read-only transactions do not reserve the writer.",
       "Explicit transactions support Read Committed and Repeatable Read. Implicit statements use Read Committed. Serializable isolation is not available.",
       "A successful commit means the Commit record is durable; heap pages may remain buffered until flush, vacuum, or close.",
-      "SQL index DDL is not available. Call create_index from the embedded API.",
+      "SQL CREATE TABLE, DROP TABLE, CREATE INDEX, and DROP INDEX are available for Heap tables. ALTER TABLE, PRIMARY KEY, and IF EXISTS are not.",
       "Multi-storage writes commit through the coordinator log. Concurrent writers and cross-process file locks are not available.",
       "Experimental on-disk formats reject older versions. There is no migration path.",
     ],
@@ -545,8 +553,8 @@ const zh: typeof en = {
       },
       {
         kind: "DML",
-        now: "显式列清单的单行 INSERT、UPDATE、DELETE、可选 WHERE",
-        not: "默认值、RETURNING、UPSERT、多表写",
+        now: "显式列清单或声明顺序的单行 INSERT、UPDATE、DELETE、可选 WHERE",
+        not: "默认值、RETURNING、UPSERT",
       },
       {
         kind: "ORDER BY",
@@ -557,6 +565,11 @@ const zh: typeof en = {
         kind: "聚合",
         now: "COUNT(*) / COUNT / SUM / MIN / MAX、源列 GROUP BY",
         not: "HAVING、DISTINCT 聚合、分组表达式、ROLLUP",
+      },
+      {
+        kind: "DDL",
+        now: "Heap 上的 CREATE TABLE、DROP TABLE、CREATE INDEX、DROP INDEX",
+        not: "ALTER TABLE、PRIMARY KEY、IF EXISTS、限定名、LSM/范围 DROP",
       },
     ],
     nominalTitle: "名义类型",
@@ -581,11 +594,11 @@ const zh: typeof en = {
       "create_tables 仍按表组合一个堆文件。范围分区表以及混合 Heap+LSM 目录经协调日志提交。不提供并发写者。不提供可串行化隔离。",
     indexTitle: "索引与 ANALYZE",
     indexBody:
-      "create_index 在事务性回填后注册非唯一单列索引。随后的堆与 SQL DML 会维护已注册索引。符合条件的等值与 IS NULL 谓词可选择点查 IndexScan；经过分析的双侧 Int64/UInt64 边界可选择范围 IndexScan。ANALYZE 为显式操作，DML 不会自动维护统计。不提供 SQL 索引 DDL。",
+      "create_index 与 SQL CREATE INDEX 在事务性回填后注册非唯一单列 Heap BTree。DROP INDEX 注销该注册。随后的堆与 SQL DML 会维护已注册索引。符合条件的等值与 IS NULL 谓词可选择点查 IndexScan；经过分析的双侧 Int64/UInt64 边界可选择范围 IndexScan。ANALYZE 为显式操作，DML 不会自动维护统计。",
   },
   roadmap: {
     title: "路线图",
-    description: "NetbaDB 已完成至隔离级别、分区、LSM、IndexJoin 与实验性 PostgreSQL 协议的阶段划分。",
+    description: "NetbaDB 已完成至隔离级别、分区、LSM、IndexJoin、SQL DDL 与实验性 PostgreSQL 协议的阶段划分。",
     kicker: "路线图",
     heroHtml: "按垂直切片实现，<br />再分阶段扩展。",
     deck:
@@ -623,12 +636,15 @@ const zh: typeof en = {
     isolationTitle: "隔离级别",
     isolationBody:
       "begin_transaction 使用读已提交。可重复读通过 begin_transaction_with_isolation 提供。IsolationLevel 由 netbadb-core 导出。不提供可串行化隔离。",
-    extraStorageTitle: "LSM、分区与 vacuum",
+    extraStorageTitle: "LSM、分区、catalog 与 vacuum",
     extraStorageBody:
-      "Database::create_storages 可创建 Heap 或 LSM 表。create_with_placements 挂载 RANGE 分区。vacuum 回收活动快照不可见的死亡堆版本。",
+      "Database::create_storages 可创建 Heap 或 LSM 表。create_with_placements 挂载 RANGE 分区。open_catalog 无需外部 TableDef 即可打开已发布的 schema catalog。vacuum 回收活动快照不可见的死亡堆版本。",
+    ddlTitle: "SQL DDL",
+    ddlBody:
+      "Heap CREATE TABLE 支持 BOOLEAN/BOOL、BIGINT/INT64、TEXT 以及原生 UINT64。DROP TABLE 在 prepare 时绑定身份。CREATE INDEX / DROP INDEX 管理单列非唯一 Heap BTree。网络 DDL 需要 schema_admin。",
     pgTitle: "实验性 PostgreSQL 端点",
     pgBody:
-      "netbadbd --manifest server.json --postgres 在清单监听地址上提供 Simple Query 与 Extended Query。这不是通用 PostgreSQL 兼容声明。不支持迁移执行、PostgreSQL DDL、完整系统目录以及口令认证。",
+      "netbadbd --manifest server.json --postgres 在清单监听地址上提供 Simple Query 与 Extended Query。在授予 schema_admin 时，Heap CREATE TABLE、DROP TABLE 与 CREATE/DROP INDEX 可通过该端点执行。这不是通用 PostgreSQL 兼容声明。不支持 ALTER TABLE、完整系统目录以及口令认证。",
     cliTitle: "6. 使用命令行检查文件",
     cliBody:
       "请先停止 netbadbd 以及任何使用同一文件的嵌入式进程。CLI 通过正常启动恢复打开表，并且不会执行被检查的 SQL。JSON 输出使用 Inspection JSON v5。",
@@ -645,7 +661,7 @@ const zh: typeof en = {
       "每个打开的数据库对象允许一个写者。只读事务不预定写者。",
       "显式事务支持读已提交与可重复读。隐式语句使用读已提交。不提供可串行化隔离。",
       "成功的提交表示 Commit 记录已持久化；堆页可能仍留在缓冲中，直到 flush、vacuum 或 close。",
-      "不提供 SQL 索引 DDL。请通过嵌入式 API 调用 create_index。",
+      "Heap 表支持 SQL CREATE TABLE、DROP TABLE、CREATE INDEX 与 DROP INDEX。不支持 ALTER TABLE、PRIMARY KEY 与 IF EXISTS。",
       "多存储写入经协调日志提交。不提供并发写者与跨进程文件锁。",
       "实验性磁盘格式会拒绝旧版本，不提供迁移路径。",
     ],
