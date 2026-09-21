@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import CodeBlock from "../components/CodeBlock.astro";
+import Faq from "../components/Faq.astro";
 import { site } from "../data/site";
 import { useCopy } from "../i18n/copy";
 
@@ -58,7 +59,7 @@ let statement = database.inspect_statement(
 println!("{}", inspection::render_statement(&statement));`;
 
 const manifest = `{
-  "version": 4,
+  "version": 11,
   "listen": "127.0.0.1:7878",
   "authorization": {
     "local_plaintext": {
@@ -114,17 +115,17 @@ cd netbadb
 make test`;
 ---
 
-<BaseLayout title={t.start.title} description={t.start.description}>
+<BaseLayout title={t.start.title} description={t.start.description} faqs={t.start.faq}>
   <div class="wrap content-page">
     <p class="kicker">{t.start.kicker}</p>
     <h1 class="page-title" set:html={t.start.heroHtml} />
     <p class="page-deck">
-      {t.start.deck.replace("{toolchain}", site.rustToolchain).replace("{msrv}", site.msrv)}
+      {t.start.deck.replace("{toolchain}", site.db.rustToolchain).replace("{msrv}", site.db.msrv)}
     </p>
 
     <div class="actions" style="margin-bottom: 2rem;">
-      <a class="btn btn-primary" href={site.github}>{t.start.openGithub}</a>
-      <a class="btn btn-ghost" href={`${site.github}/blob/main/sdk/rust/README.md`}>{t.start.readReadme}</a>
+      <a class="btn btn-primary" href={site.db.github}>{t.start.openGithub}</a>
+      <a class="btn btn-ghost" href={`${site.db.github}/blob/main/sdk/rust/README.md`}>{t.start.readReadme}</a>
     </div>
 
     <div class="prose" id="embedded">
@@ -182,8 +183,11 @@ let mut tx = database.begin_transaction_with_isolation(
     name TEXT,
     active BOOLEAN NOT NULL
 );
+ALTER TABLE projects ADD COLUMN notes TEXT;
+ALTER TABLE projects ALTER COLUMN name SET NOT NULL;
 CREATE INDEX projects_id_idx ON projects (id);
 DROP INDEX projects_id_idx;
+ALTER TABLE projects DROP COLUMN notes;
 DROP TABLE projects;`}
       lang="sql"
     />
@@ -204,10 +208,24 @@ let mut reopened = Database::open_catalog("catalog")?;`}
     />
 
     <div class="prose">
-      <h2>{t.start.pgTitle}</h2>
-      <p>{t.start.pgBody}</p>
+      <h2>{t.start.operatorTitle}</h2>
+      <p>{t.start.operatorBody}</p>
     </div>
-    <CodeBlock code={`cargo run -p netbadbd -- --manifest server.json --postgres`} lang="bash" />
+    <CodeBlock
+      code={`{
+  "operator": {
+    "unix_socket": "run/netbadb-operator.sock",
+    "io_timeout_ms": 5000,
+    "allow_physical_index_apply": false,
+    "allow_physical_columnar_apply": false,
+    "allow_physical_design_receipt_read": false,
+    "physical_index_admission": {"mode": "unadmitted"},
+    "physical_columnar_snapshot_admission": {"mode": "unadmitted"},
+    "physical_columnar_incremental_admission": {"mode": "unadmitted"}
+  }
+}`}
+      lang="json"
+    />
 
     <div class="prose" id="cli">
       <h2>{t.start.cliTitle}</h2>
@@ -240,9 +258,10 @@ let mut reopened = Database::open_catalog("catalog")?;`}
       <h2>{t.start.licenseTitle}</h2>
       <p>
         {t.start.licenseBody.split("{license}")[0]}
-        <a href={`${site.github}/blob/main/LICENSE`}>{site.license}</a>
+        <a href={`${site.db.github}/blob/main/LICENSE`}>{site.license}</a>
         {t.start.licenseBody.split("{license}")[1]}
       </p>
     </div>
+    <Faq title={t.chrome.faqTitle} items={t.start.faq} />
   </div>
 </BaseLayout>

@@ -1,20 +1,32 @@
 ---
 import { useCopy } from "../i18n/copy";
+import { localizePath } from "../i18n/locale";
 import { site } from "../data/site";
 
-const { t } = useCopy(Astro.url.pathname);
+const { locale, t } = useCopy(Astro.url.pathname);
 ---
 
 <footer class="site-footer">
-  <div class="wrap footer-inner">
-    <div>
-      <strong class="serif">{site.name}</strong>
-      {" "}{t.chrome.footerBody}
-    </div>
-    <div>
-      <a href={site.github}>sskycn/netbadb</a>
-      {" · "}{site.license}
-      {" · "}{t.chrome.footerStatic}
+  <div class="wrap">
+    <nav class="footer-nav" aria-label={t.chrome.footerNavAria}>
+      {
+        t.chrome.footerNav.map((item) => (
+          <a href={localizePath(item.href, locale)}>{item.label}</a>
+        ))
+      }
+    </nav>
+    <div class="footer-inner">
+      <div>
+        <strong class="serif">{site.name}</strong>
+        {" "}{t.chrome.footerBody}
+      </div>
+      <div>
+        <a href={site.db.github}>sskycn/netbadb</a>
+        {" · "}
+        <a href={site.iot.github}>sskycn/netbaiot</a>
+        {" · "}{site.license}
+        {" · "}{t.chrome.footerStatic}
+      </div>
     </div>
   </div>
 </footer>

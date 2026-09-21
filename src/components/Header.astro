@@ -2,37 +2,73 @@
 import LangSwitch from "./LangSwitch.astro";
 import { useCopy } from "../i18n/copy";
 import { localizePath, stripLocale } from "../i18n/locale";
-import { nav, site } from "../data/site";
+import { dbNav, iotNav, productFromPath, productNav, site } from "../data/site";
 
 const { locale, t } = useCopy(Astro.url.pathname);
 const current = stripLocale(Astro.url.pathname);
+const product = productFromPath(current);
+const subnav = product === "iot" ? iotNav : product === "db" ? dbNav : [];
+const github = product === "iot" ? site.iot.github : site.db.github;
+const brandSuffix = product === "iot" ? "IoT" : product === "db" ? "DB" : "";
 ---
 
 <header class="site-header">
   <div class="wrap header-inner">
     <a class="brand" data-home href={localizePath("/", locale)}>
-      <span class="brand-mark">Netba<span>DB</span></span>
-      <span class="brand-phase">Phase {site.phase}</span>
+      <span class="brand-mark">Netba{brandSuffix ? <span>{brandSuffix}</span> : null}</span>
+      {
+        product === "db" ? (
+          <span class="brand-phase">Phase {site.db.phase}</span>
+        ) : product === "iot" ? (
+          <span class="brand-phase">MQTT {site.iot.mqtt}</span>
+        ) : (
+          <span class="brand-phase">AGPL-3.0</span>
+        )
+      }
     </a>
     <input class="nav-toggle" id="nav-toggle" type="checkbox" />
     <label class="menu-btn" for="nav-toggle">{t.chrome.menu}</label>
     <nav class="nav" aria-label={t.chrome.navAria}>
       {
-        nav.map((item) => {
+        productNav.map((item) => {
           const href = localizePath(item.href, locale);
+          const active =
+            item.product === "iot" ? product === "iot" : product === "db";
           return (
             <a
               href={href}
               data-nav-key={item.key}
-              aria-current={current === item.href ? "page" : undefined}
+              data-path={item.href}
+              aria-current={active ? "page" : undefined}
             >
               {t.chrome.nav[item.key]}
             </a>
           );
         })
       }
-      <a class="nav-github" href={site.github} rel="noreferrer">GitHub</a>
+      <a class="nav-github" href={github} rel="noreferrer">GitHub</a>
       <LangSwitch />
     </nav>
   </div>
+  {
+    subnav.length > 0 && (
+      <div class="subnav">
+        <div class="wrap subnav-inner">
+          {subnav.map((item) => {
+            const href = localizePath(item.href, locale);
+            return (
+              <a
+                href={href}
+                data-nav-key={item.key}
+                data-path={item.href}
+                aria-current={current === item.href ? "page" : undefined}
+              >
+                {t.chrome.nav[item.key]}
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    )
+  }
 </header>

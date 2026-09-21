@@ -15,10 +15,10 @@ const { t } = useCopy(Astro.url.pathname);
       <pre>
 Executor
     ↓
-HeapStorage
+TableStorage (Heap / LSM / derived Columnar)
     ↘ BTree persistence
     ↓
-TransactionManager + WAL
+Transaction + WAL + coordinator log
     ↓
 BufferPool + PageGuards
     ↓

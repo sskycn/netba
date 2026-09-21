@@ -5,6 +5,10 @@ import { storageKey } from "../i18n/locale";
 <script is:inline define:vars={{ storageKey }}>
   (function () {
     if (document.documentElement.hasAttribute("data-404")) return;
+    var ua = navigator.userAgent || "";
+    if (/bot|crawl|spider|slurp|bingpreview|facebookexternalhit|linkedinbot|embedly|pinterest|slackbot|twitterbot|whatsapp|gptbot|chatgpt|claudebot|anthropic|perplexity|bytespider|applebot|ia_archiver|ccbot|google-extended/i.test(ua)) {
+      return;
+    }
     var path = location.pathname.replace(/\/$/, "") || "/";
     var current = path === "/zh" || path.indexOf("/zh/") === 0 ? "zh" : "en";
     var saved = localStorage.getItem(storageKey);

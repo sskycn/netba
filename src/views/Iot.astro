@@ -1,0 +1,53 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Faq from "../components/Faq.astro";
+import { iotImplemented, iotNotImplemented } from "../data/iot";
+import { site } from "../data/site";
+import { useCopy } from "../i18n/copy";
+import { localizePath } from "../i18n/locale";
+
+const { locale, t } = useCopy(Astro.url.pathname);
+---
+
+<BaseLayout title={t.iot.title} description={t.iot.description} faqs={t.iot.faq}>
+  <div class="wrap content-page">
+    <p class="kicker">{t.iot.kicker}</p>
+    <h1 class="page-title" set:html={t.iot.heroHtml} />
+    <p class="page-deck">{t.iot.deck}</p>
+    <div class="actions" style="margin-bottom: 2rem;">
+      <a class="btn btn-primary" href={localizePath("/iot/start", locale)}>{t.iot.ctaStart}</a>
+      <a class="btn btn-ghost" href={localizePath("/iot/architecture", locale)}>{t.iot.ctaArchitecture}</a>
+    </div>
+    <div class="hero-meta" style="margin-bottom: 2rem;">
+      <div class="stat"><b>Protocol {site.iot.protocolVersion}</b><span>MQTT {site.iot.mqtt}</span></div>
+      <div class="stat"><b>MSRV {site.iot.msrv}</b><span>AGPL-3.0</span></div>
+    </div>
+
+    <div class="grid-2">
+      <article class="card">
+        <h3>{t.iot.done}</h3>
+        <ul>
+          {iotImplemented[locale].map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+      <article class="card warn">
+        <h3>{t.iot.notDone}</h3>
+        <ul>
+          {iotNotImplemented[locale].map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+
+    <div class="prose">
+      <h2>{t.iot.pathsTitle}</h2>
+      <p>{t.iot.pathsDeck}</p>
+      <h2>{t.iot.deliveryTitle}</h2>
+      <p>{t.iot.deliveryBody}</p>
+      <h2>{t.iot.commandTitle}</h2>
+      <p>{t.iot.commandBody}</p>
+      <h2>{t.iot.restartTitle}</h2>
+      <p>{t.iot.restartBody}</p>
+    </div>
+    <Faq title={t.chrome.faqTitle} items={t.iot.faq} />
+  </div>
+</BaseLayout>

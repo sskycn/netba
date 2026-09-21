@@ -19,6 +19,14 @@ GROUP BY team_id`;
 const dmlSql = `INSERT INTO users (id, name) VALUES (1, 'Ada');
 UPDATE users SET name = 'Ada Lovelace' WHERE id = 1;
 DELETE FROM users WHERE name IS NULL;`;
+
+const ddlSql = `CREATE TABLE events (
+    id BIGINT NOT NULL,
+    payload BYTEA NOT NULL
+);
+ALTER TABLE events ADD COLUMN note TEXT;
+SELECT id::TEXT, payload FROM events;
+DROP TABLE events;`;
 ---
 
 <BaseLayout title={t.query.title} description={t.query.description}>
@@ -87,6 +95,12 @@ NULL IS NULL    → TRUE</pre>
       <p>{t.query.dmlBody}</p>
     </div>
     <CodeBlock code={dmlSql} lang="sql" />
+
+    <div class="prose">
+      <h2>{t.query.ddlTitle}</h2>
+      <p>{t.query.ddlBody}</p>
+    </div>
+    <CodeBlock code={ddlSql} lang="sql" />
 
     <div class="prose">
       <h2>{t.query.sortTitle}</h2>

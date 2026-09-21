@@ -1,0 +1,17 @@
+---
+type Item = { q: string; a: string };
+type Props = { title: string; items: Item[] };
+const { title, items } = Astro.props;
+---
+
+<section class="faq" aria-labelledby="faq-heading">
+  <h2 id="faq-heading">{title}</h2>
+  {
+    items.map((item) => (
+      <details>
+        <summary>{item.q}</summary>
+        <p>{item.a}</p>
+      </details>
+    ))
+  }
+</section>

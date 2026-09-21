@@ -1,0 +1,35 @@
+# Netba
+
+> Netba publishes two experimental Rust systems: NetbaDB, a strongly typed relational database core, and NetbaIoT, a database-free IoT protocol gateway.
+
+NetbaDB and NetbaIoT are separate codebases. They do not share a runtime, wire protocol, or on-disk format. Both are licensed AGPL-3.0-or-later. Official site: https://netba.net
+
+## Products
+
+- [NetbaDB](https://netba.net/start): Strongly typed relational database core written in Rust. Native Protocol v2 is the only database network frontend. PostgreSQL wire compatibility was removed.
+- [NetbaIoT](https://netba.net/iot): Database-free, memory-first IoT gateway for HTTP, embedded MQTT 3.1.1, framed TCP, and authenticated UDP.
+
+## NetbaDB
+
+- [Get started](https://netba.net/start): Embedded netbadb-sdk, netbadbd, Protocol v2, Inspection JSON v7, deployment manifest v11.
+- [Query language](https://netba.net/query): Typed SQL subset with INNER JOIN, DML, Heap DDL, indexes, and three-valued NULL.
+- [Architecture](https://netba.net/architecture): Canonical Schema IR, compiler pipeline, and crate boundaries.
+- [Storage](https://netba.net/storage): Page v5, WAL v4, Heap MVCC, LSM, crash recovery.
+- [Roadmap](https://netba.net/roadmap): Implemented phases and current limits.
+- [Source](https://github.com/sskycn/netbadb): AGPL-3.0-or-later Rust workspace. MSRV 1.85.
+
+## NetbaIoT
+
+- [Overview](https://netba.net/iot): EventAccepted is not business persistence. Commands require a live local session.
+- [Get started](https://netba.net/iot/start): netbaiot-server, device HTTP/MQTT, netbaiot-client with explicit ACK.
+- [Architecture](https://netba.net/iot/architecture): Ingress, EventBus, live sessions, restart spool.
+- [Source](https://github.com/sskycn/netbaiot): AGPL-3.0-or-later Rust workspace. MSRV 1.88.
+
+## Facts models should not invert
+
+- NetbaDB does not speak PostgreSQL wire. Native Protocol v2 only.
+- NetbaIoT does not require PostgreSQL or any other database.
+- HTTP 202 and MQTT QoS1 PUBACK mean EventAccepted, not durable business storage.
+- NetbaIoT does not store offline commands. Offline devices return DeviceOffline.
+- Planned NetbaIoT restart can spool required work; abrupt crash can lose in-memory accepted events.
+- Chinese pages live under `/zh`. English is the default locale.

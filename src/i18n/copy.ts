@@ -2,9 +2,10 @@ import { localeFromPath, type Locale } from "./locale";
 
 const en = {
   meta: {
-    tagline: "A strongly typed relational database core",
+    title: "typed Rust database and database-free IoT gateway",
+    tagline: "Typed database core and database-free IoT gateway",
     description:
-      "NetbaDB is a strongly typed relational database core written in Rust. Use the embedded SDK in-process, or connect to netbadbd over Protocol v1.",
+      "Netba publishes two experimental Rust systems: NetbaDB, a strongly typed relational database core, and NetbaIoT, a database-free IoT protocol gateway for HTTP and MQTT 3.1.1.",
   },
   chrome: {
     skip: "Skip to content",
@@ -12,22 +13,61 @@ const en = {
     navAria: "Primary",
     langAria: "Language",
     nav: {
+      db: "NetbaDB",
+      iot: "NetbaIoT",
       architecture: "Architecture",
       storage: "Storage",
       query: "Query",
       roadmap: "Roadmap",
       start: "Get started",
+      iotOverview: "Overview",
+      iotStart: "Get started",
+      iotArchitecture: "Architecture",
     },
     footerBody:
-      "is an experimental relational database core. The current release implements a documented parser-to-storage subset.",
+      "publishes two experimental systems: NetbaDB, a typed relational database core, and NetbaIoT, a database-free IoT gateway.",
     footerStatic: "Official website",
+    footerNavAria: "Site",
+    footerNav: [
+      { href: "/", label: "Home" },
+      { href: "/start", label: "NetbaDB" },
+      { href: "/query", label: "Query language" },
+      { href: "/architecture", label: "DB architecture" },
+      { href: "/storage", label: "Storage" },
+      { href: "/iot", label: "NetbaIoT" },
+      { href: "/iot/start", label: "IoT get started" },
+      { href: "/iot/architecture", label: "IoT architecture" },
+    ],
+    faqTitle: "Questions",
   },
   home: {
-    heroHtml: "A strongly typed<br />relational <em>database core</em>.",
+    heroHtml: "Two experimental systems.<br />One <em>Netba</em> site.",
     lede:
-      "NetbaDB is a strongly typed relational database core written in Rust. Create a local Heap or LSM file with the embedded SDK, or start netbadbd and connect with Protocol v1 or the experimental PostgreSQL endpoint.",
+      "NetbaDB is a strongly typed relational database core. NetbaIoT is a memory-first IoT protocol gateway that does not require a database. Both are experimental Rust workspaces licensed AGPL-3.0-or-later.",
     ctaArchitecture: "Architecture",
     ctaStart: "Get started",
+    ctaDb: "NetbaDB",
+    ctaIot: "NetbaIoT",
+    productsKicker: "Products",
+    productsTitle: "Separate codebases, separate contracts.",
+    productsDeck:
+      "NetbaDB stores typed relational data. NetbaIoT routes device events and live commands. They do not share a runtime, wire protocol, or on-disk format.",
+    dbCardTitle: "NetbaDB",
+    dbCardBody:
+      "Embedded or remote typed SQL subset, Heap/LSM storage, WAL recovery, Protocol v2, and a Unix operator plane.",
+    dbPoints: [
+      "Native Protocol v2 only; PostgreSQL wire was removed",
+      "Deployment manifest v11 and Inspection JSON v7",
+      "Read Committed and Repeatable Read",
+    ],
+    iotCardTitle: "NetbaIoT",
+    iotCardBody:
+      "HTTP, embedded MQTT 3.1.1, TCP, and UDP ingress into DeviceEvent, then confirmed or best-effort business sinks.",
+    iotPoints: [
+      "No PostgreSQL or other database in the runtime",
+      "HTTP 202 and MQTT QoS1 mean EventAccepted, not business persistence",
+      "Commands require a live local session",
+    ],
     statSlice: "Current release",
     statProtocol: "Remote protocol",
     statIndexes: "Registered indexes",
@@ -42,11 +82,11 @@ const en = {
     pipelineKicker: "Architecture",
     pipelineTitle: "Stable layer boundaries.",
     pipelineDeck:
-      "Application languages are not part of the database's persistent meaning. Rust provides embedded and remote APIs. Go uses an independent Protocol v1 client and generated typed bindings.",
+      "Application languages are not part of the database's persistent meaning. Rust provides embedded and remote APIs. Go uses an independent Protocol v2 client and generated typed bindings.",
     pathsKicker: "Get started",
     pathsTitle: "Three supported entry points.",
     pathsDeck:
-      "Most applications should start with the embedded SDK. Use netbadbd when another process needs a Protocol v1 connection. Use the CLI to inspect catalogs and plans without executing SQL.",
+      "Most applications should start with the embedded SDK. Use netbadbd when another process needs a Protocol v2 connection. Use the CLI to inspect catalogs and plans without executing SQL.",
     paths: [
       {
         title: "Embedded Rust",
@@ -66,8 +106,8 @@ const en = {
       { title: "Parser / HIR", text: "Name resolution and nominal type checking" },
       { title: "Planner", text: "SeqScan, IndexScan, NestedLoopJoin, HashJoin, IndexJoin" },
       { title: "Executor", text: "Synchronous and bounded-batch execution" },
-      { title: "Storage", text: "Heap MVCC, LSM, partitions, WAL, coordinator" },
-      { title: "Protocol", text: "netbadbd, Protocol v1, experimental PostgreSQL v3" },
+      { title: "Storage", text: "Heap MVCC, LSM, partitions, derived columnar, WAL, coordinator" },
+      { title: "Protocol", text: "netbadbd, Protocol v2, Unix NBOP v7" },
     ],
     typesKicker: "Nominal types",
     typesTitleHtml: "Identical <code>u64</code> encodings remain distinct types.",
@@ -75,10 +115,10 @@ const en = {
       "UserId and TeamId may share a physical representation, but their nominal semantic types remain distinct. Storage encodes physical values. Canonical Schema is the source of semantic meaning.",
     typesSplitTitle: "Physical and semantic types",
     typesSplitBody:
-      "Internal identifiers are newtypes: TableId, RelationBindingId, ColumnId, PageId, RowId. In a self join, two aliases of the same table remain two bindings.",
+      "Internal identifiers are newtypes: TableId, RelationBindingId, ColumnId, PageId, RowId. Physical Types v2 covers Bool, exact-width integers through 128 bits, Float32/Float64, Text, and Bytes. In a self join, two aliases of the same table remain two bindings.",
     typesFpTitle: "Schema identity on open",
     typesFpBody:
-      "Every validated table has a versioned canonical byte encoding and a SHA-256 fingerprint. Heap metadata persists it; reopen requires the caller's full table identity, including semantic types and column order.",
+      "Every validated table has a versioned canonical byte encoding and a SHA-256 fingerprint. Heap metadata persists it. open_catalog reconstructs committed schema without external TableDefs; optional caller schemas are exact subset expectations.",
     cratesKicker: "Workspace",
     cratesTitle: "Acyclic crate dependencies.",
     cratesDeck:
@@ -90,11 +130,29 @@ const en = {
       "The Get started page covers the embedded SDK, indexes, netbadbd, and remote clients. Source code:",
     ctaStartAgain: "Get started",
     ctaStorage: "Query language",
+    faq: [
+      {
+        q: "What is Netba?",
+        a: "Netba is the official site for two experimental Rust systems: NetbaDB, a strongly typed relational database core, and NetbaIoT, a database-free IoT protocol gateway. They are separate codebases and do not share a runtime, wire protocol, or on-disk format.",
+      },
+      {
+        q: "What is NetbaDB?",
+        a: "NetbaDB is a strongly typed relational database core written in Rust. Applications use the embedded SDK or connect to netbadbd over Native Protocol v2. PostgreSQL wire compatibility was removed.",
+      },
+      {
+        q: "What is NetbaIoT?",
+        a: "NetbaIoT is a memory-first IoT gateway. It accepts HTTP, embedded MQTT 3.1.1, framed TCP, and authenticated UDP, then routes DeviceEvent values to confirmed or best-effort business sinks. It does not require a database.",
+      },
+      {
+        q: "What license do they use?",
+        a: "Both NetbaDB and NetbaIoT are licensed AGPL-3.0-or-later. If you modify the program and let users interact with it over a network, you must provide the corresponding source.",
+      },
+    ],
   },
   architecture: {
-    title: "Architecture",
+    title: "NetbaDB architecture",
     description:
-      "NetbaDB's language boundary, compiler pipeline, crate dependency direction, and synchronous embedded core.",
+      "NetbaDB architecture: Canonical Schema IR, typed SQL compiler, planner, executor, WAL, and Heap/LSM storage in Rust.",
     kicker: "Architecture",
     heroHtml: "Application languages remain<br />outside the engine.",
     deck:
@@ -122,8 +180,8 @@ const en = {
       "In the graph, A → B means A depends on B. Lower layers must not depend on higher-level policy. In particular, storage must not depend on the planner or executor, and the executor must not depend on an SDK.",
     langTitle: "Cross-language strategy",
     langLead: "Go is an application language, not an implementation language. The support boundary is:",
-    langRust: "Rust: native core, embedded SDK, and Protocol v1 remote client",
-    langGo: "Go: independent Protocol v1 client and generated typed bindings",
+    langRust: "Rust: native core, embedded SDK, and Protocol v2 remote client",
+    langGo: "Go: independent Protocol v2 client and generated typed bindings",
     langBody:
       "sdk/go is an independent standard-library client. Generated bindings validate result order, names, physical and semantic types, and nullability. They do not generate SQL or query-builder APIs.",
     decisionTitle: "Design priorities",
@@ -131,16 +189,16 @@ const en = {
       "Correctness, explicit invariants, and type safety take precedence over convenience. Features are introduced as complete, testable vertical slices. Unimplemented components are not represented as finished APIs.",
   },
   storage: {
-    title: "Storage",
+    title: "NetbaDB storage engine",
     description:
-      "NetbaDB Page v5 slotted pages, buffer pool, WAL, recovery, checkpoints, and persistent B+Tree.",
+      "NetbaDB storage: 4 KiB Page v5, WAL v4, Heap MVCC, LSM, crash recovery, and persistent B+Tree indexes.",
     kicker: "Storage",
     heroHtml: "4 KiB pages, WAL,<br />and crash recovery.",
     deck:
-      "The storage path is synchronous. The current model is single-writer, STEAL, NO-FORCE, and WAL-protected. It supports synchronous physical runtime rollback and startup crash recovery. Reads have no snapshot and may observe an active writer.",
+      "The storage path is synchronous. The current model is single-writer, STEAL, NO-FORCE, and WAL-protected. Explicit transactions support Read Committed and Repeatable Read. Heap and LSM remain authoritative; columnar projections are derived and stale until refresh.",
     pageTitle: "Page format v5",
     pageIntro:
-      "Data pages are a fixed 4096 bytes. Page 0 is still legacy container / heap metadata and is not interpreted as Page v5. Heap metadata is a separate NBD1 version-2 layout and stores the canonical table fingerprint. Versions 1 through 4 are rejected rather than guessed or migrated.",
+      "Data pages are a fixed 4096 bytes. Page 0 is still legacy container / heap metadata and is not interpreted as Page v5. Heap metadata is a separate NBD1 version-5 layout and stores the canonical table fingerprint and StorageId. Versions 1 through 4 are rejected rather than guessed or migrated.",
     thOffset: "Offset",
     thField: "Field",
     thMeaning: "Meaning",
@@ -163,12 +221,12 @@ const en = {
     walIntro:
       "Each database uses two alternating slots: <database>-wal and <database>-wal.next. Logical LSNs and physical offsets are deliberately different:",
     walP1:
-      "The WAL header is 48 bytes, format version 3, with a whole-header CRC32C. Record headers are 40 bytes, format version 2; the type determines the only valid total length. Record types include Begin, PageUpdate, Prepare, Commit, Abort, and RollbackComplete. PageUpdate carries complete 4 KiB before/after images.",
+      "The WAL header is 48 bytes, format version 4, with a whole-header CRC32C. Record headers are 40 bytes, format version 5; versions 3 and 4 remain readable. Record types include Begin, PageUpdate, PageAllocationTransition, PageGenerationReservation, Prepare, Commit, Abort, and RollbackComplete. PageUpdate carries complete 4 KiB before/after images.",
     walP2:
       "A physically complete record whose checksum fails is corruption and is never truncated as a crash tail, even at EOF. Only an incomplete final record whose available header passes structural checks may be discarded at the recovery boundary.",
     txnTitle: "Transactions, isolation, and the single writer",
     txnP1:
-      "Explicit transactions support Read Committed and Repeatable Read. Implicit statements use Read Committed. Writer ownership is acquired lazily on the first write; read-only transactions do not reserve it. Multi-storage commits use WAL Prepare plus a coordinator CommitDecision. vacuum reclaims Heap versions that no active snapshot can see.",
+      "Explicit transactions support Read Committed and Repeatable Read. Implicit statements use Read Committed. Writer ownership is acquired lazily on the first write; read-only transactions do not reserve it. Multi-storage commits use WAL Prepare plus a coordinator CommitDecision. Global mode publishes a gap-free DatabaseCommitSeq and a Heap/LSM visibility vector. vacuum reclaims Heap versions that no active snapshot can see.",
     txnP2:
       "Dropping an unfinished dirty writer does not silently release it: later writes require recovery, and close reports an error. flush remains legal during an active transaction because the engine uses STEAL and WAL-orders every page write; flush success is not commit.",
     recoveryTitle: "Startup recovery",
@@ -181,27 +239,27 @@ const en = {
     btreeP1:
       "Heap and B+Tree pages share one database file, buffer pool, transaction chain, WAL, recovery pass, and checkpoint. Index pages are ordinary checksummed Page v5 pages with exactly one generation-1 payload slot.",
     btreeP2:
-      "netbadb-index owns ordering, nodes, and versioned codecs, with no dependency on storage, SQL, or the executor. BTreeHandle is a stable metadata-page identity; a root split can replace the root without changing the handle. Registered indexes are backfilled by create_index, maintained by heap and SQL DML, and visible to the planner as IndexScan. SQL index DDL is not available.",
+      "netbadb-index owns ordering, nodes, and versioned codecs, with no dependency on storage, SQL, or the executor. BTreeHandle is a stable metadata-page identity; a root split can replace the root without changing the handle. Registered indexes are backfilled by create_index or SQL CREATE INDEX, maintained by heap and SQL DML, and visible to the planner as IndexScan.",
     integrityTitle: "Integrity, not authentication",
     integrityBody:
-      "Page CRC and WAL CRC detect persistent corruption. They neither repair it nor provide cryptographic authentication. Decoder fuzzing covers WAL recovery, Page v5, and B+Tree nodes.",
+      "Page CRC and WAL CRC detect persistent corruption. They neither repair it nor provide cryptographic authentication. Decoder fuzzing covers WAL recovery, Page v5, B+Tree, protocol, schema catalog, coordinator log, and LSM formats.",
   },
   query: {
-    title: "Query",
+    title: "NetbaDB query language",
     description:
-      "NetbaDB's small typed SQL subset: JOIN, DML, NULL three-valued logic, ORDER BY, and GROUP BY.",
+      "NetbaDB typed SQL subset: INNER JOIN, INSERT/UPDATE/DELETE, Heap CREATE/ALTER/DROP TABLE, indexes, three-valued NULL, ORDER BY, and GROUP BY.",
     kicker: "Query language",
     heroHtml: "A typed SQL subset<br />with explicit semantics.",
     deck:
-      "The query language is a limited native subset. It includes a parser, nominal type checking, three-valued logic, and WAL-protected DML. It is not a complete SQL dialect.",
+      "The query language is a limited native subset. It includes a parser, nominal type checking, three-valued logic, WAL-protected DML, and a bounded Heap DDL set. It is not a complete SQL dialect.",
     thKind: "Area",
     thNow: "Supported now",
     thNot: "Not supported",
     rows: [
       {
         kind: "SELECT",
-        now: "Qualified / unqualified columns, wildcard projection, LIMIT",
-        not: "Arbitrary expression projection, output aliases, DISTINCT",
+        now: "Qualified / unqualified columns, wildcard, LIMIT, typed expressions, AS aliases, postfix :: casts",
+        not: "DISTINCT, window functions, subqueries in projection",
       },
       {
         kind: "FROM / JOIN",
@@ -230,8 +288,8 @@ const en = {
       },
       {
         kind: "DDL",
-        now: "CREATE TABLE, DROP TABLE, CREATE INDEX, DROP INDEX on Heap",
-        not: "ALTER TABLE, PRIMARY KEY, IF EXISTS, qualified names, LSM/range DROP",
+        now: "Heap CREATE TABLE (Physical Types v2), DROP TABLE, ALTER TABLE (rename, nullable ADD, DROP, SET/DROP NOT NULL), CREATE/DROP INDEX",
+        not: "PRIMARY KEY / UNIQUE / FK, IF EXISTS, qualified names, LSM/range composition, general ALTER COLUMN TYPE",
       },
     ],
     nominalTitle: "Nominal types",
@@ -246,6 +304,9 @@ const en = {
     dmlTitle: "DML",
     dmlBody:
       "Typed DML uses the same compiler, transaction, full-page WAL, rollback, and recovery path as heap writes. Database::execute returns query rows or an explicit AffectedRows(u64); query rejects mutating statements. Omitted nullable INSERT columns become NULL; omitted non-nullable columns are rejected. UPDATE evaluates every right-hand side against the original row, so SET a = b, b = a swaps.",
+    ddlTitle: "DDL",
+    ddlBody:
+      "Heap CREATE TABLE, DROP TABLE, ALTER TABLE, and CREATE/DROP INDEX are transactional. ALTER supports rename table/column, nullable ADD, restricted DROP, and SET/DROP NOT NULL. Postfix :: casts are exact-width; there is no implicit numeric widening. LSM and partitioned tables are not part of this SQL DDL surface.",
     sortTitle: "Sort and aggregates",
     sortP1:
       "The ordinary plan is Scan/Join → Filter → Sort → Project → Limit. The aggregate plan is Scan/Join → Filter → Aggregate → Limit. Keys resolve against the complete FROM / JOIN scope before projection, so a query may sort by a column it does not return.",
@@ -253,32 +314,32 @@ const en = {
       "COUNT(*) counts rows; COUNT(column) ignores NULL. A lone global COUNT(column) over SeqScan can count presence without materializing rows. Numeric SUM uses checked arithmetic and strips nominal meaning. MIN / MAX preserve the input SemanticType. NULLs at a grouping key share one group, unlike expression NULL = NULL, which remains UNKNOWN. Grouped queries currently reject ORDER BY.",
     multiTitle: "Writes across storages",
     multiBody:
-      "create_tables still composes one heap file per table. Range-partitioned tables and mixed Heap+LSM catalogs commit through the coordinator log. Concurrent writers are not available. Serializable isolation is not available.",
+      "create_tables still composes one heap file per table. Range-partitioned tables and mixed Heap+LSM catalogs commit through the coordinator log. Derived columnar projections are never authoritative. Concurrent writers are not available. Serializable isolation is not available.",
     indexTitle: "Indexes and ANALYZE",
     indexBody:
       "create_index and SQL CREATE INDEX register a non-unique single-column Heap BTree after a transactional backfill. DROP INDEX retires that registration. Subsequent heap and SQL DML maintains registered indexes. Eligible equality and IS NULL predicates can select a point IndexScan; analyzed two-sided Int64/UInt64 bounds can select a range IndexScan. ANALYZE is explicit and is not maintained by DML.",
   },
   roadmap: {
-    title: "Roadmap",
+    title: "NetbaDB roadmap",
     description:
-      "NetbaDB's implemented phases through isolation, partitions, LSM, IndexJoin, SQL DDL, and experimental PostgreSQL wire.",
+      "NetbaDB implemented phases: Protocol v2, Heap DDL, LSM, columnar projections, manifest v11, NBOP v7, and current limits including no Serializable isolation.",
     kicker: "Roadmap",
     heroHtml: "Implemented vertically,<br />then extended by phase.",
     deck:
-      "Development follows a vertical sequence. {n} phases are complete through item 73. Serializable isolation, concurrent writers, and MCP remain planned or deferred work.",
+      "Development follows a vertical sequence. {n} items are complete. The numbered engine sequence ends at 73; later coordinator, columnar, and schema-evolution work is also complete. Serializable isolation, concurrent writers, and MCP remain planned or deferred.",
     complete: "Complete",
     next: "Next",
     later: "Later",
     notTitle: "Not included in the current release",
   },
   start: {
-    title: "Get started",
+    title: "Get started with NetbaDB",
     description:
-      "Add the Rust SDK, create a local NetbaDB file, run SQL, register an index, or start netbadbd.",
+      "Install netbadb-sdk, create a local Heap or LSM database in Rust, run typed SQL, or start netbadbd over Native Protocol v2.",
     kicker: "Get started",
     heroHtml: "Add the SDK,<br />then create a database.",
     deck:
-      "The supported application crate is netbadb-sdk. The default feature is embedded. Disable default features and enable remote for a Protocol v1 client only. Toolchain {toolchain}; MSRV {msrv}.",
+      "The supported application crate is netbadb-sdk. The default feature is embedded. Disable default features and enable remote for a Protocol v2 client only. Toolchain {toolchain}; MSRV {msrv}.",
     openGithub: "View on GitHub",
     readReadme: "Read the README",
     depTitle: "1. Add the dependency",
@@ -292,7 +353,7 @@ const en = {
       "Inspection compiles and plans a statement without executing it. It does not scan heaps, refresh ANALYZE, acquire the writer, or append WAL.",
     serverTitle: "4. Start netbadbd",
     serverBody:
-      "The server opens existing heap files declared by deployment manifest v4. Loopback plaintext requires exactly one local_plaintext principal. Non-loopback listening requires mutual TLS.",
+      "The server opens existing heap files declared by deployment manifest v11. Versions 1 through 10 are rejected. Loopback plaintext requires exactly one local_plaintext principal. Non-loopback listening requires mutual TLS.",
     remoteTitle: "5. Connect a remote client",
     remoteBody:
       "Plaintext is accepted only when the resolved TCP peer is loopback. Remote deployments require verified mutual TLS. There is no connection pool, automatic retry, or multiplexing.",
@@ -301,22 +362,22 @@ const en = {
       "begin_transaction uses Read Committed. Repeatable Read is available through begin_transaction_with_isolation. IsolationLevel is exported by netbadb-core. Serializable isolation is not available.",
     extraStorageTitle: "LSM, partitions, catalog, and vacuum",
     extraStorageBody:
-      "Database::create_storages can create Heap or LSM tables. create_with_placements attaches RANGE partitions. open_catalog reopens a published schema catalog without external TableDefs. vacuum reclaims dead Heap versions that no active snapshot can see.",
+      "Database::create_storages can create Heap or LSM tables. create_with_placements attaches RANGE partitions. open_catalog reopens a published schema catalog without external TableDefs. vacuum reclaims dead Heap versions that no active snapshot can see. Columnar projections are derived, opt-in, and stale after committed DML until refresh.",
     ddlTitle: "SQL DDL",
     ddlBody:
-      "Heap CREATE TABLE supports BOOLEAN/BOOL, BIGINT/INT64, TEXT, and native UINT64. DROP TABLE binds identity at prepare time. CREATE INDEX / DROP INDEX manage a single-column non-unique Heap BTree. Network DDL requires schema_admin.",
-    pgTitle: "Experimental PostgreSQL endpoint",
-    pgBody:
-      "netbadbd --manifest server.json --postgres serves Simple Query and Extended Query on the manifest listen address. Heap CREATE TABLE, DROP TABLE, and CREATE/DROP INDEX work through that endpoint when schema_admin is granted. This is not general PostgreSQL compatibility. ALTER TABLE, complete catalogs, and password authentication are unsupported.",
+      "Heap CREATE TABLE accepts Physical Types v2 names, including BOOLEAN, integer widths, TEXT/VARCHAR, REAL/DOUBLE, BYTEA, and native UINT*. DROP TABLE binds identity at prepare time. ALTER TABLE supports rename table/column, nullable ADD, restricted DROP, and SET/DROP NOT NULL. CREATE INDEX / DROP INDEX manage a single-column non-unique Heap BTree. Network DDL requires schema_admin. PostgreSQL wire compatibility is not available.",
+    operatorTitle: "Local operator plane",
+    operatorBody:
+      "NBOP v7 is a Unix-domain operator protocol configured by manifest v11. It is not the database wire protocol. Native Protocol v2 remains the only network database frontend.",
     cliTitle: "6. Inspect files from the command line",
     cliBody:
-      "Stop netbadbd and any embedded process using the same files first. The CLI opens tables with normal startup recovery and never executes the inspected SQL. JSON output uses Inspection JSON v5.",
+      "Stop netbadbd and any embedded process using the same files first. The CLI opens tables with normal startup recovery and never executes the inspected SQL. JSON output uses Inspection JSON v7.",
     goTitle: "Go client",
     goBody:
-      "The Go module is an independent Protocol v1 client. It uses no cgo or Rust FFI. Dial performs Hello automatically.",
+      "The Go module is an independent Protocol v2 client. It uses no cgo or Rust FFI. Dial performs Hello automatically. Int128 and UInt128 result types are rejected by the Go client.",
     lspTitle: "Editor diagnostics",
     lspBody:
-      "netbadb-lsp --schema schema.json is a diagnostics-only stdio language server. It does not open database files or report physical plans.",
+      "netbadb-lsp --schema schema.json is a diagnostics-only stdio language server. It loads SDK Schema Spec v1 or v2 once. It does not open database files or report physical plans.",
     sourceTitle: "Build from source",
     cargoEquiv: "Equivalent cargo commands:",
     contractTitle: "Operating constraints",
@@ -324,13 +385,122 @@ const en = {
       "One writer per open database object. Read-only transactions do not reserve the writer.",
       "Explicit transactions support Read Committed and Repeatable Read. Implicit statements use Read Committed. Serializable isolation is not available.",
       "A successful commit means the Commit record is durable; heap pages may remain buffered until flush, vacuum, or close.",
-      "SQL CREATE TABLE, DROP TABLE, CREATE INDEX, and DROP INDEX are available for Heap tables. ALTER TABLE, PRIMARY KEY, and IF EXISTS are not.",
+      "SQL CREATE TABLE, DROP TABLE, ALTER TABLE, CREATE INDEX, and DROP INDEX are available for Heap tables. PRIMARY KEY, IF EXISTS, and general ALTER COLUMN TYPE are not.",
       "Multi-storage writes commit through the coordinator log. Concurrent writers and cross-process file locks are not available.",
       "Experimental on-disk formats reject older versions. There is no migration path.",
     ],
     licenseTitle: "License",
     licenseBody:
       "NetbaDB is licensed under {license}. If you modify the program and let users interact with it over a network, you must provide the corresponding source.",
+    faq: [
+      {
+        q: "How do I embed NetbaDB in a Rust process?",
+        a: "Add netbadb-sdk from the GitHub workspace, call Database::create, then insert and query in-process. The default feature is embedded.",
+      },
+      {
+        q: "What protocol does netbadbd speak?",
+        a: "Native Protocol v2 only. Manifest v11 is the current startup contract. PostgreSQL wire and netbadbd --postgres were removed.",
+      },
+      {
+        q: "Which isolation levels exist?",
+        a: "Explicit transactions support Read Committed and Repeatable Read. Implicit statements use Read Committed. Serializable isolation is not available.",
+      },
+    ],
+  },
+  iot: {
+    title: "NetbaIoT MQTT and HTTP IoT gateway",
+    description:
+      "NetbaIoT is a database-free IoT gateway for HTTP, MQTT 3.1.1, TCP, and UDP. HTTP 202 means EventAccepted, not business persistence.",
+    kicker: "NetbaIoT",
+    heroHtml: "A database-free<br />IoT <em>event gateway</em>.",
+    deck:
+      "NetbaIoT accepts device traffic over HTTP, embedded MQTT 3.1.1, framed TCP, and authenticated UDP. It normalizes that traffic into DeviceEvent and sends it to confirmed or best-effort business sinks. The runtime never requires PostgreSQL or another database.",
+    done: "Implemented",
+    notDone: "Out of scope",
+    ctaStart: "Get started",
+    ctaArchitecture: "Architecture",
+    pathsTitle: "Device, business, and operator paths.",
+    pathsDeck:
+      "Devices may use standard MQTT 3.1.1 or device HTTP. Business systems consume confirmed events through netbaiot-client. Operators use the management listener and the netbaiot CLI.",
+    deliveryTitle: "EventAccepted is not business persistence.",
+    deliveryBody:
+      "HTTP 202 and MQTT QoS1 PUBACK mean the event crossed the bounded EventAccepted boundary: authentication, codec validation, routing, and atomic reservation of every confirmed-required sink. They do not mean a business database stored the event. Consumers must deduplicate by stable event_id.",
+    commandTitle: "Commands are live-session only.",
+    commandBody:
+      "A command is admitted only into a currently connected local MQTT or TCP session queue. An offline device returns typed DeviceOffline. NetbaIoT does not store offline commands.",
+    restartTitle: "Planned restart, not crash durability.",
+    restartBody:
+      "Planned shutdown drains required work into a bounded local restart spool with fsync and atomic rename. That is graceful-restart-safe at-least-once delivery. SIGKILL, process crash, or power failure can lose the in-memory accepted window.",
+    faq: [
+      {
+        q: "Does NetbaIoT need a database?",
+        a: "No. The runtime is database-free. Business systems own durable business data. NetbaIoT's only persistent mechanism is a bounded local restart spool used during planned graceful shutdown.",
+      },
+      {
+        q: "What does HTTP 202 or MQTT QoS1 PUBACK mean?",
+        a: "They mean EventAccepted: authentication, codec validation, routing, and atomic reservation of every confirmed-required sink. They do not mean a business database stored the event. Consumers must deduplicate by event_id.",
+      },
+      {
+        q: "Are commands stored for offline devices?",
+        a: "No. A command is admitted only into a currently connected local MQTT or TCP session. An offline device returns typed DeviceOffline.",
+      },
+    ],
+  },
+  iotStart: {
+    title: "Get started with NetbaIoT",
+    description:
+      "Run netbaiot-server, upload a device HTTP or MQTT event, and consume it with netbaiot-client using explicit ACK.",
+    kicker: "Get started",
+    heroHtml: "Start the gateway,<br />then accept an event.",
+    deck:
+      "The server crate is netbaiot-server. Business systems use netbaiot-client. Devices may use standard MQTT 3.1.1 or the optional netbaiot-device-sdk. MSRV {msrv}. Public protocol {protocol}.",
+    openGithub: "View on GitHub",
+    readReadme: "Read the README",
+    runTitle: "1. Run the development server",
+    runBody:
+      "Development listeners bind to loopback. HTTP 202 means EventAccepted. Set a 64-character NETBAIOT_ADMIN_SECRET before calling management APIs. Production configurations must specify a confirmed webhook or framed TCP/RPC business sink.",
+    uploadTitle: "2. Upload a device event",
+    uploadBody:
+      "Device bearer format is credential_id:secret. The JSON schema is DeviceUplink. Retry and restart replay can duplicate delivery; the business sink must deduplicate by event_id.",
+    clientTitle: "3. Consume events from a business client",
+    clientBody:
+      "AckMode defaults to Manual. ACK after application processing. One server-confirmed delivery is outstanding per subscription. Dropping an unacknowledged delivery closes the stream so the server may redeliver.",
+    deviceTitle: "4. Optional device SDK",
+    deviceBody:
+      "netbaiot-device-sdk is convenience, not a requirement. Standard MQTT 3.1.1 clients remain first-class. Disconnected publish is rejected; the SDK does not accumulate an offline RAM queue.",
+    cliTitle: "5. Operator CLI",
+    cliBody:
+      "netbaiot is implemented only through netbaiot-client. Tokens are never printed. Drain requires --yes. Exit code 5 is device offline.",
+    contractTitle: "Operating constraints",
+    contract: [
+      "The runtime has no database, durable outbox, or persistent command state.",
+      "EventAccepted is not business persistence. Consumers must be idempotent on event_id.",
+      "Commands are not stored for offline devices.",
+      "Planned restart can spool required work; abrupt crash can lose in-memory accepted events.",
+      "MQTT 5, WebSockets, shared subscriptions, and $SYS are outside the current broker.",
+    ],
+    licenseTitle: "License",
+    licenseBody:
+      "NetbaIoT is licensed under {license}. If you modify the program and let users interact with it over a network, you must provide the corresponding source.",
+  },
+  iotArchitecture: {
+    title: "NetbaIoT architecture",
+    description:
+      "NetbaIoT architecture: HTTP/MQTT/TCP/UDP ingress, EventAccepted, EventBus, live-session commands, and a bounded restart spool.",
+    kicker: "Architecture",
+    heroHtml: "Ingress, EventBus,<br />and live sessions.",
+    deck:
+      "Normal MQTT and TCP telemetry uses socket parser state, a bound AuthContext, shared codec/config snapshots, and bounded memory routing. It performs no database, filesystem, remote auth, or control-plane operation on the hot path.",
+    pipelineTitle: "Runtime path",
+    cratesTitle: "Workspace responsibilities",
+    cratesDeck:
+      "Public client crates depend only on netbaiot-protocol and network libraries. They never depend on runtime, transport, broker, session, or server implementation crates.",
+    mqttTitle: "Embedded MQTT 3.1.1",
+    mqttBody:
+      "The broker implements CONNECT through DISCONNECT, including QoS0, QoS1, and explicit QoS2 state machines. ClientId is not trusted identity. Persistent sessions are keyed by authenticated DeviceKey plus ClientId. MQTT QoS and EventBus delivery are separate contracts.",
+    decisionTitle: "Design priorities",
+    decisionBody:
+      "There is deliberately no storage crate, SQL migration, database pool, durable outbox, persistent command state, or runtime message history. Business systems own durable business data.",
   },
   notFound: {
     title: "Page not found",
@@ -345,9 +515,10 @@ const en = {
 
 const zh: typeof en = {
   meta: {
-    tagline: "强类型关系型数据库核心",
+    title: "强类型 Rust 数据库与无数据库 IoT 网关",
+    tagline: "强类型数据库核心与无数据库 IoT 网关",
     description:
-      "NetbaDB 是用 Rust 实现的强类型关系型数据库核心。可在进程内使用嵌入式 SDK，或通过 Protocol v1 连接 netbadbd。",
+      "Netba 发布两套实验性 Rust 系统：NetbaDB（强类型关系型数据库核心）与 NetbaIoT（面向 HTTP 与 MQTT 3.1.1 的无数据库 IoT 协议网关）。",
   },
   chrome: {
     skip: "跳到正文",
@@ -355,22 +526,61 @@ const zh: typeof en = {
     navAria: "主导航",
     langAria: "语言",
     nav: {
+      db: "NetbaDB",
+      iot: "NetbaIoT",
       architecture: "架构",
       storage: "存储",
       query: "查询",
       roadmap: "路线图",
       start: "开始使用",
+      iotOverview: "概览",
+      iotStart: "开始使用",
+      iotArchitecture: "架构",
     },
     footerBody:
-      "是实验性关系型数据库核心。当前版本实现了已文档化的解析器至存储路径。",
+      "发布两套实验性系统：NetbaDB（类型化关系型数据库核心）与 NetbaIoT（无数据库 IoT 网关）。",
     footerStatic: "官方网站",
+    footerNavAria: "站点",
+    footerNav: [
+      { href: "/", label: "首页" },
+      { href: "/start", label: "NetbaDB" },
+      { href: "/query", label: "查询语言" },
+      { href: "/architecture", label: "数据库架构" },
+      { href: "/storage", label: "存储" },
+      { href: "/iot", label: "NetbaIoT" },
+      { href: "/iot/start", label: "IoT 开始使用" },
+      { href: "/iot/architecture", label: "IoT 架构" },
+    ],
+    faqTitle: "常见问题",
   },
   home: {
-    heroHtml: "强类型<br />关系型<em>数据库核心</em>。",
+    heroHtml: "两套实验性系统。<br />同一个 <em>Netba</em> 站点。",
     lede:
-      "NetbaDB 是用 Rust 实现的强类型关系型数据库核心。使用嵌入式 SDK 创建本地 Heap 或 LSM 文件，或启动 netbadbd 后通过 Protocol v1 或实验性 PostgreSQL 端点连接。",
+      "NetbaDB 是强类型关系型数据库核心。NetbaIoT 是内存优先、不依赖数据库的 IoT 协议网关。两者均为实验性 Rust workspace，并以 AGPL-3.0-or-later 授权。",
     ctaArchitecture: "架构",
     ctaStart: "开始使用",
+    ctaDb: "NetbaDB",
+    ctaIot: "NetbaIoT",
+    productsKicker: "产品",
+    productsTitle: "独立代码库，独立契约。",
+    productsDeck:
+      "NetbaDB 存储类型化关系数据。NetbaIoT 路由设备事件与在线命令。它们不共享运行时、线协议或磁盘格式。",
+    dbCardTitle: "NetbaDB",
+    dbCardBody:
+      "嵌入式或远程的类型化 SQL 子集、Heap/LSM 存储、WAL 恢复、Protocol v2，以及 Unix 运维平面。",
+    dbPoints: [
+      "仅 Native Protocol v2；PostgreSQL 协议已移除",
+      "部署清单 v11 与 Inspection JSON v7",
+      "读已提交与可重复读",
+    ],
+    iotCardTitle: "NetbaIoT",
+    iotCardBody:
+      "HTTP、内嵌 MQTT 3.1.1、TCP 与 UDP 入口归一为 DeviceEvent，再发往确认型或尽力而为业务 sink。",
+    iotPoints: [
+      "运行时不需要 PostgreSQL 或其他数据库",
+      "HTTP 202 与 MQTT QoS1 表示 EventAccepted，不是业务持久化",
+      "命令要求本地在线会话",
+    ],
     statSlice: "当前版本",
     statProtocol: "远程协议",
     statIndexes: "已注册索引",
@@ -385,11 +595,11 @@ const zh: typeof en = {
     pipelineKicker: "架构",
     pipelineTitle: "稳定的分层边界。",
     pipelineDeck:
-      "应用语言不属于数据库的持久语义。Rust 提供嵌入式与远程 API。Go 使用独立的 Protocol v1 客户端及生成的类型化绑定。",
+      "应用语言不属于数据库的持久语义。Rust 提供嵌入式与远程 API。Go 使用独立的 Protocol v2 客户端及生成的类型化绑定。",
     pathsKicker: "开始使用",
     pathsTitle: "三条受支持的接入路径。",
     pathsDeck:
-      "大多数应用应从嵌入式 SDK 开始。当另一进程需要 Protocol v1 连接时使用 netbadbd。使用 CLI 可在不执行 SQL 的情况下检查目录与计划。",
+      "大多数应用应从嵌入式 SDK 开始。当另一进程需要 Protocol v2 连接时使用 netbadbd。使用 CLI 可在不执行 SQL 的情况下检查目录与计划。",
     paths: [
       {
         title: "嵌入式 Rust",
@@ -409,8 +619,8 @@ const zh: typeof en = {
       { title: "Parser / HIR", text: "名字解析与名义类型检查" },
       { title: "Planner", text: "SeqScan、IndexScan、NestedLoopJoin、HashJoin、IndexJoin" },
       { title: "Executor", text: "同步与有界批执行" },
-      { title: "Storage", text: "堆 MVCC、LSM、分区、WAL、协调器" },
-      { title: "Protocol", text: "netbadbd、Protocol v1、实验性 PostgreSQL v3" },
+      { title: "Storage", text: "堆 MVCC、LSM、分区、派生列存、WAL、协调器" },
+      { title: "Protocol", text: "netbadbd、Protocol v2、Unix NBOP v7" },
     ],
     typesKicker: "名义类型",
     typesTitleHtml: "相同的 <code>u64</code> 编码仍是不同的类型。",
@@ -418,10 +628,10 @@ const zh: typeof en = {
       "UserId 与 TeamId 可以共享物理表示，但其名义语义类型保持互斥。存储仅编码物理值。Canonical Schema 是语义含义的来源。",
     typesSplitTitle: "物理类型与语义类型",
     typesSplitBody:
-      "内部标识均为 newtype：TableId、RelationBindingId、ColumnId、PageId、RowId。在自连接中，同一张表的两个别名仍对应两个绑定。",
+      "内部标识均为 newtype：TableId、RelationBindingId、ColumnId、PageId、RowId。物理类型 v2 覆盖 Bool、最长 128 位的定宽整数、Float32/Float64、Text 与 Bytes。在自连接中，同一张表的两个别名仍对应两个绑定。",
     typesFpTitle: "打开时的模式身份校验",
     typesFpBody:
-      "每张通过校验的表都有版本化规范字节编码与 SHA-256 指纹。堆元数据会持久化它；重开要求调用方给出完整表身份，包括语义类型与列顺序。",
+      "每张通过校验的表都有版本化规范字节编码与 SHA-256 指纹。堆元数据会持久化它。open_catalog 无需外部 TableDef 即可重建已提交 schema；可选的调用方 schema 是精确子集期望。",
     cratesKicker: "组件",
     cratesTitle: "无环的 crate 依赖。",
     cratesDeck:
@@ -432,9 +642,27 @@ const zh: typeof en = {
     ctaBody: "「开始使用」页面覆盖嵌入式 SDK、索引、netbadbd 与远程客户端。源代码：",
     ctaStartAgain: "开始使用",
     ctaStorage: "查询语言",
+    faq: [
+      {
+        q: "什么是 Netba？",
+        a: "Netba 是两套实验性 Rust 系统的官方站点：NetbaDB（强类型关系型数据库核心）与 NetbaIoT（无数据库 IoT 协议网关）。它们是独立代码库，不共享运行时、线协议或磁盘格式。",
+      },
+      {
+        q: "什么是 NetbaDB？",
+        a: "NetbaDB 是用 Rust 实现的强类型关系型数据库核心。应用可使用嵌入式 SDK，或通过 Native Protocol v2 连接 netbadbd。PostgreSQL 协议兼容已被移除。",
+      },
+      {
+        q: "什么是 NetbaIoT？",
+        a: "NetbaIoT 是内存优先的 IoT 网关。它接收 HTTP、内嵌 MQTT 3.1.1、分帧 TCP 与已认证 UDP，将 DeviceEvent 路由到确认型或尽力而为业务 sink。运行时不需要数据库。",
+      },
+      {
+        q: "使用什么许可证？",
+        a: "NetbaDB 与 NetbaIoT 均以 AGPL-3.0-or-later 授权。如果修改程序并让用户通过网络与之交互，必须提供对应源代码。",
+      },
+    ],
   },
   architecture: {
-    title: "架构",
+    title: "NetbaDB 架构",
     description: "NetbaDB 的语言边界、编译流水线、crate 依赖方向，以及同步嵌入式核心。",
     kicker: "架构",
     heroHtml: "应用语言位于<br />引擎边界之外。",
@@ -462,8 +690,8 @@ const zh: typeof en = {
       "图中 A → B 表示 A 依赖 B。下层不得依赖上层策略。尤其是存储不得依赖规划器或执行器，执行器不得依赖 SDK。",
     langTitle: "跨语言策略",
     langLead: "Go 是应用语言，不是实现语言。支持边界如下：",
-    langRust: "Rust: 原生核心、嵌入式 SDK 与 Protocol v1 远程客户端",
-    langGo: "Go: 独立 Protocol v1 客户端与生成的类型化绑定",
+    langRust: "Rust: 原生核心、嵌入式 SDK 与 Protocol v2 远程客户端",
+    langGo: "Go: 独立 Protocol v2 客户端与生成的类型化绑定",
     langBody:
       "sdk/go 是独立的标准库客户端。生成绑定会校验结果顺序、名称、物理 / 语义类型与可空性，但不生成 SQL 或查询构建 API。",
     decisionTitle: "设计优先级",
@@ -471,15 +699,15 @@ const zh: typeof en = {
       "正确性、显式不变量与类型安全优先于便利性。功能以完整、可测试的垂直切片引入。未实现的组件不以完成 API 的形式呈现。",
   },
   storage: {
-    title: "存储",
-    description: "NetbaDB 的 Page v5 槽页、缓冲池、WAL、恢复、检查点与持久 B+Tree。",
+    title: "NetbaDB 存储引擎",
+    description: "NetbaDB 存储：4 KiB Page v5、WAL v4、堆 MVCC、LSM、崩溃恢复与持久 B+Tree 索引。",
     kicker: "存储",
     heroHtml: "4 KiB 页、WAL<br />与崩溃恢复。",
     deck:
-      "存储路径是同步的。当前模型是单写者、STEAL、NO-FORCE，并由 WAL 保护。它支持同步物理运行时回滚与启动崩溃恢复。读没有快照，也可能看见活动写者。",
+      "存储路径是同步的。当前模型是单写者、STEAL、NO-FORCE，并由 WAL 保护。显式事务支持读已提交与可重复读。Heap 与 LSM 仍为权威存储；列存投影是派生的，在刷新前会因已提交 DML 而过期。",
     pageTitle: "页格式 v5",
     pageIntro:
-      "数据页固定为 4096 字节。Page 0 仍为遗留容器 / 堆元数据，不按 Page v5 解释。堆元数据采用独立的 NBD1 版本 2 布局，并保存规范表指纹。版本 1 至 4 将被拒绝，不提供自动迁移。",
+      "数据页固定为 4096 字节。Page 0 仍为遗留容器 / 堆元数据，不按 Page v5 解释。堆元数据采用独立的 NBD1 版本 5 布局，并保存规范表指纹与 StorageId。版本 1 至 4 将被拒绝，不提供自动迁移。",
     thOffset: "偏移",
     thField: "字段",
     thMeaning: "含义",
@@ -502,12 +730,12 @@ const zh: typeof en = {
     walIntro:
       "每个数据库使用两个交替槽：<database>-wal 与 <database>-wal.next。逻辑 LSN 与物理偏移刻意分开：",
     walP1:
-      "WAL 头是 48 字节，格式版本 3，并带整头 CRC32C。记录头 40 字节，格式版本 2；类型决定唯一合法总长。记录类型包括 Begin、PageUpdate、Prepare、Commit、Abort 与 RollbackComplete。PageUpdate 携带完整 4 KiB before / after 镜像。",
+      "WAL 头是 48 字节，格式版本 4，并带整头 CRC32C。记录头 40 字节，格式版本 5；版本 3 与 4 仍可读。记录类型包括 Begin、PageUpdate、PageAllocationTransition、PageGenerationReservation、Prepare、Commit、Abort 与 RollbackComplete。PageUpdate 携带完整 4 KiB before / after 镜像。",
     walP2:
       "结构完整但校验失败的记录是损坏，即使位于 EOF 也不会被当成崩溃尾截断。只有可用头通过结构校验的、物理不完整的最后一条记录，才可以在恢复边界丢弃。",
     txnTitle: "事务、隔离与单写者",
     txnP1:
-      "显式事务支持读已提交与可重复读。隐式语句使用读已提交。写者所有权由第一次写入惰性获取，只读事务不预定它。多存储提交使用 WAL Prepare 与协调器 CommitDecision。vacuum 回收活动快照不可见的堆版本。",
+      "显式事务支持读已提交与可重复读。隐式语句使用读已提交。写者所有权由第一次写入惰性获取，只读事务不预定它。多存储提交使用 WAL Prepare 与协调器 CommitDecision。全局模式发布无间隙 DatabaseCommitSeq 与 Heap/LSM 可见性向量。vacuum 回收活动快照不可见的堆版本。",
     txnP2:
       "丢弃未完成的脏写者不会隐式释放写所有权：后续写入将要求恢复，close 亦会返回错误。活动事务期间仍允许 flush，因为引擎采用 STEAL，并对每次页写进行 WAL 排序；flush 成功并不表示提交完成。",
     recoveryTitle: "启动恢复",
@@ -520,26 +748,26 @@ const zh: typeof en = {
     btreeP1:
       "堆页与 B+Tree 页共享同一个数据库文件、缓冲池、事务链、WAL、恢复趟与检查点。索引页是普通的、带校验的 Page v5，恰好一个 generation-1 的 payload 槽。",
     btreeP2:
-      "netbadb-index 拥有排序、节点与版本化编解码，不依赖存储、SQL 或执行器。BTreeHandle 是稳定的元数据页身份；根分裂可以替换根而不改变句柄。已注册索引由 create_index 回填，由堆与 SQL DML 维护，并作为 IndexScan 对规划器可见。不提供 SQL 索引 DDL。",
+      "netbadb-index 拥有排序、节点与版本化编解码，不依赖存储、SQL 或执行器。BTreeHandle 是稳定的元数据页身份；根分裂可以替换根而不改变句柄。已注册索引由 create_index 或 SQL CREATE INDEX 回填，由堆与 SQL DML 维护，并作为 IndexScan 对规划器可见。",
     integrityTitle: "完整性，不是认证",
     integrityBody:
-      "页 CRC 与 WAL CRC 检测持久损坏。它们既不修复损坏，也不提供密码学认证。解码 fuzz 覆盖 WAL 恢复、Page v5 与 B+Tree 节点。",
+      "页 CRC 与 WAL CRC 检测持久损坏。它们既不修复损坏，也不提供密码学认证。解码 fuzz 覆盖 WAL 恢复、Page v5、B+Tree、协议、schema catalog、协调日志与 LSM 格式。",
   },
   query: {
-    title: "查询",
-    description: "NetbaDB 的小型 typed SQL 子集：JOIN、DML、NULL 三值逻辑、ORDER BY 与 GROUP BY。",
+    title: "NetbaDB 查询语言",
+    description: "NetbaDB 类型化 SQL 子集：INNER JOIN、INSERT/UPDATE/DELETE、Heap CREATE/ALTER/DROP TABLE、索引、三值 NULL、ORDER BY 与 GROUP BY。",
     kicker: "查询语言",
     heroHtml: "具有明确语义的<br />类型化 SQL 子集。",
     deck:
-      "查询语言为有限的原生子集，包含解析器、名义类型检查、三值逻辑以及受 WAL 保护的 DML。它不是完整的 SQL 方言。",
+      "查询语言为有限的原生子集，包含解析器、名义类型检查、三值逻辑、受 WAL 保护的 DML，以及有界的 Heap DDL。它不是完整的 SQL 方言。",
     thKind: "类别",
     thNow: "当前支持",
     thNot: "当前不支持",
     rows: [
       {
         kind: "SELECT",
-        now: "限定 / 非限定列、通配投影、LIMIT",
-        not: "任意表达式投影、别名输出、DISTINCT",
+        now: "限定 / 非限定列、通配投影、LIMIT、类型化表达式、AS 别名、后缀 :: 转换",
+        not: "DISTINCT、窗口函数、投影中的子查询",
       },
       {
         kind: "FROM / JOIN",
@@ -568,8 +796,8 @@ const zh: typeof en = {
       },
       {
         kind: "DDL",
-        now: "Heap 上的 CREATE TABLE、DROP TABLE、CREATE INDEX、DROP INDEX",
-        not: "ALTER TABLE、PRIMARY KEY、IF EXISTS、限定名、LSM/范围 DROP",
+        now: "Heap CREATE TABLE（物理类型 v2）、DROP TABLE、ALTER TABLE（改名、可空 ADD、DROP、SET/DROP NOT NULL）、CREATE/DROP INDEX",
+        not: "PRIMARY KEY / UNIQUE / FK、IF EXISTS、限定名、LSM/范围组合、通用 ALTER COLUMN TYPE",
       },
     ],
     nominalTitle: "名义类型",
@@ -584,6 +812,9 @@ const zh: typeof en = {
     dmlTitle: "DML",
     dmlBody:
       "类型化 DML 使用与堆写入相同的编译器、事务、整页 WAL、回滚与恢复路径。Database::execute 返回查询行或显式 AffectedRows(u64)；query 拒绝变更语句。省略的可空 INSERT 列赋值为 NULL；省略的非空列将被拒绝。UPDATE 基于原始行求值全部右侧，因此 SET a = b, b = a 会交换两列。",
+    ddlTitle: "DDL",
+    ddlBody:
+      "Heap 上的 CREATE TABLE、DROP TABLE、ALTER TABLE 与 CREATE/DROP INDEX 是事务性的。ALTER 支持改表名 / 列名、可空 ADD、受限 DROP 与 SET/DROP NOT NULL。后缀 :: 转换为精确宽度，没有隐式数值拓宽。LSM 与分区表不在该 SQL DDL 范围内。",
     sortTitle: "排序与聚合",
     sortP1:
       "普通计划是 Scan/Join → Filter → Sort → Project → Limit。聚合计划是 Scan/Join → Filter → Aggregate → Limit。键在投影之前、对着完整 FROM / JOIN 作用域解析，所以查询可以按它不返回的列排序。",
@@ -591,31 +822,31 @@ const zh: typeof en = {
       "COUNT(*) 计行；COUNT(column) 忽略 NULL。单独的全局 COUNT(column) 在 SeqScan 上可统计存在性而不物化行。数值 SUM 使用受检算术，并剥去名义含义。MIN / MAX 保留输入 SemanticType。分组键上的 NULL 共享一组，这与表达式里 NULL = NULL 仍为 UNKNOWN 不同。带 GROUP BY 的查询当前拒绝 ORDER BY。",
     multiTitle: "跨存储写入",
     multiBody:
-      "create_tables 仍按表组合一个堆文件。范围分区表以及混合 Heap+LSM 目录经协调日志提交。不提供并发写者。不提供可串行化隔离。",
+      "create_tables 仍按表组合一个堆文件。范围分区表以及混合 Heap+LSM 目录经协调日志提交。派生列存投影不是权威存储。不提供并发写者。不提供可串行化隔离。",
     indexTitle: "索引与 ANALYZE",
     indexBody:
       "create_index 与 SQL CREATE INDEX 在事务性回填后注册非唯一单列 Heap BTree。DROP INDEX 注销该注册。随后的堆与 SQL DML 会维护已注册索引。符合条件的等值与 IS NULL 谓词可选择点查 IndexScan；经过分析的双侧 Int64/UInt64 边界可选择范围 IndexScan。ANALYZE 为显式操作，DML 不会自动维护统计。",
   },
   roadmap: {
-    title: "路线图",
-    description: "NetbaDB 已完成至隔离级别、分区、LSM、IndexJoin、SQL DDL 与实验性 PostgreSQL 协议的阶段划分。",
+    title: "NetbaDB 路线图",
+    description: "NetbaDB 已完成阶段：Protocol v2、Heap DDL、LSM、列存投影、清单 v11、NBOP v7，以及当前限制（不含可串行化隔离）。",
     kicker: "路线图",
     heroHtml: "按垂直切片实现，<br />再分阶段扩展。",
     deck:
-      "实现顺序为垂直推进。截至第 73 项，已完成 {n} 个阶段。可串行化隔离、并发写者以及 MCP 仍属规划或暂缓内容。",
+      "实现顺序为垂直推进。已完成 {n} 项。编号引擎序列止于 73；其后的协调器、列存与 schema 演进工作亦已完成。可串行化隔离、并发写者以及 MCP 仍属规划或暂缓内容。",
     complete: "已完成",
     next: "下一步",
     later: "后续",
     notTitle: "当前版本不包含以下能力",
   },
   start: {
-    title: "开始使用",
+    title: "开始使用 NetbaDB",
     description:
-      "添加 Rust SDK，创建本地 NetbaDB 文件，运行 SQL，注册索引，或启动 netbadbd。",
+      "安装 netbadb-sdk，用 Rust 创建本地 Heap 或 LSM 数据库，运行类型化 SQL，或通过 Native Protocol v2 启动 netbadbd。",
     kicker: "开始使用",
     heroHtml: "添加 SDK，<br />然后创建数据库。",
     deck:
-      "受支持的应用 crate 是 netbadb-sdk。默认特性为 embedded。仅使用 Protocol v1 客户端时，请关闭默认特性并启用 remote。工具链 {toolchain}；MSRV {msrv}。",
+      "受支持的应用 crate 是 netbadb-sdk。默认特性为 embedded。仅使用 Protocol v2 客户端时，请关闭默认特性并启用 remote。工具链 {toolchain}；MSRV {msrv}。",
     openGithub: "在 GitHub 上查看",
     readReadme: "阅读 README",
     depTitle: "1. 添加依赖",
@@ -629,7 +860,7 @@ const zh: typeof en = {
       "检查会编译并规划语句，但不会执行。它不会扫描堆、刷新 ANALYZE、获取写者或追加 WAL。",
     serverTitle: "4. 启动 netbadbd",
     serverBody:
-      "服务器打开部署清单 v4 声明的已有堆文件。回环明文要求恰好一个 local_plaintext 主体。非回环监听要求双向 TLS。",
+      "服务器打开部署清单 v11 声明的已有堆文件。版本 1 至 10 均被拒绝。回环明文要求恰好一个 local_plaintext 主体。非回环监听要求双向 TLS。",
     remoteTitle: "5. 连接远程客户端",
     remoteBody:
       "仅当解析后的 TCP 对端为回环地址时才接受明文。远程部署要求经过校验的双向 TLS。不提供连接池、自动重试或多路复用。",
@@ -638,22 +869,22 @@ const zh: typeof en = {
       "begin_transaction 使用读已提交。可重复读通过 begin_transaction_with_isolation 提供。IsolationLevel 由 netbadb-core 导出。不提供可串行化隔离。",
     extraStorageTitle: "LSM、分区、catalog 与 vacuum",
     extraStorageBody:
-      "Database::create_storages 可创建 Heap 或 LSM 表。create_with_placements 挂载 RANGE 分区。open_catalog 无需外部 TableDef 即可打开已发布的 schema catalog。vacuum 回收活动快照不可见的死亡堆版本。",
+      "Database::create_storages 可创建 Heap 或 LSM 表。create_with_placements 挂载 RANGE 分区。open_catalog 无需外部 TableDef 即可打开已发布的 schema catalog。vacuum 回收活动快照不可见的死亡堆版本。列存投影是派生、可选的，已提交 DML 之后在刷新前会过期。",
     ddlTitle: "SQL DDL",
     ddlBody:
-      "Heap CREATE TABLE 支持 BOOLEAN/BOOL、BIGINT/INT64、TEXT 以及原生 UINT64。DROP TABLE 在 prepare 时绑定身份。CREATE INDEX / DROP INDEX 管理单列非唯一 Heap BTree。网络 DDL 需要 schema_admin。",
-    pgTitle: "实验性 PostgreSQL 端点",
-    pgBody:
-      "netbadbd --manifest server.json --postgres 在清单监听地址上提供 Simple Query 与 Extended Query。在授予 schema_admin 时，Heap CREATE TABLE、DROP TABLE 与 CREATE/DROP INDEX 可通过该端点执行。这不是通用 PostgreSQL 兼容声明。不支持 ALTER TABLE、完整系统目录以及口令认证。",
+      "Heap CREATE TABLE 接受物理类型 v2 名称，包括 BOOLEAN、整数宽度、TEXT/VARCHAR、REAL/DOUBLE、BYTEA 以及原生 UINT*。DROP TABLE 在 prepare 时绑定身份。ALTER TABLE 支持改表名 / 列名、可空 ADD、受限 DROP 与 SET/DROP NOT NULL。CREATE INDEX / DROP INDEX 管理单列非唯一 Heap BTree。网络 DDL 需要 schema_admin。不提供 PostgreSQL 协议兼容。",
+    operatorTitle: "本地运维平面",
+    operatorBody:
+      "NBOP v7 是由清单 v11 配置的 Unix 域运维协议，不是数据库线协议。Native Protocol v2 仍是唯一的网络数据库前端。",
     cliTitle: "6. 使用命令行检查文件",
     cliBody:
-      "请先停止 netbadbd 以及任何使用同一文件的嵌入式进程。CLI 通过正常启动恢复打开表，并且不会执行被检查的 SQL。JSON 输出使用 Inspection JSON v5。",
+      "请先停止 netbadbd 以及任何使用同一文件的嵌入式进程。CLI 通过正常启动恢复打开表，并且不会执行被检查的 SQL。JSON 输出使用 Inspection JSON v7。",
     goTitle: "Go 客户端",
     goBody:
-      "Go 模块是独立的 Protocol v1 客户端，不使用 cgo 或 Rust FFI。Dial 会自动完成 Hello。",
+      "Go 模块是独立的 Protocol v2 客户端，不使用 cgo 或 Rust FFI。Dial 会自动完成 Hello。Go 客户端拒绝 Int128 与 UInt128 结果类型。",
     lspTitle: "编辑器诊断",
     lspBody:
-      "netbadb-lsp --schema schema.json 是仅提供诊断的 stdio 语言服务器。它不会打开数据库文件，也不报告物理计划。",
+      "netbadb-lsp --schema schema.json 是仅提供诊断的 stdio 语言服务器。它会一次性加载 SDK Schema Spec v1 或 v2。它不会打开数据库文件，也不报告物理计划。",
     sourceTitle: "从源码构建",
     cargoEquiv: "等价的 cargo 命令：",
     contractTitle: "运行约束",
@@ -661,13 +892,122 @@ const zh: typeof en = {
       "每个打开的数据库对象允许一个写者。只读事务不预定写者。",
       "显式事务支持读已提交与可重复读。隐式语句使用读已提交。不提供可串行化隔离。",
       "成功的提交表示 Commit 记录已持久化；堆页可能仍留在缓冲中，直到 flush、vacuum 或 close。",
-      "Heap 表支持 SQL CREATE TABLE、DROP TABLE、CREATE INDEX 与 DROP INDEX。不支持 ALTER TABLE、PRIMARY KEY 与 IF EXISTS。",
+      "Heap 表支持 SQL CREATE TABLE、DROP TABLE、ALTER TABLE、CREATE INDEX 与 DROP INDEX。不支持 PRIMARY KEY、IF EXISTS 与通用 ALTER COLUMN TYPE。",
       "多存储写入经协调日志提交。不提供并发写者与跨进程文件锁。",
       "实验性磁盘格式会拒绝旧版本，不提供迁移路径。",
     ],
     licenseTitle: "许可",
     licenseBody:
       "NetbaDB 以 {license} 授权。如果修改程序并让用户通过网络与之交互，必须提供对应源代码。",
+    faq: [
+      {
+        q: "如何在 Rust 进程内嵌入 NetbaDB？",
+        a: "从 GitHub workspace 添加 netbadb-sdk，调用 Database::create，然后在进程内插入与查询。默认特性为 embedded。",
+      },
+      {
+        q: "netbadbd 使用什么协议？",
+        a: "仅 Native Protocol v2。当前启动契约是清单 v11。PostgreSQL 协议与 netbadbd --postgres 已被移除。",
+      },
+      {
+        q: "有哪些隔离级别？",
+        a: "显式事务支持读已提交与可重复读。隐式语句使用读已提交。不提供可串行化隔离。",
+      },
+    ],
+  },
+  iot: {
+    title: "NetbaIoT MQTT 与 HTTP IoT 网关",
+    description:
+      "NetbaIoT 是面向 HTTP、MQTT 3.1.1、TCP 与 UDP 的无数据库 IoT 网关。HTTP 202 表示 EventAccepted，不是业务持久化。",
+    kicker: "NetbaIoT",
+    heroHtml: "无数据库的<br />IoT <em>事件网关</em>。",
+    deck:
+      "NetbaIoT 通过 HTTP、内嵌 MQTT 3.1.1、分帧 TCP 与已认证 UDP 接收设备流量，归一为 DeviceEvent，再发往确认型或尽力而为业务 sink。运行时从不需要 PostgreSQL 或其他数据库。",
+    done: "已实现",
+    notDone: "不在当前范围",
+    ctaStart: "开始使用",
+    ctaArchitecture: "架构",
+    pathsTitle: "设备、业务与运维路径。",
+    pathsDeck:
+      "设备可使用标准 MQTT 3.1.1 或设备 HTTP。业务系统通过 netbaiot-client 消费确认事件。运维使用管理监听与 netbaiot CLI。",
+    deliveryTitle: "EventAccepted 不是业务持久化。",
+    deliveryBody:
+      "HTTP 202 与 MQTT QoS1 PUBACK 表示事件越过了有界 EventAccepted 边界：认证、编解码校验、路由，以及对每个确认必达 sink 的原子预留。它们不表示业务数据库已存储该事件。消费者必须按稳定 event_id 去重。",
+    commandTitle: "命令仅针对在线会话。",
+    commandBody:
+      "命令只会进入当前已连接的本地 MQTT 或 TCP 会话队列。离线设备返回类型化的 DeviceOffline。NetbaIoT 不存储离线命令。",
+    restartTitle: "计划内重启，不是崩溃持久。",
+    restartBody:
+      "计划内关机将必达工作排入带 fsync 与原子重命名的有界本地重启 spool。这是优雅重启安全的至少一次投递。SIGKILL、进程崩溃或断电可能丢失仍在内存中的已接受窗口。",
+    faq: [
+      {
+        q: "NetbaIoT 需要数据库吗？",
+        a: "不需要。运行时无数据库。持久业务数据由业务系统持有。NetbaIoT 唯一的持久机制是计划内优雅关机时使用的有界本地重启 spool。",
+      },
+      {
+        q: "HTTP 202 或 MQTT QoS1 PUBACK 表示什么？",
+        a: "表示 EventAccepted：认证、编解码校验、路由，以及对每个确认必达 sink 的原子预留。它们不表示业务数据库已存储该事件。消费者必须按 event_id 去重。",
+      },
+      {
+        q: "会为离线设备存储命令吗？",
+        a: "不会。命令只会进入当前已连接的本地 MQTT 或 TCP 会话。离线设备返回类型化的 DeviceOffline。",
+      },
+    ],
+  },
+  iotStart: {
+    title: "开始使用 NetbaIoT",
+    description:
+      "运行 netbaiot-server，通过设备 HTTP 或 MQTT 上传事件，并用 netbaiot-client 在显式 ACK 后消费。",
+    kicker: "开始使用",
+    heroHtml: "启动网关，<br />然后接受事件。",
+    deck:
+      "服务器 crate 是 netbaiot-server。业务系统使用 netbaiot-client。设备可使用标准 MQTT 3.1.1 或可选的 netbaiot-device-sdk。MSRV {msrv}。公开协议 {protocol}。",
+    openGithub: "在 GitHub 上查看",
+    readReadme: "阅读 README",
+    runTitle: "1. 运行开发服务器",
+    runBody:
+      "开发监听绑定回环地址。HTTP 202 表示 EventAccepted。调用管理 API 前需设置 64 字符的 NETBAIOT_ADMIN_SECRET。生产配置必须指定确认型 webhook 或分帧 TCP/RPC 业务 sink。",
+    uploadTitle: "2. 上传设备事件",
+    uploadBody:
+      "设备 bearer 格式为 credential_id:secret。JSON schema 为 DeviceUplink。重试与重启重放可能重复投递；业务 sink 必须按 event_id 去重。",
+    clientTitle: "3. 用业务客户端消费事件",
+    clientBody:
+      "AckMode 默认为 Manual。在应用处理之后 ACK。每个订阅同时只有一条服务器确认投递。丢弃未确认投递会关闭流，以便服务器重投。",
+    deviceTitle: "4. 可选设备 SDK",
+    deviceBody:
+      "netbaiot-device-sdk 是便利层，不是硬性要求。标准 MQTT 3.1.1 客户端仍为一等公民。断线发布会被拒绝；SDK 不会累积离线 RAM 队列。",
+    cliTitle: "5. 运维 CLI",
+    cliBody:
+      "netbaiot 仅通过 netbaiot-client 实现。令牌不会被打印。drain 需要 --yes。退出码 5 表示设备离线。",
+    contractTitle: "运行约束",
+    contract: [
+      "运行时没有数据库、持久 outbox 或持久命令状态。",
+      "EventAccepted 不是业务持久化。消费者必须对 event_id 幂等。",
+      "不会为离线设备存储命令。",
+      "计划内重启可以 spool 必达工作；突然崩溃可能丢失内存中已接受的事件。",
+      "当前 broker 不包含 MQTT 5、WebSockets、共享订阅与 $SYS。",
+    ],
+    licenseTitle: "许可",
+    licenseBody:
+      "NetbaIoT 以 {license} 授权。如果修改程序并让用户通过网络与之交互，必须提供对应源代码。",
+  },
+  iotArchitecture: {
+    title: "NetbaIoT 架构",
+    description:
+      "NetbaIoT 架构：HTTP/MQTT/TCP/UDP 入口、EventAccepted、EventBus、在线会话命令与有界重启 spool。",
+    kicker: "架构",
+    heroHtml: "入口、EventBus<br />与在线会话。",
+    deck:
+      "常规 MQTT 与 TCP 遥测只使用套接字解析状态、已绑定的 AuthContext、共享编解码 / 配置快照，以及有界内存路由。热路径不做数据库、文件系统、远程认证或控制面操作。",
+    pipelineTitle: "运行时路径",
+    cratesTitle: "工作区职责",
+    cratesDeck:
+      "公开客户端 crate 只依赖 netbaiot-protocol 与网络库，从不依赖 runtime、transport、broker、session 或 server 实现 crate。",
+    mqttTitle: "内嵌 MQTT 3.1.1",
+    mqttBody:
+      "broker 实现 CONNECT 至 DISCONNECT，包括 QoS0、QoS1 与显式 QoS2 状态机。ClientId 不是可信身份。持久会话以已认证 DeviceKey 加 ClientId 为键。MQTT QoS 与 EventBus 投递是分离的契约。",
+    decisionTitle: "设计优先级",
+    decisionBody:
+      "有意不设 storage crate、SQL 迁移、数据库连接池、持久 outbox、持久命令状态或运行时消息历史。持久业务数据由业务系统持有。",
   },
   notFound: {
     title: "页面不存在",

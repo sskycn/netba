@@ -1,0 +1,93 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CodeBlock from "../components/CodeBlock.astro";
+import { site } from "../data/site";
+import { useCopy } from "../i18n/copy";
+
+const { t } = useCopy(Astro.url.pathname);
+
+const runCmd = `cargo run -p netbaiot-server -- configs/development.json`;
+
+const upload = `curl --noproxy '*' -i http://127.0.0.1:8080/v1/device/data \\
+  -H 'Authorization: Bearer demo-device:000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f' \\
+  --data '{"schema_version":1,"source_message_id":"demo:1","kind":"heartbeat","data":{"sequence":1}}'`;
+
+const client = `use futures_util::StreamExt;
+use netbaiot_client::NetbaIoTClient;
+use netbaiot_protocol::EventFilter;
+
+let client = NetbaIoTClient::builder()
+    .endpoint(endpoint)
+    .token(token)
+    .event_address(event_address)
+    .connect()
+    .await?;
+let mut events = client.events().subscribe(EventFilter::default()).await?;
+while let Some(delivery) = events.next().await {
+    let delivery = delivery?;
+    handle(delivery.event()).await?;
+    delivery.ack().await?;
+}`;
+
+const cli = `netbaiot server status
+netbaiot events subscribe
+netbaiot command send DEVICE --json JSON
+netbaiot server drain --yes`;
+---
+
+<BaseLayout title={t.iotStart.title} description={t.iotStart.description}>
+  <div class="wrap content-page">
+    <p class="kicker">{t.iotStart.kicker}</p>
+    <h1 class="page-title" set:html={t.iotStart.heroHtml} />
+    <p class="page-deck">
+      {t.iotStart.deck.replace("{msrv}", site.iot.msrv).replace("{protocol}", site.iot.protocolVersion)}
+    </p>
+    <div class="actions" style="margin-bottom: 2rem;">
+      <a class="btn btn-primary" href={site.iot.github}>{t.iotStart.openGithub}</a>
+      <a class="btn btn-ghost" href={`${site.iot.github}/blob/main/README.md`}>{t.iotStart.readReadme}</a>
+    </div>
+
+    <div class="prose">
+      <h2>{t.iotStart.runTitle}</h2>
+      <p>{t.iotStart.runBody}</p>
+    </div>
+    <CodeBlock code={runCmd} lang="bash" />
+
+    <div class="prose">
+      <h2>{t.iotStart.uploadTitle}</h2>
+      <p>{t.iotStart.uploadBody}</p>
+    </div>
+    <CodeBlock code={upload} lang="bash" />
+
+    <div class="prose">
+      <h2>{t.iotStart.clientTitle}</h2>
+      <p>{t.iotStart.clientBody}</p>
+    </div>
+    <CodeBlock code={client} lang="rust" />
+
+    <div class="prose">
+      <h2>{t.iotStart.deviceTitle}</h2>
+      <p>{t.iotStart.deviceBody}</p>
+    </div>
+    <CodeBlock code={"cargo check -p netbaiot-device-sdk --examples"} lang="bash" />
+
+    <div class="prose">
+      <h2>{t.iotStart.cliTitle}</h2>
+      <p>{t.iotStart.cliBody}</p>
+    </div>
+    <CodeBlock code={cli} lang="bash" />
+
+    <div class="prose">
+      <h2>{t.iotStart.contractTitle}</h2>
+      <ul>
+        {t.iotStart.contract.map((item) => <li>{item}</li>)}
+      </ul>
+      <h2>{t.iotStart.licenseTitle}</h2>
+      <p>
+        {t.iotStart.licenseBody.split("{license}")[0]}
+        <a href={`${site.iot.github}/blob/main/LICENSE`}>{site.license}</a>
+        {t.iotStart.licenseBody.split("{license}")[1]}
+      </p>
+    </div>
+  </div>
+</BaseLayout>

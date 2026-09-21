@@ -171,6 +171,30 @@ a:hover {
   color: var(--teal-2) !important;
 }
 
+.subnav {
+  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg-2) 72%, transparent);
+}
+
+.subnav-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 1.15rem;
+  min-height: 2.5rem;
+  align-items: center;
+}
+
+.subnav a {
+  color: var(--ink-3);
+  text-decoration: none;
+  font-size: 0.88rem;
+}
+
+.subnav a[aria-current="page"],
+.subnav a:hover {
+  color: var(--ink);
+}
+
 .lang-switch {
   display: inline-flex;
   align-items: stretch;
@@ -731,8 +755,54 @@ section {
   flex-wrap: wrap;
 }
 
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 1.1rem;
+  margin-bottom: 1.2rem;
+}
+
+.footer-nav a {
+  color: var(--ink-2);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.footer-nav a:hover {
+  color: var(--ink);
+}
+
 .footer-inner a {
   color: inherit;
+}
+
+.faq {
+  margin: 2rem 0 0;
+}
+
+.faq h2 {
+  margin: 0 0 1rem;
+}
+
+.faq details {
+  border-top: 1px solid var(--line);
+  padding: 0.85rem 0;
+}
+
+.faq details:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.faq summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.faq details p {
+  margin: 0.65rem 0 0;
+  color: var(--ink-2);
+  max-width: 46rem;
 }
 
 .content-page {

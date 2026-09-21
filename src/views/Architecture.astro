@@ -56,19 +56,21 @@ Storage</pre>
       <pre>
 Rust Schema API
     ↓
-SELECT / JOIN / ORDER BY / GROUP BY + typed DML
+SELECT / JOIN / ORDER BY / GROUP BY + typed DML / Heap DDL
     ↓
 Typed HIR
     ↓
-Logical query / DML statement plan
+Logical query / DML / DDL statement plan
     ↓
 Scan + NestedLoopJoin / HashJoin / IndexJoin + sort + grouped aggregate
     ↓
 Join / filter / sort / aggregate / projection / limit + mutation
     ↓
-Heap
+TableId → Heap / RANGE partition / LSM / derived Columnar
     ↓
-Transaction lifecycle + versioned WAL
+Database coordinator + physical transaction lifecycle + versioned WAL
+    ↓
+optional DatabaseCommitSeq → published storage visibility vector
     ↓
 Buffer pool (guards, pinning, dirty writeback)
     ↓

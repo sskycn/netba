@@ -68,8 +68,8 @@ export const crates: Crate[] = [
     name: "netbadb-planner",
     path: "crates/netbadb-planner",
     role: {
-      en: "Logical plan → physical plan, including IndexScan, HashJoin, and IndexJoin",
-      zh: "逻辑计划 → 物理计划，含 IndexScan、HashJoin 与 IndexJoin",
+      en: "Logical plan → physical plan, including IndexScan, HashJoin, IndexJoin, and ColumnarScan",
+      zh: "逻辑计划 → 物理计划，含 IndexScan、HashJoin、IndexJoin 与 ColumnarScan",
     },
     dependsOn: ["index", "rel", "types"],
   },
@@ -77,8 +77,8 @@ export const crates: Crate[] = [
     name: "netbadb-schema-spec",
     path: "crates/netbadb-schema-spec",
     role: {
-      en: "SDK Schema Spec v1 parsing and fingerprints",
-      zh: "SDK Schema Spec v1 解析与指纹",
+      en: "SDK Schema Spec v1/v2 parsing and fingerprints",
+      zh: "SDK Schema Spec v1/v2 解析与指纹",
     },
     dependsOn: ["schema", "types"],
   },
@@ -95,8 +95,8 @@ export const crates: Crate[] = [
     name: "netbadb-inspect",
     path: "crates/netbadb-inspect",
     role: {
-      en: "Catalog and plan inspection DTOs",
-      zh: "目录与计划检查 DTO",
+      en: "Catalog and plan inspection DTOs, including Inspection JSON v7",
+      zh: "目录与计划检查 DTO，含 Inspection JSON v7",
     },
     dependsOn: ["schema", "types"],
   },
@@ -104,17 +104,8 @@ export const crates: Crate[] = [
     name: "netbadb-protocol",
     path: "crates/netbadb-protocol",
     role: {
-      en: "Protocol v1 binary wire contract",
-      zh: "Protocol v1 二进制线协议",
-    },
-    dependsOn: ["types"],
-  },
-  {
-    name: "netbadb-pgwire",
-    path: "crates/netbadb-pgwire",
-    role: {
-      en: "Bounded PostgreSQL v3 codecs and OID adaptation",
-      zh: "有界 PostgreSQL v3 编解码与 OID 适配",
+      en: "Protocol v2 binary wire contract; v1 is frozen and rejected",
+      zh: "Protocol v2 二进制线协议；v1 已冻结并被拒绝",
     },
     dependsOn: ["types"],
   },
@@ -122,8 +113,8 @@ export const crates: Crate[] = [
     name: "netbadb-client",
     path: "crates/netbadb-client",
     role: {
-      en: "Synchronous Protocol v1 remote client",
-      zh: "同步 Protocol v1 远程客户端",
+      en: "Synchronous Protocol v2 remote client",
+      zh: "同步 Protocol v2 远程客户端",
     },
     dependsOn: ["protocol", "schema", "types"],
   },
@@ -131,17 +122,17 @@ export const crates: Crate[] = [
     name: "netbadb-server",
     path: "crates/netbadb-server",
     role: {
-      en: "Sessions, authorization, blocking TCP, and experimental PostgreSQL wire",
-      zh: "会话、授权、阻塞式 TCP 与实验性 PostgreSQL 协议",
+      en: "Sessions, authorization, blocking TCP, and Unix NBOP v7 operator plane",
+      zh: "会话、授权、阻塞式 TCP 与 Unix NBOP v7 运维平面",
     },
-    dependsOn: ["core", "protocol", "pgwire", "schema", "types"],
+    dependsOn: ["core", "protocol", "schema", "types"],
   },
   {
     name: "netbadb-codegen",
     path: "crates/netbadb-codegen",
     role: {
-      en: "Schema Spec validation and Go source generation",
-      zh: "Schema Spec 校验与 Go 源码生成",
+      en: "Schema Spec v1/v2 validation and Go source generation",
+      zh: "Schema Spec v1/v2 校验与 Go 源码生成",
     },
     dependsOn: ["schema-spec", "schema", "types"],
   },
@@ -158,8 +149,8 @@ export const crates: Crate[] = [
     name: "netbadb-storage",
     path: "crates/netbadb-storage",
     role: {
-      en: "Heap MVCC, LSM, WAL, pages, buffer pool, and persistent B+Tree",
-      zh: "堆 MVCC、LSM、WAL、页、缓冲池与持久 B+Tree",
+      en: "Heap MVCC, LSM, derived columnar projections, WAL, pages, buffer pool, and persistent B+Tree",
+      zh: "堆 MVCC、LSM、派生列存投影、WAL、页、缓冲池与持久 B+Tree",
     },
     dependsOn: ["index", "schema", "types"],
   },
@@ -176,8 +167,8 @@ export const crates: Crate[] = [
     name: "netbadb-core",
     path: "crates/netbadb-core",
     role: {
-      en: "Native embedded Database API",
-      zh: "原生嵌入式 Database API",
+      en: "Native embedded Database API, schema catalog, coordinator, and columnar maintenance",
+      zh: "原生嵌入式 Database API、schema catalog、协调器与列存维护",
     },
     dependsOn: ["compiler", "inspect", "planner", "executor", "storage", "schema", "types"],
   },
@@ -223,7 +214,7 @@ export const layers: Localized<{ title: string; items: string[] }[]> = {
   en: [
     {
       title: "Application edge",
-      items: ["Rust embedded SDK", "Rust remote client", "Go Protocol v1 client", "netbadbd", "experimental PostgreSQL v3"],
+      items: ["Rust embedded SDK", "Rust remote client", "Go Protocol v2 client", "netbadbd", "NBOP v7"],
     },
     {
       title: "Compile",
@@ -235,13 +226,13 @@ export const layers: Localized<{ title: string; items: string[] }[]> = {
     },
     {
       title: "Transactions and storage",
-      items: ["Transaction boundary", "WAL + recovery", "Heap MVCC / LSM / partitions"],
+      items: ["Transaction boundary", "WAL + recovery", "Heap MVCC / LSM / partitions / derived columnar"],
     },
   ],
   zh: [
     {
       title: "应用边界",
-      items: ["Rust 嵌入式 SDK", "Rust 远程客户端", "Go Protocol v1 客户端", "netbadbd", "实验性 PostgreSQL v3"],
+      items: ["Rust 嵌入式 SDK", "Rust 远程客户端", "Go Protocol v2 客户端", "netbadbd", "NBOP v7"],
     },
     {
       title: "编译",
@@ -253,7 +244,7 @@ export const layers: Localized<{ title: string; items: string[] }[]> = {
     },
     {
       title: "事务与存储",
-      items: ["事务边界", "WAL + 恢复", "堆 MVCC / LSM / 分区"],
+      items: ["事务边界", "WAL + 恢复", "堆 MVCC / LSM / 分区 / 派生列存"],
     },
   ],
 };

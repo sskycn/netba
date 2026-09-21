@@ -66,9 +66,10 @@ const chrome = {
     if (home) home.setAttribute("href", ui.home);
     document.querySelectorAll("[data-nav-key]").forEach(function (link) {
       var key = link.getAttribute("data-nav-key");
-      if (key && ui.nav[key]) {
-        link.textContent = ui.nav[key];
-        link.setAttribute("href", (ui.prefix || "") + "/" + key);
+      var path = link.getAttribute("data-path");
+      if (key && ui.nav[key]) link.textContent = ui.nav[key];
+      if (path) {
+        link.setAttribute("href", path === "/" ? ui.home : (ui.prefix || "") + path);
       }
     });
     document.querySelectorAll("[data-lang]").forEach(function (link) {
