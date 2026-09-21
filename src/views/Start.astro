@@ -128,6 +128,21 @@ make test`;
       <a class="btn btn-ghost" href={`${site.db.github}/blob/main/sdk/rust/README.md`}>{t.start.readReadme}</a>
     </div>
 
+    <div class="grid-2" style="margin-bottom: 2rem;">
+      <article class="card">
+        <h3>{t.start.outlineTitle}</h3>
+        <ol class="howto">
+          {t.start.outline.map((item) => <li>{item}</li>)}
+        </ol>
+      </article>
+      <article class="card">
+        <h3>{t.start.traitsTitle}</h3>
+        <ul>
+          {t.start.traits.map((item) => <li>{item}</li>)}
+        </ul>
+      </article>
+    </div>
+
     <div class="prose" id="embedded">
       <h2>{t.start.depTitle}</h2>
       <p>{t.start.depBody}</p>

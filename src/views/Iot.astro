@@ -23,6 +23,13 @@ const { locale, t } = useCopy(Astro.url.pathname);
       <div class="stat"><b>MSRV {site.iot.msrv}</b><span>AGPL-3.0</span></div>
     </div>
 
+    <article class="card" style="margin-bottom: 2rem;">
+      <h3>{t.iot.traitsTitle}</h3>
+      <ul>
+        {t.iot.traits.map((item) => <li>{item}</li>)}
+      </ul>
+    </article>
+
     <div class="grid-2">
       <article class="card">
         <h3>{t.iot.done}</h3>

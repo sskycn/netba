@@ -1,8 +1,12 @@
 # Netba
 
-> Netba publishes two experimental Rust systems: NetbaDB, a strongly typed relational database core, and NetbaIoT, a database-free IoT protocol gateway.
+> NetbaDB is a strongly typed relational database core in Rust. NetbaIoT is a database-free IoT gateway for HTTP, MQTT 3.1.1, TCP, and UDP.
 
-NetbaDB and NetbaIoT are separate codebases. They do not share a runtime, wire protocol, or on-disk format. Both are licensed AGPL-3.0-or-later. Official site: https://netba.net
+They are independent programs: no shared runtime, wire protocol, or on-disk format. License: AGPL-3.0-or-later. Site: https://netba.net
+
+How to use NetbaDB: add netbadb-sdk, Database::create, insert and query; or start netbadbd with manifest v11 and connect over Protocol v2.
+
+How to use NetbaIoT: run netbaiot-server, POST /v1/device/data (HTTP 202 = EventAccepted), subscribe with netbaiot-client and ACK after application processing.
 
 ## Products
 

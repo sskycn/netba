@@ -2,10 +2,10 @@ import { localeFromPath, type Locale } from "./locale";
 
 const en = {
   meta: {
-    title: "typed Rust database and database-free IoT gateway",
+    title: "NetbaDB typed database and NetbaIoT MQTT gateway",
     tagline: "Typed database core and database-free IoT gateway",
     description:
-      "Netba publishes two experimental Rust systems: NetbaDB, a strongly typed relational database core, and NetbaIoT, a database-free IoT protocol gateway for HTTP and MQTT 3.1.1.",
+      "NetbaDB is a strongly typed relational database core in Rust. NetbaIoT is a database-free IoT gateway for HTTP and MQTT 3.1.1.",
   },
   chrome: {
     skip: "Skip to content",
@@ -19,14 +19,14 @@ const en = {
       storage: "Storage",
       query: "Query",
       roadmap: "Roadmap",
-      start: "Get started",
+      start: "Tutorial",
       iotOverview: "Overview",
-      iotStart: "Get started",
+      iotStart: "Tutorial",
       iotArchitecture: "Architecture",
     },
     footerBody:
-      "publishes two experimental systems: NetbaDB, a typed relational database core, and NetbaIoT, a database-free IoT gateway.",
-    footerStatic: "Official website",
+      "NetbaDB is a typed relational database core. NetbaIoT is a database-free IoT gateway.",
+    footerStatic: "Source",
     footerNavAria: "Site",
     footerNav: [
       { href: "/", label: "Home" },
@@ -41,32 +41,46 @@ const en = {
     faqTitle: "Questions",
   },
   home: {
-    heroHtml: "Two experimental systems.<br />One <em>Netba</em> site.",
+    heroHtml: "A typed relational <em>database</em>.<br />A database-free IoT <em>gateway</em>.",
     lede:
-      "NetbaDB is a strongly typed relational database core. NetbaIoT is a memory-first IoT protocol gateway that does not require a database. Both are experimental Rust workspaces licensed AGPL-3.0-or-later.",
+      "NetbaDB stores typed tables in-process or over Protocol v2. NetbaIoT accepts HTTP, MQTT 3.1.1, TCP, and UDP device traffic and forwards events to your business system. They are independent programs.",
     ctaArchitecture: "Architecture",
-    ctaStart: "Get started",
-    ctaDb: "NetbaDB",
-    ctaIot: "NetbaIoT",
-    productsKicker: "Products",
-    productsTitle: "Separate codebases, separate contracts.",
+    ctaStart: "Tutorial",
+    ctaDb: "NetbaDB tutorial",
+    ctaIot: "NetbaIoT tutorial",
+    productsKicker: "Characteristics",
+    productsTitle: "What each product does.",
     productsDeck:
-      "NetbaDB stores typed relational data. NetbaIoT routes device events and live commands. They do not share a runtime, wire protocol, or on-disk format.",
+      "Use NetbaDB when you need a local or remote SQL database. Use NetbaIoT when devices must publish events and receive live commands without the gateway owning business data.",
     dbCardTitle: "NetbaDB",
     dbCardBody:
-      "Embedded or remote typed SQL subset, Heap/LSM storage, WAL recovery, Protocol v2, and a Unix operator plane.",
+      "A strongly typed relational database core. Embed it in a Rust process, or run netbadbd and connect with Protocol v2.",
     dbPoints: [
-      "Native Protocol v2 only; PostgreSQL wire was removed",
-      "Deployment manifest v11 and Inspection JSON v7",
-      "Read Committed and Repeatable Read",
+      "Typed SQL subset: SELECT, INNER JOIN, INSERT/UPDATE/DELETE, Heap CREATE/ALTER/DROP TABLE and INDEX",
+      "Heap MVCC, LSM, WAL crash recovery, Read Committed and Repeatable Read",
+      "Native Protocol v2 only; PostgreSQL wire is not available",
     ],
     iotCardTitle: "NetbaIoT",
     iotCardBody:
-      "HTTP, embedded MQTT 3.1.1, TCP, and UDP ingress into DeviceEvent, then confirmed or best-effort business sinks.",
+      "A memory-first IoT gateway. Devices publish over HTTP or MQTT; business systems consume events and send commands to live sessions.",
     iotPoints: [
-      "No PostgreSQL or other database in the runtime",
-      "HTTP 202 and MQTT QoS1 mean EventAccepted, not business persistence",
-      "Commands require a live local session",
+      "HTTP, embedded MQTT 3.1.1, framed TCP, and authenticated UDP, with no database in the runtime",
+      "HTTP 202 and MQTT QoS1 mean EventAccepted, not that a business database stored the event",
+      "Commands go only to a connected local session; offline devices return DeviceOffline",
+    ],
+    howKicker: "Tutorials",
+    howTitle: "How to run them.",
+    dbHowTitle: "NetbaDB",
+    dbHow: [
+      "Add netbadb-sdk to a Rust crate.",
+      "Call Database::create, insert rows, then query with SQL.",
+      "To serve another process, write a manifest v11 file and start netbadbd.",
+    ],
+    iotHowTitle: "NetbaIoT",
+    iotHow: [
+      "Run netbaiot-server with configs/development.json.",
+      "POST /v1/device/data; HTTP 202 means the event was accepted.",
+      "Subscribe with netbaiot-client and ACK after your application handles the event.",
     ],
     statSlice: "Current release",
     statProtocol: "Remote protocol",
@@ -132,20 +146,20 @@ const en = {
     ctaStorage: "Query language",
     faq: [
       {
-        q: "What is Netba?",
-        a: "Netba is the official site for two experimental Rust systems: NetbaDB, a strongly typed relational database core, and NetbaIoT, a database-free IoT protocol gateway. They are separate codebases and do not share a runtime, wire protocol, or on-disk format.",
+        q: "Are NetbaDB and NetbaIoT the same program?",
+        a: "No. NetbaDB is a relational database. NetbaIoT is an IoT event gateway. They do not share a runtime, wire protocol, or on-disk format.",
       },
       {
-        q: "What is NetbaDB?",
-        a: "NetbaDB is a strongly typed relational database core written in Rust. Applications use the embedded SDK or connect to netbadbd over Native Protocol v2. PostgreSQL wire compatibility was removed.",
+        q: "How do I use NetbaDB?",
+        a: "Add netbadb-sdk, call Database::create, then insert and query in-process. To serve another process, start netbadbd with a deployment manifest v11 file and connect over Native Protocol v2.",
       },
       {
-        q: "What is NetbaIoT?",
-        a: "NetbaIoT is a memory-first IoT gateway. It accepts HTTP, embedded MQTT 3.1.1, framed TCP, and authenticated UDP, then routes DeviceEvent values to confirmed or best-effort business sinks. It does not require a database.",
+        q: "How do I use NetbaIoT?",
+        a: "Run netbaiot-server, upload device events over HTTP or MQTT, and consume them with netbaiot-client. ACK each delivery after your application processes it. Commands require a live device session.",
       },
       {
         q: "What license do they use?",
-        a: "Both NetbaDB and NetbaIoT are licensed AGPL-3.0-or-later. If you modify the program and let users interact with it over a network, you must provide the corresponding source.",
+        a: "Both are licensed AGPL-3.0-or-later. If you modify the program and let users interact with it over a network, you must provide the corresponding source.",
       },
     ],
   },
@@ -154,7 +168,7 @@ const en = {
     description:
       "NetbaDB architecture: Canonical Schema IR, typed SQL compiler, planner, executor, WAL, and Heap/LSM storage in Rust.",
     kicker: "Architecture",
-    heroHtml: "Application languages remain<br />outside the engine.",
+    heroHtml: "From Canonical Schema IR<br />to WAL-backed storage.",
     deck:
       "NetbaDB keeps application-language concerns at the frontend boundary. A Go, Rust, or future schema frontend produces the same Canonical Schema IR. The core does not inspect Go types or application Rust structs.",
     durableTitle: "Architectural boundary",
@@ -249,7 +263,7 @@ const en = {
     description:
       "NetbaDB typed SQL subset: INNER JOIN, INSERT/UPDATE/DELETE, Heap CREATE/ALTER/DROP TABLE, indexes, three-valued NULL, ORDER BY, and GROUP BY.",
     kicker: "Query language",
-    heroHtml: "A typed SQL subset<br />with explicit semantics.",
+    heroHtml: "Typed SQL:<br />JOIN, DML, and Heap DDL.",
     deck:
       "The query language is a limited native subset. It includes a parser, nominal type checking, three-valued logic, WAL-protected DML, and a bounded Heap DDL set. It is not a complete SQL dialect.",
     thKind: "Area",
@@ -324,7 +338,7 @@ const en = {
     description:
       "NetbaDB implemented phases: Protocol v2, Heap DDL, LSM, columnar projections, manifest v11, NBOP v7, and current limits including no Serializable isolation.",
     kicker: "Roadmap",
-    heroHtml: "Implemented vertically,<br />then extended by phase.",
+    heroHtml: "What is implemented,<br />and what is not.",
     deck:
       "Development follows a vertical sequence. {n} items are complete. The numbered engine sequence ends at 73; later coordinator, columnar, and schema-evolution work is also complete. Serializable isolation, concurrent writers, and MCP remain planned or deferred.",
     complete: "Complete",
@@ -336,16 +350,28 @@ const en = {
     title: "Get started with NetbaDB",
     description:
       "Install netbadb-sdk, create a local Heap or LSM database in Rust, run typed SQL, or start netbadbd over Native Protocol v2.",
-    kicker: "Get started",
-    heroHtml: "Add the SDK,<br />then create a database.",
+    kicker: "Tutorial",
+    heroHtml: "Create a local database<br />and run SQL.",
     deck:
-      "The supported application crate is netbadb-sdk. The default feature is embedded. Disable default features and enable remote for a Protocol v2 client only. Toolchain {toolchain}; MSRV {msrv}.",
+      "Follow these steps with netbadb-sdk. The default feature is embedded in-process. Enable the remote feature only when you need a Protocol v2 client. Toolchain {toolchain}; MSRV {msrv}.",
     openGithub: "View on GitHub",
-    readReadme: "Read the README",
+    readReadme: "SDK README",
+    outlineTitle: "You will",
+    outline: [
+      "Add netbadb-sdk to a Rust crate",
+      "Create a Heap file, insert a row, and query it",
+      "Optionally inspect the catalog, then start netbadbd for a remote client",
+    ],
+    traitsTitle: "Engine characteristics",
+    traits: [
+      "Typed SQL subset with nominal semantic types",
+      "Heap MVCC, optional LSM, WAL, and crash recovery",
+      "One writer per open database; Read Committed or Repeatable Read",
+    ],
     depTitle: "1. Add the dependency",
     depBody:
       "The crate is published from the workspace repository. Cargo resolves the netbadb-sdk package in that git workspace.",
-    embedTitle: "2. Embedded create, insert, and query",
+    embedTitle: "2. Create, insert, and query",
     embedBody:
       "Database::create refuses to overwrite an existing database or WAL slot. insert and execute run as implicit transactions. create_index backfills current rows and registers a non-unique single-column index. analyze writes a fresh optimizer snapshot; DML does not refresh it automatically.",
     inspectTitle: "3. Inspect the catalog and plan",
@@ -412,12 +438,19 @@ const en = {
     description:
       "NetbaIoT is a database-free IoT gateway for HTTP, MQTT 3.1.1, TCP, and UDP. HTTP 202 means EventAccepted, not business persistence.",
     kicker: "NetbaIoT",
-    heroHtml: "A database-free<br />IoT <em>event gateway</em>.",
+    heroHtml: "Device events in,<br />business sinks out.",
     deck:
-      "NetbaIoT accepts device traffic over HTTP, embedded MQTT 3.1.1, framed TCP, and authenticated UDP. It normalizes that traffic into DeviceEvent and sends it to confirmed or best-effort business sinks. The runtime never requires PostgreSQL or another database.",
+      "NetbaIoT is an IoT gateway. Devices publish over HTTP, MQTT 3.1.1, TCP, or UDP. The gateway authenticates, decodes, and forwards DeviceEvent values to your webhook or TCP sink. It does not store business data.",
+    traitsTitle: "Gateway characteristics",
+    traits: [
+      "No PostgreSQL or other database in the runtime",
+      "HTTP 202 and MQTT QoS1 mean EventAccepted, not business persistence",
+      "Commands require a live MQTT or TCP session",
+      "Planned shutdown can spool required work; a crash can lose in-memory events",
+    ],
     done: "Implemented",
     notDone: "Out of scope",
-    ctaStart: "Get started",
+    ctaStart: "Tutorial",
     ctaArchitecture: "Architecture",
     pathsTitle: "Device, business, and operator paths.",
     pathsDeck:
@@ -450,12 +483,18 @@ const en = {
     title: "Get started with NetbaIoT",
     description:
       "Run netbaiot-server, upload a device HTTP or MQTT event, and consume it with netbaiot-client using explicit ACK.",
-    kicker: "Get started",
-    heroHtml: "Start the gateway,<br />then accept an event.",
+    kicker: "Tutorial",
+    heroHtml: "Run the gateway<br />and accept an event.",
     deck:
-      "The server crate is netbaiot-server. Business systems use netbaiot-client. Devices may use standard MQTT 3.1.1 or the optional netbaiot-device-sdk. MSRV {msrv}. Public protocol {protocol}.",
+      "This tutorial starts netbaiot-server, uploads one device event, then consumes it with netbaiot-client. Standard MQTT 3.1.1 clients work without the optional device SDK. MSRV {msrv}. Protocol {protocol}.",
     openGithub: "View on GitHub",
-    readReadme: "Read the README",
+    readReadme: "README",
+    outlineTitle: "You will",
+    outline: [
+      "Start the development listeners on loopback",
+      "POST a heartbeat and read HTTP 202",
+      "Subscribe in a business client and ACK the delivery",
+    ],
     runTitle: "1. Run the development server",
     runBody:
       "Development listeners bind to loopback. HTTP 202 means EventAccepted. Set a 64-character NETBAIOT_ADMIN_SECRET before calling management APIs. Production configurations must specify a confirmed webhook or framed TCP/RPC business sink.",
@@ -515,10 +554,10 @@ const en = {
 
 const zh: typeof en = {
   meta: {
-    title: "强类型 Rust 数据库与无数据库 IoT 网关",
+    title: "NetbaDB 类型化数据库与 NetbaIoT MQTT 网关",
     tagline: "强类型数据库核心与无数据库 IoT 网关",
     description:
-      "Netba 发布两套实验性 Rust 系统：NetbaDB（强类型关系型数据库核心）与 NetbaIoT（面向 HTTP 与 MQTT 3.1.1 的无数据库 IoT 协议网关）。",
+      "NetbaDB 是用 Rust 实现的强类型关系型数据库核心。NetbaIoT 是面向 HTTP 与 MQTT 3.1.1 的无数据库 IoT 网关。",
   },
   chrome: {
     skip: "跳到正文",
@@ -532,14 +571,14 @@ const zh: typeof en = {
       storage: "存储",
       query: "查询",
       roadmap: "路线图",
-      start: "开始使用",
+      start: "教程",
       iotOverview: "概览",
-      iotStart: "开始使用",
+      iotStart: "教程",
       iotArchitecture: "架构",
     },
     footerBody:
-      "发布两套实验性系统：NetbaDB（类型化关系型数据库核心）与 NetbaIoT（无数据库 IoT 网关）。",
-    footerStatic: "官方网站",
+      "NetbaDB 是类型化关系型数据库核心。NetbaIoT 是无数据库 IoT 网关。",
+    footerStatic: "源码",
     footerNavAria: "站点",
     footerNav: [
       { href: "/", label: "首页" },
@@ -554,32 +593,46 @@ const zh: typeof en = {
     faqTitle: "常见问题",
   },
   home: {
-    heroHtml: "两套实验性系统。<br />同一个 <em>Netba</em> 站点。",
+    heroHtml: "类型化关系型<em>数据库</em>。<br />无数据库 IoT <em>网关</em>。",
     lede:
-      "NetbaDB 是强类型关系型数据库核心。NetbaIoT 是内存优先、不依赖数据库的 IoT 协议网关。两者均为实验性 Rust workspace，并以 AGPL-3.0-or-later 授权。",
+      "NetbaDB 在进程内或通过 Protocol v2 存储类型化表。NetbaIoT 接收 HTTP、MQTT 3.1.1、TCP 与 UDP 设备流量，并把事件转发给你的业务系统。它们是彼此独立的程序。",
     ctaArchitecture: "架构",
-    ctaStart: "开始使用",
-    ctaDb: "NetbaDB",
-    ctaIot: "NetbaIoT",
-    productsKicker: "产品",
-    productsTitle: "独立代码库，独立契约。",
+    ctaStart: "教程",
+    ctaDb: "NetbaDB 教程",
+    ctaIot: "NetbaIoT 教程",
+    productsKicker: "特点",
+    productsTitle: "各自做什么。",
     productsDeck:
-      "NetbaDB 存储类型化关系数据。NetbaIoT 路由设备事件与在线命令。它们不共享运行时、线协议或磁盘格式。",
+      "需要本地或远程 SQL 数据库时用 NetbaDB。需要设备上报事件并接收在线命令、且网关不持有业务数据时用 NetbaIoT。",
     dbCardTitle: "NetbaDB",
     dbCardBody:
-      "嵌入式或远程的类型化 SQL 子集、Heap/LSM 存储、WAL 恢复、Protocol v2，以及 Unix 运维平面。",
+      "强类型关系型数据库核心。可嵌入 Rust 进程，或运行 netbadbd 后通过 Protocol v2 连接。",
     dbPoints: [
-      "仅 Native Protocol v2；PostgreSQL 协议已移除",
-      "部署清单 v11 与 Inspection JSON v7",
-      "读已提交与可重复读",
+      "类型化 SQL 子集：SELECT、INNER JOIN、INSERT/UPDATE/DELETE，以及 Heap CREATE/ALTER/DROP TABLE 与 INDEX",
+      "堆 MVCC、LSM、WAL 崩溃恢复，读已提交与可重复读",
+      "仅 Native Protocol v2；不提供 PostgreSQL 协议",
     ],
     iotCardTitle: "NetbaIoT",
     iotCardBody:
-      "HTTP、内嵌 MQTT 3.1.1、TCP 与 UDP 入口归一为 DeviceEvent，再发往确认型或尽力而为业务 sink。",
+      "内存优先的 IoT 网关。设备通过 HTTP 或 MQTT 上报；业务系统消费事件，并向在线会话下发命令。",
     iotPoints: [
-      "运行时不需要 PostgreSQL 或其他数据库",
-      "HTTP 202 与 MQTT QoS1 表示 EventAccepted，不是业务持久化",
-      "命令要求本地在线会话",
+      "HTTP、内嵌 MQTT 3.1.1、分帧 TCP 与已认证 UDP；运行时没有数据库",
+      "HTTP 202 与 MQTT QoS1 表示 EventAccepted，不表示业务库已落盘",
+      "命令只发往已连接的本地会话；离线设备返回 DeviceOffline",
+    ],
+    howKicker: "教程",
+    howTitle: "怎么跑起来。",
+    dbHowTitle: "NetbaDB",
+    dbHow: [
+      "在 Rust crate 中加入 netbadb-sdk。",
+      "调用 Database::create，插入行，再用 SQL 查询。",
+      "若要给另一进程提供服务，编写清单 v11 并启动 netbadbd。",
+    ],
+    iotHowTitle: "NetbaIoT",
+    iotHow: [
+      "用 configs/development.json 运行 netbaiot-server。",
+      "POST /v1/device/data；HTTP 202 表示事件已被接受。",
+      "用 netbaiot-client 订阅，并在应用处理后再 ACK。",
     ],
     statSlice: "当前版本",
     statProtocol: "远程协议",
@@ -644,20 +697,20 @@ const zh: typeof en = {
     ctaStorage: "查询语言",
     faq: [
       {
-        q: "什么是 Netba？",
-        a: "Netba 是两套实验性 Rust 系统的官方站点：NetbaDB（强类型关系型数据库核心）与 NetbaIoT（无数据库 IoT 协议网关）。它们是独立代码库，不共享运行时、线协议或磁盘格式。",
+        q: "NetbaDB 和 NetbaIoT 是同一个程序吗？",
+        a: "不是。NetbaDB 是关系型数据库。NetbaIoT 是 IoT 事件网关。它们不共享运行时、线协议或磁盘格式。",
       },
       {
-        q: "什么是 NetbaDB？",
-        a: "NetbaDB 是用 Rust 实现的强类型关系型数据库核心。应用可使用嵌入式 SDK，或通过 Native Protocol v2 连接 netbadbd。PostgreSQL 协议兼容已被移除。",
+        q: "怎么用 NetbaDB？",
+        a: "添加 netbadb-sdk，调用 Database::create，然后在进程内插入与查询。若要给另一进程提供服务，用部署清单 v11 启动 netbadbd，再通过 Native Protocol v2 连接。",
       },
       {
-        q: "什么是 NetbaIoT？",
-        a: "NetbaIoT 是内存优先的 IoT 网关。它接收 HTTP、内嵌 MQTT 3.1.1、分帧 TCP 与已认证 UDP，将 DeviceEvent 路由到确认型或尽力而为业务 sink。运行时不需要数据库。",
+        q: "怎么用 NetbaIoT？",
+        a: "运行 netbaiot-server，通过 HTTP 或 MQTT 上传设备事件，再用 netbaiot-client 消费。应用处理完成后再 ACK。命令要求设备在线。",
       },
       {
         q: "使用什么许可证？",
-        a: "NetbaDB 与 NetbaIoT 均以 AGPL-3.0-or-later 授权。如果修改程序并让用户通过网络与之交互，必须提供对应源代码。",
+        a: "两者均以 AGPL-3.0-or-later 授权。如果修改程序并让用户通过网络与之交互，必须提供对应源代码。",
       },
     ],
   },
@@ -665,7 +718,7 @@ const zh: typeof en = {
     title: "NetbaDB 架构",
     description: "NetbaDB 的语言边界、编译流水线、crate 依赖方向，以及同步嵌入式核心。",
     kicker: "架构",
-    heroHtml: "应用语言位于<br />引擎边界之外。",
+    heroHtml: "从 Canonical Schema IR<br />到 WAL 保护的存储。",
     deck:
       "NetbaDB 将应用语言相关问题限制在前端边界。Go、Rust 或未来的 schema 前端均应生成同一份 Canonical Schema IR。核心不检查 Go 类型，也不读取应用侧 Rust 结构体。",
     durableTitle: "架构边界",
@@ -757,7 +810,7 @@ const zh: typeof en = {
     title: "NetbaDB 查询语言",
     description: "NetbaDB 类型化 SQL 子集：INNER JOIN、INSERT/UPDATE/DELETE、Heap CREATE/ALTER/DROP TABLE、索引、三值 NULL、ORDER BY 与 GROUP BY。",
     kicker: "查询语言",
-    heroHtml: "具有明确语义的<br />类型化 SQL 子集。",
+    heroHtml: "类型化 SQL：<br />JOIN、DML 与 Heap DDL。",
     deck:
       "查询语言为有限的原生子集，包含解析器、名义类型检查、三值逻辑、受 WAL 保护的 DML，以及有界的 Heap DDL。它不是完整的 SQL 方言。",
     thKind: "类别",
@@ -831,7 +884,7 @@ const zh: typeof en = {
     title: "NetbaDB 路线图",
     description: "NetbaDB 已完成阶段：Protocol v2、Heap DDL、LSM、列存投影、清单 v11、NBOP v7，以及当前限制（不含可串行化隔离）。",
     kicker: "路线图",
-    heroHtml: "按垂直切片实现，<br />再分阶段扩展。",
+    heroHtml: "已经实现的能力，<br />以及尚未实现的部分。",
     deck:
       "实现顺序为垂直推进。已完成 {n} 项。编号引擎序列止于 73；其后的协调器、列存与 schema 演进工作亦已完成。可串行化隔离、并发写者以及 MCP 仍属规划或暂缓内容。",
     complete: "已完成",
@@ -843,16 +896,28 @@ const zh: typeof en = {
     title: "开始使用 NetbaDB",
     description:
       "安装 netbadb-sdk，用 Rust 创建本地 Heap 或 LSM 数据库，运行类型化 SQL，或通过 Native Protocol v2 启动 netbadbd。",
-    kicker: "开始使用",
-    heroHtml: "添加 SDK，<br />然后创建数据库。",
+    kicker: "教程",
+    heroHtml: "创建本地数据库，<br />然后运行 SQL。",
     deck:
-      "受支持的应用 crate 是 netbadb-sdk。默认特性为 embedded。仅使用 Protocol v2 客户端时，请关闭默认特性并启用 remote。工具链 {toolchain}；MSRV {msrv}。",
+      "按下列步骤使用进程内 netbadb-sdk。默认特性为 embedded。只有需要 Protocol v2 客户端时才启用 remote。工具链 {toolchain}；MSRV {msrv}。",
     openGithub: "在 GitHub 上查看",
-    readReadme: "阅读 README",
+    readReadme: "SDK README",
+    outlineTitle: "你将完成",
+    outline: [
+      "在 Rust crate 中加入 netbadb-sdk",
+      "创建 Heap 文件、插入一行并用 SQL 查询",
+      "可选：检查 catalog，再启动 netbadbd 供远程客户端连接",
+    ],
+    traitsTitle: "引擎特点",
+    traits: [
+      "带名义语义类型的类型化 SQL 子集",
+      "堆 MVCC、可选 LSM、WAL 与崩溃恢复",
+      "每个打开的数据库一个写者；读已提交或可重复读",
+    ],
     depTitle: "1. 添加依赖",
     depBody:
       "该 crate 来自工作区仓库。Cargo 会在该 git workspace 中解析名为 netbadb-sdk 的包。",
-    embedTitle: "2. 嵌入式创建、插入与查询",
+    embedTitle: "2. 创建、插入与查询",
     embedBody:
       "Database::create 拒绝覆盖已有数据库或 WAL 槽。insert 与 execute 作为隐式事务运行。create_index 回填当前行并注册非唯一单列索引。analyze 写入新的优化器快照；DML 不会自动刷新该快照。",
     inspectTitle: "3. 检查目录与计划",
@@ -919,12 +984,19 @@ const zh: typeof en = {
     description:
       "NetbaIoT 是面向 HTTP、MQTT 3.1.1、TCP 与 UDP 的无数据库 IoT 网关。HTTP 202 表示 EventAccepted，不是业务持久化。",
     kicker: "NetbaIoT",
-    heroHtml: "无数据库的<br />IoT <em>事件网关</em>。",
+    heroHtml: "设备事件进来，<br />业务 sink 出去。",
     deck:
-      "NetbaIoT 通过 HTTP、内嵌 MQTT 3.1.1、分帧 TCP 与已认证 UDP 接收设备流量，归一为 DeviceEvent，再发往确认型或尽力而为业务 sink。运行时从不需要 PostgreSQL 或其他数据库。",
+      "NetbaIoT 是 IoT 网关。设备通过 HTTP、MQTT 3.1.1、TCP 或 UDP 上报。网关完成认证与解码后，把 DeviceEvent 转发到你的 webhook 或 TCP sink。它不存储业务数据。",
+    traitsTitle: "网关特点",
+    traits: [
+      "运行时没有 PostgreSQL 或其他数据库",
+      "HTTP 202 与 MQTT QoS1 表示 EventAccepted，不是业务持久化",
+      "命令要求在线 MQTT 或 TCP 会话",
+      "计划内关机可以 spool 必达工作；崩溃可能丢失内存中的事件",
+    ],
     done: "已实现",
     notDone: "不在当前范围",
-    ctaStart: "开始使用",
+    ctaStart: "教程",
     ctaArchitecture: "架构",
     pathsTitle: "设备、业务与运维路径。",
     pathsDeck:
@@ -957,12 +1029,18 @@ const zh: typeof en = {
     title: "开始使用 NetbaIoT",
     description:
       "运行 netbaiot-server，通过设备 HTTP 或 MQTT 上传事件，并用 netbaiot-client 在显式 ACK 后消费。",
-    kicker: "开始使用",
-    heroHtml: "启动网关，<br />然后接受事件。",
+    kicker: "教程",
+    heroHtml: "启动网关，<br />并接受一条事件。",
     deck:
-      "服务器 crate 是 netbaiot-server。业务系统使用 netbaiot-client。设备可使用标准 MQTT 3.1.1 或可选的 netbaiot-device-sdk。MSRV {msrv}。公开协议 {protocol}。",
+      "本教程启动 netbaiot-server，上传一条设备事件，再用 netbaiot-client 消费。标准 MQTT 3.1.1 客户端不依赖可选设备 SDK。MSRV {msrv}。协议 {protocol}。",
     openGithub: "在 GitHub 上查看",
-    readReadme: "阅读 README",
+    readReadme: "README",
+    outlineTitle: "你将完成",
+    outline: [
+      "在回环地址上启动开发监听",
+      "POST 一条 heartbeat 并看到 HTTP 202",
+      "在业务客户端中订阅并 ACK 该投递",
+    ],
     runTitle: "1. 运行开发服务器",
     runBody:
       "开发监听绑定回环地址。HTTP 202 表示 EventAccepted。调用管理 API 前需设置 64 字符的 NETBAIOT_ADMIN_SECRET。生产配置必须指定确认型 webhook 或分帧 TCP/RPC 业务 sink。",

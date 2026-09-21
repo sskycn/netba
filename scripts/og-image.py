@@ -45,7 +45,7 @@ draw.text((88, 318), "NetbaDB — typed Rust database core", font=product, fill=
 draw.text((88, 378), "NetbaIoT — database-free IoT gateway", font=product, fill=TEAL)
 draw.text(
     (88, 448),
-    "Separate codebases. AGPL-3.0-or-later.",
+    "Independent programs.  AGPL-3.0-or-later.",
     font=sub,
     fill=INK2,
 )

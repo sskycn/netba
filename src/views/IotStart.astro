@@ -47,6 +47,13 @@ netbaiot server drain --yes`;
       <a class="btn btn-ghost" href={`${site.iot.github}/blob/main/README.md`}>{t.iotStart.readReadme}</a>
     </div>
 
+    <article class="card" style="margin-bottom: 2rem;">
+      <h3>{t.iotStart.outlineTitle}</h3>
+      <ol class="howto">
+        {t.iotStart.outline.map((item) => <li>{item}</li>)}
+      </ol>
+    </article>
+
     <div class="prose">
       <h2>{t.iotStart.runTitle}</h2>
       <p>{t.iotStart.runBody}</p>

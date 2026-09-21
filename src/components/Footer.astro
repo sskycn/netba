@@ -18,7 +18,7 @@ const { locale, t } = useCopy(Astro.url.pathname);
     <div class="footer-inner">
       <div>
         <strong class="serif">{site.name}</strong>
-        {" "}{t.chrome.footerBody}
+        <p class="footer-note">{t.chrome.footerBody}</p>
       </div>
       <div>
         <a href={site.db.github}>sskycn/netbadb</a>

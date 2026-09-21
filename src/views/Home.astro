@@ -14,15 +14,15 @@ const { locale, t } = useCopy(Astro.url.pathname);
     <section class="hero" style="padding-top: 3.4rem; padding-bottom: 1rem;">
       <div>
         <p class="eyebrow">
-          <span class="chip">{locale === "zh" ? "实验性" : "Experimental"}</span>
-          <span class="chip teal">NetbaDB · NetbaIoT</span>
+          <span class="chip">NetbaDB</span>
+          <span class="chip teal">NetbaIoT</span>
           <span class="chip moss">AGPL-3.0</span>
         </p>
         <h1 set:html={t.home.heroHtml} />
         <p class="lede">{t.home.lede}</p>
         <div class="actions">
           <a class="btn btn-primary" href={localizePath("/start", locale)}>{t.home.ctaDb}</a>
-          <a class="btn btn-ghost" href={localizePath("/iot", locale)}>{t.home.ctaIot}</a>
+          <a class="btn btn-ghost" href={localizePath("/iot/start", locale)}>{t.home.ctaIot}</a>
         </div>
       </div>
       <PageFrame />
@@ -40,30 +40,55 @@ const { locale, t } = useCopy(Astro.url.pathname);
       </div>
       <div class="grid-2">
         <article class="card">
-          <p class="kicker">Protocol {site.db.protocolVersion}</p>
           <h3>{t.home.dbCardTitle}</h3>
           <p>{t.home.dbCardBody}</p>
           <ul>
             {t.home.dbPoints.map((item) => <li>{item}</li>)}
           </ul>
           <p>
-            <a href={localizePath("/start", locale)}>{t.home.ctaStart}</a>
+            <a href={localizePath("/start", locale)}>{t.home.ctaDb}</a>
             {" · "}
-            <a href={site.db.github}>github.com/sskycn/netbadb</a>
+            <a href={site.db.github}>sskycn/netbadb</a>
           </p>
         </article>
         <article class="card">
-          <p class="kicker">MQTT {site.iot.mqtt}</p>
           <h3>{t.home.iotCardTitle}</h3>
           <p>{t.home.iotCardBody}</p>
           <ul>
             {t.home.iotPoints.map((item) => <li>{item}</li>)}
           </ul>
           <p>
-            <a href={localizePath("/iot/start", locale)}>{t.home.ctaStart}</a>
+            <a href={localizePath("/iot/start", locale)}>{t.home.ctaIot}</a>
             {" · "}
-            <a href={site.iot.github}>github.com/sskycn/netbaiot</a>
+            <a href={site.iot.github}>sskycn/netbaiot</a>
           </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="kicker">{t.home.howKicker}</p>
+          <h2>{t.home.howTitle}</h2>
+        </div>
+      </div>
+      <div class="grid-2">
+        <article class="card">
+          <h3>{t.home.dbHowTitle}</h3>
+          <ol class="howto">
+            {t.home.dbHow.map((item) => <li>{item}</li>)}
+          </ol>
+          <p><a href={localizePath("/start", locale)}>{t.home.ctaDb}</a></p>
+        </article>
+        <article class="card">
+          <h3>{t.home.iotHowTitle}</h3>
+          <ol class="howto">
+            {t.home.iotHow.map((item) => <li>{item}</li>)}
+          </ol>
+          <p><a href={localizePath("/iot/start", locale)}>{t.home.ctaIot}</a></p>
         </article>
       </div>
     </div>
