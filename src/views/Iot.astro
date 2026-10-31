@@ -20,7 +20,7 @@ const { locale, t } = useCopy(Astro.url.pathname);
     </div>
     <div class="hero-meta" style="margin-bottom: 2rem;">
       <div class="stat"><b>Protocol {site.iot.protocolVersion}</b><span>MQTT {site.iot.mqtt}</span></div>
-      <div class="stat"><b>MSRV {site.iot.msrv}</b><span>AGPL-3.0</span></div>
+      <div class="stat"><b>MSRV {site.iot.msrv}</b><span>v{site.iot.version}</span></div>
     </div>
 
     <article class="card" style="margin-bottom: 2rem;">

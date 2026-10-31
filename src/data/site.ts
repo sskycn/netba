@@ -24,10 +24,11 @@ export const site = {
   iot: {
     name: "NetbaIoT",
     github: "https://github.com/sskycn/netbaiot",
-    version: "0.1.0",
+    version: "0.6.6",
+    license: "NetbaIoT Commercial Software License",
     msrv: "1.88.0",
     protocolVersion: "v1",
-    mqtt: "3.1.1",
+    mqtt: "3.1.1 / 5.0",
   },
 } as const;
 

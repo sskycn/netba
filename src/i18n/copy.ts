@@ -5,7 +5,7 @@ const en = {
     title: "NetbaDB typed database and NetbaIoT MQTT gateway",
     tagline: "Typed database core and database-free IoT gateway",
     description:
-      "NetbaDB is a strongly typed relational database core in Rust. NetbaIoT is a database-free IoT gateway for HTTP and MQTT 3.1.1.",
+      "NetbaDB is a strongly typed relational database core in Rust. NetbaIoT is a memory-only IoT gateway for MQTT, TCP, and UDP.",
   },
   chrome: {
     skip: "Skip to content",
@@ -43,7 +43,7 @@ const en = {
   home: {
     heroHtml: "A typed relational <em>database</em>.<br />A database-free IoT <em>gateway</em>.",
     lede:
-      "NetbaDB stores typed tables in-process or over Protocol v2. NetbaIoT accepts HTTP, MQTT 3.1.1, TCP, and UDP device traffic and forwards events to your business system. They are independent programs.",
+      "NetbaDB stores typed tables in-process or over Protocol v2. NetbaIoT accepts MQTT, TCP, and UDP device traffic and forwards events to your business system. They are independent programs.",
     ctaArchitecture: "Architecture",
     ctaStart: "Tutorial",
     ctaDb: "NetbaDB tutorial",
@@ -62,10 +62,10 @@ const en = {
     ],
     iotCardTitle: "NetbaIoT",
     iotCardBody:
-      "A memory-first IoT gateway. Devices publish over HTTP or MQTT; business systems consume events and send commands to live sessions.",
+      "A memory-first IoT gateway. Devices publish over MQTT, TCP, or UDP; business systems consume events and send commands to live sessions.",
     iotPoints: [
-      "HTTP, embedded MQTT 3.1.1, framed TCP, and authenticated UDP, with no database in the runtime",
-      "HTTP 202 and MQTT QoS1 mean EventAccepted, not that a business database stored the event",
+      "Embedded MQTT 3.1.1 and a bounded MQTT 5.0 profile, framed TCP, and authenticated UDP",
+      "MQTT QoS1 PUBACK means EventAccepted, not that a business database stored the event",
       "Commands go only to a connected local session; offline devices return DeviceOffline",
     ],
     howKicker: "Tutorials",
@@ -78,9 +78,9 @@ const en = {
     ],
     iotHowTitle: "NetbaIoT",
     iotHow: [
-      "Run netbaiot-server with configs/development.json.",
-      "POST /v1/device/data; HTTP 202 means the event was accepted.",
-      "Subscribe with netbaiot-client and ACK after your application handles the event.",
+      "Run the local demo with cargo run --locked -p netbaiot-cli -- demo --once.",
+      "The demo publishes an MQTT heartbeat and waits for the business sink ACK.",
+      "Initialize a configuration for your own gateway and connect a business sink.",
     ],
     statSlice: "Current release",
     statProtocol: "Remote protocol",
@@ -155,11 +155,11 @@ const en = {
       },
       {
         q: "How do I use NetbaIoT?",
-        a: "Run netbaiot-server, upload device events over HTTP or MQTT, and consume them with netbaiot-client. ACK each delivery after your application processes it. Commands require a live device session.",
+        a: "Run the CLI demo, then configure MQTT, TCP, or UDP devices and a confirmed business sink. ACK after application processing. Commands require a live device session.",
       },
       {
         q: "What license do they use?",
-        a: "Both are licensed AGPL-3.0-or-later. If you modify the program and let users interact with it over a network, you must provide the corresponding source.",
+        a: "NetbaDB is AGPL-3.0-or-later. Current NetbaIoT versions use a commercial license with a 30-day internal, non-production evaluation; production and redistribution require a written grant.",
       },
     ],
   },
@@ -434,112 +434,42 @@ const en = {
     ],
   },
   iot: {
-    title: "NetbaIoT MQTT and HTTP IoT gateway",
-    description:
-      "NetbaIoT is a database-free IoT gateway for HTTP, MQTT 3.1.1, TCP, and UDP. HTTP 202 means EventAccepted, not business persistence.",
-    kicker: "NetbaIoT",
-    heroHtml: "Device events in,<br />business sinks out.",
-    deck:
-      "NetbaIoT is an IoT gateway. Devices publish over HTTP, MQTT 3.1.1, TCP, or UDP. The gateway authenticates, decodes, and forwards DeviceEvent values to your webhook or TCP sink. It does not store business data.",
+    title: "NetbaIoT MQTT, TCP and UDP gateway",
+    description: "A memory-only IoT gateway for MQTT, TCP and UDP with confirmed business delivery.",
+    kicker: "NetbaIoT", heroHtml: "Device events in,<br />business sinks out.",
+    deck: "NetbaIoT authenticates and decodes MQTT, framed TCP and UDP uplinks into DeviceEvents, then routes them to confirmed webhook or Business RPC sinks. Business systems own durable data.",
     traitsTitle: "Gateway characteristics",
-    traits: [
-      "No PostgreSQL or other database in the runtime",
-      "HTTP 202 and MQTT QoS1 mean EventAccepted, not business persistence",
-      "Commands require a live MQTT or TCP session",
-      "Planned shutdown can spool required work; a crash can lose in-memory events",
-    ],
-    done: "Implemented",
-    notDone: "Out of scope",
-    ctaStart: "Tutorial",
-    ctaArchitecture: "Architecture",
+    traits: ["No database or local runtime persistence", "MQTT QoS1 PUBACK means EventAccepted, not business persistence", "Commands require a live MQTT or TCP session", "Planned shutdown drains required work in memory; a forced exit loses pending events"],
+    done: "Implemented", notDone: "Out of scope", ctaStart: "Tutorial", ctaArchitecture: "Architecture",
     pathsTitle: "Device, business, and operator paths.",
-    pathsDeck:
-      "Devices may use standard MQTT 3.1.1 or device HTTP. Business systems consume confirmed events through netbaiot-client. Operators use the management listener and the netbaiot CLI.",
+    pathsDeck: "Devices use MQTT, framed TCP or authenticated UDP. Business systems receive confirmed webhook or Business RPC events; HTTP is reserved for management.",
     deliveryTitle: "EventAccepted is not business persistence.",
-    deliveryBody:
-      "HTTP 202 and MQTT QoS1 PUBACK mean the event crossed the bounded EventAccepted boundary: authentication, codec validation, routing, and atomic reservation of every confirmed-required sink. They do not mean a business database stored the event. Consumers must deduplicate by stable event_id.",
-    commandTitle: "Commands are live-session only.",
-    commandBody:
-      "A command is admitted only into a currently connected local MQTT or TCP session queue. An offline device returns typed DeviceOffline. NetbaIoT does not store offline commands.",
-    restartTitle: "Planned restart, not crash durability.",
-    restartBody:
-      "Planned shutdown drains required work into a bounded local restart spool with fsync and atomic rename. That is graceful-restart-safe at-least-once delivery. SIGKILL, process crash, or power failure can lose the in-memory accepted window.",
+    deliveryBody: "A device receipt follows validation, routing and atomic admission to every required sink. Required sinks ACK explicitly. In-memory retries can duplicate the stable event_id, so consumers must be idempotent.",
+    commandTitle: "Commands are live-session only.", commandBody: "Commands target connected local MQTT or TCP sessions. Offline devices return DEVICE_OFFLINE; no offline commands are stored. Transport send, device receipt and execution ACK are separate.",
+    restartTitle: "Memory-only shutdown and restart.", restartBody: "Planned shutdown closes ingress and waits in memory for required sinks to ACK. An outage keeps the process alive and unready. A forced exit loses pending events; every restart starts with empty runtime and MQTT state.",
     faq: [
-      {
-        q: "Does NetbaIoT need a database?",
-        a: "No. The runtime is database-free. Business systems own durable business data. NetbaIoT's only persistent mechanism is a bounded local restart spool used during planned graceful shutdown.",
-      },
-      {
-        q: "What does HTTP 202 or MQTT QoS1 PUBACK mean?",
-        a: "They mean EventAccepted: authentication, codec validation, routing, and atomic reservation of every confirmed-required sink. They do not mean a business database stored the event. Consumers must deduplicate by event_id.",
-      },
-      {
-        q: "Are commands stored for offline devices?",
-        a: "No. A command is admitted only into a currently connected local MQTT or TCP session. An offline device returns typed DeviceOffline.",
-      },
+      {q: "Does NetbaIoT need a database?", a: "No. The gateway has no database or runtime state files. Business systems own durable data."},
+      {q: "What does MQTT QoS1 PUBACK mean?", a: "It means EventAccepted, not business persistence. Required sink retries may duplicate event_id; consumers must be idempotent."},
+      {q: "Are commands stored for offline devices?", a: "No. Commands target currently connected local MQTT or TCP sessions; offline devices return DEVICE_OFFLINE."},
     ],
   },
   iotStart: {
-    title: "Get started with NetbaIoT",
-    description:
-      "Run netbaiot-server, upload a device HTTP or MQTT event, and consume it with netbaiot-client using explicit ACK.",
-    kicker: "Tutorial",
-    heroHtml: "Run the gateway<br />and accept an event.",
-    deck:
-      "This tutorial starts netbaiot-server, uploads one device event, then consumes it with netbaiot-client. Standard MQTT 3.1.1 clients work without the optional device SDK. MSRV {msrv}. Protocol {protocol}.",
-    openGithub: "View on GitHub",
-    readReadme: "README",
-    outlineTitle: "You will",
-    outline: [
-      "Start the development listeners on loopback",
-      "POST a heartbeat and read HTTP 202",
-      "Subscribe in a business client and ACK the delivery",
-    ],
-    runTitle: "1. Run the development server",
-    runBody:
-      "Development listeners bind to loopback. HTTP 202 means EventAccepted. Set a 64-character NETBAIOT_ADMIN_SECRET before calling management APIs. Production configurations must specify a confirmed webhook or framed TCP/RPC business sink.",
-    uploadTitle: "2. Upload a device event",
-    uploadBody:
-      "Device bearer format is credential_id:secret. The JSON schema is DeviceUplink. Retry and restart replay can duplicate delivery; the business sink must deduplicate by event_id.",
-    clientTitle: "3. Consume events from a business client",
-    clientBody:
-      "AckMode defaults to Manual. ACK after application processing. One server-confirmed delivery is outstanding per subscription. Dropping an unacknowledged delivery closes the stream so the server may redeliver.",
-    deviceTitle: "4. Optional device SDK",
-    deviceBody:
-      "netbaiot-device-sdk is convenience, not a requirement. Standard MQTT 3.1.1 clients remain first-class. Disconnected publish is rejected; the SDK does not accumulate an offline RAM queue.",
-    cliTitle: "5. Operator CLI",
-    cliBody:
-      "netbaiot is implemented only through netbaiot-client. Tokens are never printed. Drain requires --yes. Exit code 5 is device offline.",
-    contractTitle: "Operating constraints",
-    contract: [
-      "The runtime has no database, durable outbox, or persistent command state.",
-      "EventAccepted is not business persistence. Consumers must be idempotent on event_id.",
-      "Commands are not stored for offline devices.",
-      "Planned restart can spool required work; abrupt crash can lose in-memory accepted events.",
-      "MQTT 5, WebSockets, shared subscriptions, and $SYS are outside the current broker.",
-    ],
-    licenseTitle: "License",
-    licenseBody:
-      "NetbaIoT is licensed under {license}. If you modify the program and let users interact with it over a network, you must provide the corresponding source.",
+    title: "Get started with NetbaIoT", description: "Run the MQTT demo, then initialize and configure your gateway.", kicker: "Tutorial", heroHtml: "Run the gateway<br />and accept an event.",
+    deck: "Run a self-contained MQTT demo, then initialize your own gateway. Rust MSRV {msrv}; device protocol {protocol}.", openGithub: "View on GitHub", readReadme: "README", outlineTitle: "You will",
+    outline: ["Run a local MQTT demo", "Initialize and validate a gateway configuration", "Connect devices and a confirmed business sink"],
+    runTitle: "1. Run the demo", runBody: "From a source checkout, run this command. It authenticates a real MQTT device, publishes a heartbeat, waits for the business sink ACK, then drains and exits. Omit --once for an interactive demo. Demo credentials are for local development only.",
+    uploadTitle: "2. Initialize your gateway", uploadBody: "From an extracted release archive, initialize a directory, validate the configuration, and start the gateway. The CLI reads netbaiot.json in the current directory by default.",
+    clientTitle: "3. Connect a business sink", clientBody: "Configure a confirmed HTTP webhook or Business RPC V4 sink. Business RPC V5 event windows are opt-in. ACK only after application processing and make processing idempotent by event_id. See the repository examples for client configuration.",
+    deviceTitle: "4. Connect devices", deviceBody: "Use standard MQTT 3.1.1 or the supported MQTT 5.0 profile, framed TCP, or authenticated UDP. Public device TCP requires TLS; UDP authentication does not encrypt payloads.",
+    cliTitle: "5. Production setup", cliBody: "Use netbaiot init --production to generate a configuration and independent device and management TLS material. Review the production PKI documentation and configure the business sink before deployment.",
+    contractTitle: "Operating constraints", contract: ["The gateway keeps runtime state in bounded memory and starts empty after restart.", "EventAccepted is not business persistence; consumers must be idempotent on event_id.", "Commands are not stored for offline devices.", "Planned shutdown waits for required ACKs; a forced exit loses pending events.", "The gateway is single-node; MQTT over WebSocket and shared subscriptions are not supported."],
+    licenseTitle: "License", licenseBody: "Current NetbaIoT versions use the {license}. It permits 30 days of internal non-production evaluation. Production, hosting and redistribution require the applicable written commercial grant. Historical AGPL rights remain in effect for their respective copies.",
   },
   iotArchitecture: {
-    title: "NetbaIoT architecture",
-    description:
-      "NetbaIoT architecture: HTTP/MQTT/TCP/UDP ingress, EventAccepted, EventBus, live-session commands, and a bounded restart spool.",
-    kicker: "Architecture",
-    heroHtml: "Ingress, EventBus,<br />and live sessions.",
-    deck:
-      "Normal MQTT and TCP telemetry uses socket parser state, a bound AuthContext, shared codec/config snapshots, and bounded memory routing. It performs no database, filesystem, remote auth, or control-plane operation on the hot path.",
-    pipelineTitle: "Runtime path",
-    cratesTitle: "Workspace responsibilities",
-    cratesDeck:
-      "Public client crates depend only on netbaiot-protocol and network libraries. They never depend on runtime, transport, broker, session, or server implementation crates.",
-    mqttTitle: "Embedded MQTT 3.1.1",
-    mqttBody:
-      "The broker implements CONNECT through DISCONNECT, including QoS0, QoS1, and explicit QoS2 state machines. ClientId is not trusted identity. Persistent sessions are keyed by authenticated DeviceKey plus ClientId. MQTT QoS and EventBus delivery are separate contracts.",
-    decisionTitle: "Design priorities",
-    decisionBody:
-      "There is deliberately no storage crate, SQL migration, database pool, durable outbox, persistent command state, or runtime message history. Business systems own durable business data.",
+    title: "NetbaIoT architecture", description: "MQTT, TCP and UDP ingress, bounded event routing, live commands and memory-only shutdown.", kicker: "Architecture", heroHtml: "Ingress, event routing,<br />and live sessions.",
+    deck: "MQTT and TCP telemetry uses authenticated connections, versioned codecs and bounded memory routing. Business systems own durable data.", pipelineTitle: "Runtime path", cratesTitle: "Selected workspace responsibilities", cratesDeck: "The workspace separates public protocols and clients from gateway runtime and transport implementation.",
+    mqttTitle: "Embedded MQTT 3.1.1 and bounded 5.0 profile", mqttBody: "The broker supports QoS 0, 1 and 2, retained messages, Will and persistent sessions within one process. Restart clears all MQTT state. MQTT QoS and business delivery are separate contracts.",
+    decisionTitle: "Design priorities", decisionBody: "No runtime state files, database, durable outbox or offline command storage. Planned shutdown waits for required sink ACKs in memory; a forced exit loses pending work.",
   },
   notFound: {
     title: "Page not found",
@@ -557,7 +487,7 @@ const zh: typeof en = {
     title: "NetbaDB 类型化数据库与 NetbaIoT MQTT 网关",
     tagline: "强类型数据库核心与无数据库 IoT 网关",
     description:
-      "NetbaDB 是用 Rust 实现的强类型关系型数据库核心。NetbaIoT 是面向 HTTP 与 MQTT 3.1.1 的无数据库 IoT 网关。",
+      "NetbaDB 是用 Rust 实现的强类型关系型数据库核心。NetbaIoT 是面向 MQTT、TCP 与 UDP 的纯内存 IoT 网关。",
   },
   chrome: {
     skip: "跳到正文",
@@ -595,7 +525,7 @@ const zh: typeof en = {
   home: {
     heroHtml: "类型化关系型<em>数据库</em>。<br />无数据库 IoT <em>网关</em>。",
     lede:
-      "NetbaDB 在进程内或通过 Protocol v2 存储类型化表。NetbaIoT 接收 HTTP、MQTT 3.1.1、TCP 与 UDP 设备流量，并把事件转发给你的业务系统。它们是彼此独立的程序。",
+      "NetbaDB 在进程内或通过 Protocol v2 存储类型化表。NetbaIoT 接收 MQTT、TCP 与 UDP 设备流量，并把事件转发给你的业务系统。它们是彼此独立的程序。",
     ctaArchitecture: "架构",
     ctaStart: "教程",
     ctaDb: "NetbaDB 教程",
@@ -614,10 +544,10 @@ const zh: typeof en = {
     ],
     iotCardTitle: "NetbaIoT",
     iotCardBody:
-      "内存优先的 IoT 网关。设备通过 HTTP 或 MQTT 上报；业务系统消费事件，并向在线会话下发命令。",
+      "内存优先的 IoT 网关。设备通过 MQTT、TCP 或 UDP 上报；业务系统消费事件，并向在线会话下发命令。",
     iotPoints: [
-      "HTTP、内嵌 MQTT 3.1.1、分帧 TCP 与已认证 UDP；运行时没有数据库",
-      "HTTP 202 与 MQTT QoS1 表示 EventAccepted，不表示业务库已落盘",
+      "内嵌 MQTT 3.1.1 与有限 MQTT 5.0 配置、分帧 TCP 和已认证 UDP",
+      "MQTT QoS1 PUBACK 表示 EventAccepted，不表示业务库已落盘",
       "命令只发往已连接的本地会话；离线设备返回 DeviceOffline",
     ],
     howKicker: "教程",
@@ -630,9 +560,9 @@ const zh: typeof en = {
     ],
     iotHowTitle: "NetbaIoT",
     iotHow: [
-      "用 configs/development.json 运行 netbaiot-server。",
-      "POST /v1/device/data；HTTP 202 表示事件已被接受。",
-      "用 netbaiot-client 订阅，并在应用处理后再 ACK。",
+      "运行 cargo run --locked -p netbaiot-cli -- demo --once。",
+      "演示会发布 MQTT heartbeat 并等待业务 sink ACK。",
+      "初始化自己的网关配置并连接业务 sink。",
     ],
     statSlice: "当前版本",
     statProtocol: "远程协议",
@@ -706,11 +636,11 @@ const zh: typeof en = {
       },
       {
         q: "怎么用 NetbaIoT？",
-        a: "运行 netbaiot-server，通过 HTTP 或 MQTT 上传设备事件，再用 netbaiot-client 消费。应用处理完成后再 ACK。命令要求设备在线。",
+        a: "先运行 CLI 演示，再配置 MQTT、TCP 或 UDP 设备与确认型业务 sink。应用处理完成后再 ACK。命令要求设备在线。",
       },
       {
         q: "使用什么许可证？",
-        a: "两者均以 AGPL-3.0-or-later 授权。如果修改程序并让用户通过网络与之交互，必须提供对应源代码。",
+        a: "NetbaDB 采用 AGPL-3.0-or-later。当前 NetbaIoT 使用商业许可，允许 30 天内部非生产评估；生产使用和再分发需取得书面授权。",
       },
     ],
   },
@@ -980,112 +910,35 @@ const zh: typeof en = {
     ],
   },
   iot: {
-    title: "NetbaIoT MQTT 与 HTTP IoT 网关",
-    description:
-      "NetbaIoT 是面向 HTTP、MQTT 3.1.1、TCP 与 UDP 的无数据库 IoT 网关。HTTP 202 表示 EventAccepted，不是业务持久化。",
-    kicker: "NetbaIoT",
-    heroHtml: "设备事件进来，<br />业务 sink 出去。",
-    deck:
-      "NetbaIoT 是 IoT 网关。设备通过 HTTP、MQTT 3.1.1、TCP 或 UDP 上报。网关完成认证与解码后，把 DeviceEvent 转发到你的 webhook 或 TCP sink。它不存储业务数据。",
-    traitsTitle: "网关特点",
-    traits: [
-      "运行时没有 PostgreSQL 或其他数据库",
-      "HTTP 202 与 MQTT QoS1 表示 EventAccepted，不是业务持久化",
-      "命令要求在线 MQTT 或 TCP 会话",
-      "计划内关机可以 spool 必达工作；崩溃可能丢失内存中的事件",
-    ],
-    done: "已实现",
-    notDone: "不在当前范围",
-    ctaStart: "教程",
-    ctaArchitecture: "架构",
-    pathsTitle: "设备、业务与运维路径。",
-    pathsDeck:
-      "设备可使用标准 MQTT 3.1.1 或设备 HTTP。业务系统通过 netbaiot-client 消费确认事件。运维使用管理监听与 netbaiot CLI。",
-    deliveryTitle: "EventAccepted 不是业务持久化。",
-    deliveryBody:
-      "HTTP 202 与 MQTT QoS1 PUBACK 表示事件越过了有界 EventAccepted 边界：认证、编解码校验、路由，以及对每个确认必达 sink 的原子预留。它们不表示业务数据库已存储该事件。消费者必须按稳定 event_id 去重。",
-    commandTitle: "命令仅针对在线会话。",
-    commandBody:
-      "命令只会进入当前已连接的本地 MQTT 或 TCP 会话队列。离线设备返回类型化的 DeviceOffline。NetbaIoT 不存储离线命令。",
-    restartTitle: "计划内重启，不是崩溃持久。",
-    restartBody:
-      "计划内关机将必达工作排入带 fsync 与原子重命名的有界本地重启 spool。这是优雅重启安全的至少一次投递。SIGKILL、进程崩溃或断电可能丢失仍在内存中的已接受窗口。",
+    title: "NetbaIoT MQTT、TCP 与 UDP 网关", description: "支持 MQTT、TCP 与 UDP 的纯内存 IoT 网关，向业务系统确认投递事件。", kicker: "NetbaIoT", heroHtml: "设备事件进来，<br />业务 sink 出去。",
+    deck: "NetbaIoT 将 MQTT、分帧 TCP 与 UDP 上行数据认证、解码为 DeviceEvent，再路由到确认型 webhook 或 Business RPC sink。持久业务数据由业务系统持有。",
+    traitsTitle: "网关特点", traits: ["运行时无数据库，也不在本地持久化状态", "MQTT QoS1 PUBACK 表示 EventAccepted，不是业务持久化", "命令要求在线 MQTT 或 TCP 会话", "计划内关机在内存中排空必达工作；强制退出会丢失待处理事件"],
+    done: "已实现", notDone: "不在当前范围", ctaStart: "教程", ctaArchitecture: "架构", pathsTitle: "设备、业务与运维路径。", pathsDeck: "设备使用 MQTT、分帧 TCP 或已认证 UDP；业务系统通过确认型 webhook 或 Business RPC 接收事件；HTTP 仅用于管理。",
+    deliveryTitle: "EventAccepted 不是业务持久化。", deliveryBody: "设备回执表示校验、路由以及对每个必达 sink 的原子准入已经完成。必达 sink 显式 ACK。内存重试可能重复投递同一 event_id，消费者必须保证幂等。",
+    commandTitle: "命令仅针对在线会话。", commandBody: "命令发往已连接的本地 MQTT 或 TCP 会话。离线设备返回 DEVICE_OFFLINE，不存储离线命令。传输发送、设备接收与执行 ACK 是不同阶段。",
+    restartTitle: "纯内存关机与重启。", restartBody: "计划内关机先关闭入口，再在内存中等待必达 sink ACK。sink 故障时进程保持运行但不再就绪。强制退出会丢失待处理事件；每次重启的运行时与 MQTT 状态均为空。",
     faq: [
-      {
-        q: "NetbaIoT 需要数据库吗？",
-        a: "不需要。运行时无数据库。持久业务数据由业务系统持有。NetbaIoT 唯一的持久机制是计划内优雅关机时使用的有界本地重启 spool。",
-      },
-      {
-        q: "HTTP 202 或 MQTT QoS1 PUBACK 表示什么？",
-        a: "表示 EventAccepted：认证、编解码校验、路由，以及对每个确认必达 sink 的原子预留。它们不表示业务数据库已存储该事件。消费者必须按 event_id 去重。",
-      },
-      {
-        q: "会为离线设备存储命令吗？",
-        a: "不会。命令只会进入当前已连接的本地 MQTT 或 TCP 会话。离线设备返回类型化的 DeviceOffline。",
-      },
+      {q: "NetbaIoT 需要数据库吗？", a: "不需要。网关没有数据库或运行时状态文件，持久数据由业务系统持有。"},
+      {q: "MQTT QoS1 PUBACK 表示什么？", a: "表示 EventAccepted，不表示业务已持久化。必达 sink 重试可能重复投递 event_id，消费者需保证幂等。"},
+      {q: "会为离线设备存储命令吗？", a: "不会。命令只发往当前已连接的本地 MQTT 或 TCP 会话；离线设备返回 DEVICE_OFFLINE。"},
     ],
   },
   iotStart: {
-    title: "开始使用 NetbaIoT",
-    description:
-      "运行 netbaiot-server，通过设备 HTTP 或 MQTT 上传事件，并用 netbaiot-client 在显式 ACK 后消费。",
-    kicker: "教程",
-    heroHtml: "启动网关，<br />并接受一条事件。",
-    deck:
-      "本教程启动 netbaiot-server，上传一条设备事件，再用 netbaiot-client 消费。标准 MQTT 3.1.1 客户端不依赖可选设备 SDK。MSRV {msrv}。协议 {protocol}。",
-    openGithub: "在 GitHub 上查看",
-    readReadme: "README",
-    outlineTitle: "你将完成",
-    outline: [
-      "在回环地址上启动开发监听",
-      "POST 一条 heartbeat 并看到 HTTP 202",
-      "在业务客户端中订阅并 ACK 该投递",
-    ],
-    runTitle: "1. 运行开发服务器",
-    runBody:
-      "开发监听绑定回环地址。HTTP 202 表示 EventAccepted。调用管理 API 前需设置 64 字符的 NETBAIOT_ADMIN_SECRET。生产配置必须指定确认型 webhook 或分帧 TCP/RPC 业务 sink。",
-    uploadTitle: "2. 上传设备事件",
-    uploadBody:
-      "设备 bearer 格式为 credential_id:secret。JSON schema 为 DeviceUplink。重试与重启重放可能重复投递；业务 sink 必须按 event_id 去重。",
-    clientTitle: "3. 用业务客户端消费事件",
-    clientBody:
-      "AckMode 默认为 Manual。在应用处理之后 ACK。每个订阅同时只有一条服务器确认投递。丢弃未确认投递会关闭流，以便服务器重投。",
-    deviceTitle: "4. 可选设备 SDK",
-    deviceBody:
-      "netbaiot-device-sdk 是便利层，不是硬性要求。标准 MQTT 3.1.1 客户端仍为一等公民。断线发布会被拒绝；SDK 不会累积离线 RAM 队列。",
-    cliTitle: "5. 运维 CLI",
-    cliBody:
-      "netbaiot 仅通过 netbaiot-client 实现。令牌不会被打印。drain 需要 --yes。退出码 5 表示设备离线。",
-    contractTitle: "运行约束",
-    contract: [
-      "运行时没有数据库、持久 outbox 或持久命令状态。",
-      "EventAccepted 不是业务持久化。消费者必须对 event_id 幂等。",
-      "不会为离线设备存储命令。",
-      "计划内重启可以 spool 必达工作；突然崩溃可能丢失内存中已接受的事件。",
-      "当前 broker 不包含 MQTT 5、WebSockets、共享订阅与 $SYS。",
-    ],
-    licenseTitle: "许可",
-    licenseBody:
-      "NetbaIoT 以 {license} 授权。如果修改程序并让用户通过网络与之交互，必须提供对应源代码。",
+    title: "开始使用 NetbaIoT", description: "运行 MQTT 演示，然后初始化并配置网关。", kicker: "教程", heroHtml: "启动网关，<br />并接受一条事件。",
+    deck: "先运行独立的 MQTT 演示，再初始化自己的网关。Rust 最低版本 {msrv}；设备协议 {protocol}。", openGithub: "在 GitHub 上查看", readReadme: "README", outlineTitle: "你将完成", outline: ["运行本地 MQTT 演示", "初始化并校验网关配置", "连接设备和确认型业务 sink"],
+    runTitle: "1. 运行演示", runBody: "在源码目录运行以下命令。演示会认证真实 MQTT 设备、发布 heartbeat、等待业务 sink ACK，然后排空并退出。去掉 --once 可进入交互式演示。演示凭据仅用于本地开发。",
+    uploadTitle: "2. 初始化网关", uploadBody: "从解压后的发布包运行以下命令，初始化目录、校验配置并启动网关。CLI 默认读取当前目录的 netbaiot.json。",
+    clientTitle: "3. 连接业务 sink", clientBody: "配置确认型 HTTP webhook 或 Business RPC V4 sink。Business RPC V5 事件窗口需显式启用。应用处理完成后再 ACK，并按 event_id 保证幂等。客户端配置请参考仓库示例。",
+    deviceTitle: "4. 连接设备", deviceBody: "可使用标准 MQTT 3.1.1、受支持的 MQTT 5.0 配置、分帧 TCP 或已认证 UDP。公网设备 TCP 要求 TLS；UDP 认证不加密载荷。",
+    cliTitle: "5. 生产环境准备", cliBody: "使用 netbaiot init --production 生成配置以及独立的设备和管理 TLS 材料。部署前请阅读生产 PKI 文档并配置业务 sink。",
+    contractTitle: "运行约束", contract: ["网关将运行时状态保存在有界内存中，重启后从空状态开始。", "EventAccepted 不是业务持久化；消费者必须对 event_id 幂等。", "不会为离线设备存储命令。", "计划内关机等待必达 ACK；强制退出会丢失待处理事件。", "网关为单节点；不支持 MQTT over WebSocket 和共享订阅。"],
+    licenseTitle: "许可", licenseBody: "当前 NetbaIoT 版本使用{license}，允许 30 天内部非生产评估。生产、托管和再分发需要适用的书面商业授权。历史 AGPL 权利对相应副本继续有效。",
   },
   iotArchitecture: {
-    title: "NetbaIoT 架构",
-    description:
-      "NetbaIoT 架构：HTTP/MQTT/TCP/UDP 入口、EventAccepted、EventBus、在线会话命令与有界重启 spool。",
-    kicker: "架构",
-    heroHtml: "入口、EventBus<br />与在线会话。",
-    deck:
-      "常规 MQTT 与 TCP 遥测只使用套接字解析状态、已绑定的 AuthContext、共享编解码 / 配置快照，以及有界内存路由。热路径不做数据库、文件系统、远程认证或控制面操作。",
-    pipelineTitle: "运行时路径",
-    cratesTitle: "工作区职责",
-    cratesDeck:
-      "公开客户端 crate 只依赖 netbaiot-protocol 与网络库，从不依赖 runtime、transport、broker、session 或 server 实现 crate。",
-    mqttTitle: "内嵌 MQTT 3.1.1",
-    mqttBody:
-      "broker 实现 CONNECT 至 DISCONNECT，包括 QoS0、QoS1 与显式 QoS2 状态机。ClientId 不是可信身份。持久会话以已认证 DeviceKey 加 ClientId 为键。MQTT QoS 与 EventBus 投递是分离的契约。",
-    decisionTitle: "设计优先级",
-    decisionBody:
-      "有意不设 storage crate、SQL 迁移、数据库连接池、持久 outbox、持久命令状态或运行时消息历史。持久业务数据由业务系统持有。",
+    title: "NetbaIoT 架构", description: "MQTT、TCP 与 UDP 入口、有界事件路由、在线命令和纯内存关机。", kicker: "架构", heroHtml: "入口、事件路由<br />与在线会话。",
+    deck: "MQTT 与 TCP 遥测使用已认证连接、版本化编解码与有界内存路由。持久业务数据由业务系统持有。", pipelineTitle: "运行时路径", cratesTitle: "部分工作区职责", cratesDeck: "工作区将公开协议与客户端同网关运行时和传输实现分离。",
+    mqttTitle: "内嵌 MQTT 3.1.1 与有限 5.0 配置", mqttBody: "broker 支持 QoS 0、1、2、保留消息、遗嘱和进程内持久会话。重启会清空所有 MQTT 状态。MQTT QoS 与业务投递是不同的契约。",
+    decisionTitle: "设计优先级", decisionBody: "没有运行时状态文件、数据库、持久 outbox 或离线命令存储。计划内关机在内存中等待必达 sink ACK；强制退出会丢失待处理工作。",
   },
   notFound: {
     title: "页面不存在",

@@ -24,7 +24,7 @@ const { locale, t } = useCopy(Astro.url.pathname);
         <a href={site.db.github}>sskycn/netbadb</a>
         {" · "}
         <a href={site.iot.github}>sskycn/netbaiot</a>
-        {" · "}{site.license}
+        {" · "}NetbaDB: {site.license} · NetbaIoT: <a href={`${site.iot.github}/blob/main/LICENSE`}>{site.iot.license}</a>
         {" · "}{t.chrome.footerStatic}
       </div>
     </div>

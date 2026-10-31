@@ -77,12 +77,11 @@ export function softwareJsonLd() {
       applicationSubCategory: "IoT gateway",
       operatingSystem: "Linux, macOS",
       softwareVersion: site.iot.version,
-      license: "https://www.gnu.org/licenses/agpl-3.0.html",
+      license: `${site.iot.github}/blob/main/LICENSE`,
       programmingLanguage: "Rust",
       codeRepository: site.iot.github,
-      isAccessibleForFree: true,
       description:
-        "NetbaIoT is a database-free, memory-first IoT protocol gateway for HTTP, MQTT 3.1.1, TCP, and UDP.",
+        "NetbaIoT is a database-free, memory-first IoT protocol gateway for MQTT, TCP, and UDP.",
     },
   ];
 }
