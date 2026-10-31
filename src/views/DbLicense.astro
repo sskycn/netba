@@ -1,0 +1,29 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import license from "../content/licenses/netbadb.agpl?raw";
+import { useCopy } from "../i18n/copy";
+
+const { locale } = useCopy(Astro.url.pathname);
+const title = locale === "zh" ? "NetbaDB 许可" : "NetbaDB license";
+const description = locale === "zh" ? "NetbaDB 使用的 GNU Affero 通用公共许可证第 3 版全文。" : "The full GNU Affero General Public License, version 3, used by NetbaDB.";
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="wrap content-page">
+    <p class="kicker">{locale === "zh" ? "许可" : "License"}</p>
+    <h1 class="page-title">{title}</h1>
+    <div class="prose">
+      <p>{locale === "zh" ? "NetbaDB 采用 AGPL-3.0-or-later。以下为 GNU Affero 通用公共许可证第 3 版的英文原文。" : "NetbaDB is licensed under AGPL-3.0-or-later. The original GNU Affero General Public License version 3 follows."}</p>
+      <pre class="license-text">{license}</pre>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .license-text {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font: inherit;
+    line-height: 1.7;
+  }
+</style>

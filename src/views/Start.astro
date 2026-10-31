@@ -4,14 +4,15 @@ import CodeBlock from "../components/CodeBlock.astro";
 import Faq from "../components/Faq.astro";
 import { site } from "../data/site";
 import { useCopy } from "../i18n/copy";
+import { localizePath } from "../i18n/locale";
 
-const { t } = useCopy(Astro.url.pathname);
+const { locale, t } = useCopy(Astro.url.pathname);
 
 const cargoToml = `[dependencies]
-netbadb-sdk = { git = "https://github.com/sskycn/netbadb" }`;
+netbadb-sdk = { path = "path/to/netbadb/sdk/rust" }`;
 
 const cargoTomlRemote = `[dependencies]
-netbadb-sdk = { git = "https://github.com/sskycn/netbadb", default-features = false, features = ["remote"] }`;
+netbadb-sdk = { path = "path/to/netbadb/sdk/rust", default-features = false, features = ["remote"] }`;
 
 const rustExample = `use netbadb_sdk::{
     ColumnDef, ColumnId, Database, DatabaseError, PhysicalType, ScalarValue, TableDef, TableId,
@@ -110,8 +111,7 @@ defer client.Close()
 
 rows, err := client.Query(ctx, "SELECT id, name FROM users ORDER BY id")`;
 
-const fromSource = `git clone https://github.com/sskycn/netbadb.git
-cd netbadb
+const fromSource = `cd path/to/netbadb
 make test`;
 ---
 
@@ -122,11 +122,6 @@ make test`;
     <p class="page-deck">
       {t.start.deck.replace("{toolchain}", site.db.rustToolchain).replace("{msrv}", site.db.msrv)}
     </p>
-
-    <div class="actions" style="margin-bottom: 2rem;">
-      <a class="btn btn-primary" href={site.db.github}>{t.start.openGithub}</a>
-      <a class="btn btn-ghost" href={`${site.db.github}/blob/main/sdk/rust/README.md`}>{t.start.readReadme}</a>
-    </div>
 
     <div class="grid-2" style="margin-bottom: 2rem;">
       <article class="card">
@@ -273,7 +268,7 @@ let mut reopened = Database::open_catalog("catalog")?;`}
       <h2>{t.start.licenseTitle}</h2>
       <p>
         {t.start.licenseBody.split("{license}")[0]}
-        <a href={`${site.db.github}/blob/main/LICENSE`}>{site.license}</a>
+        <a href={localizePath("/license", locale)}>{site.license}</a>
         {t.start.licenseBody.split("{license}")[1]}
       </p>
     </div>

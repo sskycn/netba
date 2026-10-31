@@ -7,6 +7,7 @@ export type FaqItem = { q: string; a: string };
 export const routes = [
   "/",
   "/start",
+  "/license",
   "/query",
   "/architecture",
   "/storage",
@@ -14,6 +15,7 @@ export const routes = [
   "/iot",
   "/iot/start",
   "/iot/architecture",
+  "/iot/license",
 ] as const;
 
 export const ogImage = {
@@ -35,7 +37,6 @@ export function organizationJsonLd() {
     name: site.name,
     url: site.url,
     logo: absoluteUrl("/favicon.svg"),
-    sameAs: [site.db.github, site.iot.github],
   };
 }
 
@@ -61,9 +62,8 @@ export function softwareJsonLd() {
       applicationSubCategory: "Relational database",
       operatingSystem: "Linux, macOS",
       softwareVersion: site.db.version,
-      license: "https://www.gnu.org/licenses/agpl-3.0.html",
+      license: absoluteUrl("/license"),
       programmingLanguage: "Rust",
-      codeRepository: site.db.github,
       isAccessibleForFree: true,
       description:
         "NetbaDB is a strongly typed relational database core written in Rust. Native Protocol v2 is the only database network frontend.",
@@ -77,9 +77,8 @@ export function softwareJsonLd() {
       applicationSubCategory: "IoT gateway",
       operatingSystem: "Linux, macOS",
       softwareVersion: site.iot.version,
-      license: `${site.iot.github}/blob/main/LICENSE`,
+      license: absoluteUrl("/iot/license"),
       programmingLanguage: "Rust",
-      codeRepository: site.iot.github,
       description:
         "NetbaIoT is a database-free, memory-first IoT protocol gateway for MQTT, TCP, and UDP.",
     },

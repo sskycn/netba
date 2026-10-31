@@ -2,7 +2,6 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PageFrame from "../components/PageFrame.astro";
 import Faq from "../components/Faq.astro";
-import { site } from "../data/site";
 import { useCopy } from "../i18n/copy";
 import { localizePath } from "../i18n/locale";
 
@@ -47,7 +46,7 @@ const { locale, t } = useCopy(Astro.url.pathname);
           <p>
             <a href={localizePath("/start", locale)}>{t.home.ctaDb}</a>
             {" · "}
-            <a href={site.db.github}>sskycn/netbadb</a>
+            <a href={localizePath("/architecture", locale)}>{locale === "zh" ? "架构" : "Architecture"}</a>
           </p>
         </article>
         <article class="card">
@@ -59,7 +58,7 @@ const { locale, t } = useCopy(Astro.url.pathname);
           <p>
             <a href={localizePath("/iot/start", locale)}>{t.home.ctaIot}</a>
             {" · "}
-            <a href={site.iot.github}>sskycn/netbaiot</a>
+            <a href={localizePath("/iot", locale)}>{locale === "zh" ? "产品概览" : "Overview"}</a>
           </p>
         </article>
       </div>

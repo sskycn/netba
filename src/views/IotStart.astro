@@ -3,10 +3,34 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import CodeBlock from "../components/CodeBlock.astro";
 import { site } from "../data/site";
 import { useCopy } from "../i18n/copy";
+import { localizePath } from "../i18n/locale";
 
 const { locale, t } = useCopy(Astro.url.pathname);
 
 const runCmd = `cargo run --locked -p netbaiot-cli -- demo --once`;
+const releaseDemo = `./netbaiot demo --once`;
+const client = `use futures_util::StreamExt;
+use netbaiot_client::NetbaIoTClient;
+use netbaiot_protocol::EventFilter;
+
+#[netbaiot_driver::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let client = NetbaIoTClient::builder()
+        .endpoint(std::env::var("NETBAIOT_ENDPOINT")?)
+        .token(std::env::var("NETBAIOT_TOKEN")?)
+        .event_token(std::env::var("NETBAIOT_EVENT_TOKEN")?)
+        .event_address(std::env::var("NETBAIOT_EVENT_ADDRESS")?.parse()?)
+        .connect().await?;
+    let mut events = client.events().subscribe(EventFilter::default()).await?;
+    while let Some(delivery) = events.next().await {
+        let delivery = delivery?;
+        println!("event {}", delivery.event_id());
+        // Process the event durably and idempotently before ACK.
+        delivery.ack().await?;
+    }
+    Ok(())
+}`;
+const production = `netbaiot init --production --domain example.com`;
 const setup = `./netbaiot init my-gateway
 cd my-gateway
 ../netbaiot config check --config netbaiot.json
@@ -21,10 +45,6 @@ cd my-gateway
     <p class="page-deck">
       {t.iotStart.deck.replace("{msrv}", site.iot.msrv).replace("{protocol}", site.iot.protocolVersion)}
     </p>
-    <div class="actions" style="margin-bottom: 2rem;">
-      <a class="btn btn-primary" href={site.iot.github}>{t.iotStart.openGithub}</a>
-      <a class="btn btn-ghost" href={`${site.iot.github}/blob/main/README.md`}>{t.iotStart.readReadme}</a>
-    </div>
 
     <article class="card" style="margin-bottom: 2rem;">
       <h3>{t.iotStart.outlineTitle}</h3>
@@ -38,6 +58,8 @@ cd my-gateway
       <p>{t.iotStart.runBody}</p>
     </div>
     <CodeBlock code={runCmd} lang="bash" />
+    <p>{locale === "zh" ? "使用解压后的发布包时，运行：" : "From an extracted release archive, run:"}</p>
+    <CodeBlock code={releaseDemo} lang="bash" />
 
     <div class="prose">
       <h2>{t.iotStart.uploadTitle}</h2>
@@ -49,7 +71,8 @@ cd my-gateway
       <h2>{t.iotStart.clientTitle}</h2>
       <p>{t.iotStart.clientBody}</p>
     </div>
-    <p><a href={`${site.iot.github}/blob/main/crates/netbaiot-client/examples/business_event_consumer.rs`}>{locale === "zh" ? "业务客户端示例" : "Business client example"}</a></p>
+    <CodeBlock code={client} lang="rust" />
+    <p>{locale === "zh" ? "示例依赖 futures-util、netbaiot-client、netbaiot-protocol 和 netbaiot-driver。事件地址与事件令牌必须与 Business RPC 监听及认证配置匹配；生产应用应先完成持久化等业务处理，再 ACK。" : "The example uses futures-util, netbaiot-client, netbaiot-protocol and netbaiot-driver. The event address and token must match the Business RPC listener and authentication configuration. Production applications should complete durable processing before ACK."}</p>
 
     <div class="prose">
       <h2>{t.iotStart.deviceTitle}</h2>
@@ -60,7 +83,18 @@ cd my-gateway
       <h2>{t.iotStart.cliTitle}</h2>
       <p>{t.iotStart.cliBody}</p>
     </div>
-    <p><a href={`${site.iot.github}/blob/main/docs/production-pki.md`}>{locale === "zh" ? "生产环境 PKI" : "Production PKI"}</a></p>
+    <CodeBlock code={production} lang="bash" />
+    <div class="prose">
+      {locale === "zh" ? (
+        <><p>命令在当前目录生成 netbaiot.json、私有 CA 层级和独立的设备与管理 TLS 密钥。设备入口默认监听 0.0.0.0:8443，UDP 使用同一端口；非回环管理监听需要独立的 management_tls。Business RPC 使用 business_rpc.listen 和独立的 TLS 配置。</p>
+        <p>初始化会显示一次新生成的离线 CA 口令；请安全保存，不要写入日志，也不要提供给运行中的网关。仅向相应客户端分发 root-ca.pem 信任锚，证书仍需通过域名校验。基础域名及其一级通配子域名会加入证书；其他域名或 IP 需显式配置。</p>
+        <p>生成的认证和业务接收地址是本地默认值，部署前必须启动对应服务或修改配置。使用 netbaiot cert reload 更新运行中网关的证书；已有连接继续使用原配置，新握手使用新配置。</p></>
+      ) : (
+        <><p>The command creates netbaiot.json, a private CA hierarchy and independent device and management TLS keys in the current directory. Device ingress defaults to 0.0.0.0:8443; UDP uses the same port. Non-loopback management requires its own management_tls. Business RPC uses business_rpc.listen and an independent TLS profile.</p>
+        <p>Initialization displays the new offline CA password once. Store it securely, keep it out of logs, and do not supply it to the running gateway. Distribute only root-ca.pem as the appropriate client trust anchor; certificate hostname validation still applies. Certificates cover the base domain and its one-level wildcard; configure additional domains or IPs explicitly.</p>
+        <p>The generated authentication and business receiver addresses are local defaults. Start those services or change the configuration before deployment. Use netbaiot cert reload to update certificates on a running gateway; existing connections retain their old configuration and new handshakes use the new one.</p></>
+      )}
+    </div>
 
     <div class="prose">
       <h2>{t.iotStart.contractTitle}</h2>
@@ -70,7 +104,7 @@ cd my-gateway
       <h2>{t.iotStart.licenseTitle}</h2>
       <p>
         {t.iotStart.licenseBody.split("{license}")[0]}
-        <a href={`${site.iot.github}/blob/main/LICENSE`}>{site.iot.license}</a>
+        <a href={localizePath("/iot/license", locale)}>{site.iot.license}</a>
         {t.iotStart.licenseBody.split("{license}")[1]}
       </p>
     </div>

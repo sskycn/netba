@@ -370,7 +370,7 @@ const en = {
     ],
     depTitle: "1. Add the dependency",
     depBody:
-      "The crate is published from the workspace repository. Cargo resolves the netbadb-sdk package in that git workspace.",
+      "In an available NetbaDB source checkout, set the path to its sdk/rust directory. Adjust the path relative to your application’s Cargo.toml.",
     embedTitle: "2. Create, insert, and query",
     embedBody:
       "Database::create refuses to overwrite an existing database or WAL slot. insert and execute run as implicit transactions. create_index backfills current rows and registers a non-unique single-column index. analyze writes a fresh optimizer snapshot; DML does not refresh it automatically.",
@@ -404,7 +404,7 @@ const en = {
     lspTitle: "Editor diagnostics",
     lspBody:
       "netbadb-lsp --schema schema.json is a diagnostics-only stdio language server. It loads SDK Schema Spec v1 or v2 once. It does not open database files or report physical plans.",
-    sourceTitle: "Build from source",
+    sourceTitle: "Build from an available source checkout",
     cargoEquiv: "Equivalent cargo commands:",
     contractTitle: "Operating constraints",
     contract: [
@@ -421,7 +421,7 @@ const en = {
     faq: [
       {
         q: "How do I embed NetbaDB in a Rust process?",
-        a: "Add netbadb-sdk from the GitHub workspace, call Database::create, then insert and query in-process. The default feature is embedded.",
+        a: "Add netbadb-sdk from an available source checkout, call Database::create, then insert and query in-process. The default feature is embedded.",
       },
       {
         q: "What protocol does netbadbd speak?",
@@ -459,7 +459,7 @@ const en = {
     outline: ["Run a local MQTT demo", "Initialize and validate a gateway configuration", "Connect devices and a confirmed business sink"],
     runTitle: "1. Run the demo", runBody: "From a source checkout, run this command. It authenticates a real MQTT device, publishes a heartbeat, waits for the business sink ACK, then drains and exits. Omit --once for an interactive demo. Demo credentials are for local development only.",
     uploadTitle: "2. Initialize your gateway", uploadBody: "From an extracted release archive, initialize a directory, validate the configuration, and start the gateway. The CLI reads netbaiot.json in the current directory by default.",
-    clientTitle: "3. Connect a business sink", clientBody: "Configure a confirmed HTTP webhook or Business RPC V4 sink. Business RPC V5 event windows are opt-in. ACK only after application processing and make processing idempotent by event_id. See the repository examples for client configuration.",
+    clientTitle: "3. Connect a business sink", clientBody: "Configure a confirmed HTTP webhook or Business RPC V4 sink. Business RPC V5 event windows are opt-in. ACK only after application processing and make processing idempotent by event_id. The example below reads management and event credentials from environment variables.",
     deviceTitle: "4. Connect devices", deviceBody: "Use standard MQTT 3.1.1 or the supported MQTT 5.0 profile, framed TCP, or authenticated UDP. Public device TCP requires TLS; UDP authentication does not encrypt payloads.",
     cliTitle: "5. Production setup", cliBody: "Use netbaiot init --production to generate a configuration and independent device and management TLS material. Review the production PKI documentation and configure the business sink before deployment.",
     contractTitle: "Operating constraints", contract: ["The gateway keeps runtime state in bounded memory and starts empty after restart.", "EventAccepted is not business persistence; consumers must be idempotent on event_id.", "Commands are not stored for offline devices.", "Planned shutdown waits for required ACKs; a forced exit loses pending events.", "The gateway is single-node; MQTT over WebSocket and shared subscriptions are not supported."],
@@ -846,7 +846,7 @@ const zh: typeof en = {
     ],
     depTitle: "1. 添加依赖",
     depBody:
-      "该 crate 来自工作区仓库。Cargo 会在该 git workspace 中解析名为 netbadb-sdk 的包。",
+      "在已有 NetbaDB 源码工作区中，将路径指向 sdk/rust 目录，并按应用 Cargo.toml 的位置调整相对路径。",
     embedTitle: "2. 创建、插入与查询",
     embedBody:
       "Database::create 拒绝覆盖已有数据库或 WAL 槽。insert 与 execute 作为隐式事务运行。create_index 回填当前行并注册非唯一单列索引。analyze 写入新的优化器快照；DML 不会自动刷新该快照。",
@@ -880,7 +880,7 @@ const zh: typeof en = {
     lspTitle: "编辑器诊断",
     lspBody:
       "netbadb-lsp --schema schema.json 是仅提供诊断的 stdio 语言服务器。它会一次性加载 SDK Schema Spec v1 或 v2。它不会打开数据库文件，也不报告物理计划。",
-    sourceTitle: "从源码构建",
+    sourceTitle: "在已有源码工作区中构建",
     cargoEquiv: "等价的 cargo 命令：",
     contractTitle: "运行约束",
     contract: [
@@ -897,7 +897,7 @@ const zh: typeof en = {
     faq: [
       {
         q: "如何在 Rust 进程内嵌入 NetbaDB？",
-        a: "从 GitHub workspace 添加 netbadb-sdk，调用 Database::create，然后在进程内插入与查询。默认特性为 embedded。",
+        a: "从已有源码工作区添加 netbadb-sdk，调用 Database::create，然后在进程内插入与查询。默认特性为 embedded。",
       },
       {
         q: "netbadbd 使用什么协议？",
@@ -928,7 +928,7 @@ const zh: typeof en = {
     deck: "先运行独立的 MQTT 演示，再初始化自己的网关。Rust 最低版本 {msrv}；设备协议 {protocol}。", openGithub: "在 GitHub 上查看", readReadme: "README", outlineTitle: "你将完成", outline: ["运行本地 MQTT 演示", "初始化并校验网关配置", "连接设备和确认型业务 sink"],
     runTitle: "1. 运行演示", runBody: "在源码目录运行以下命令。演示会认证真实 MQTT 设备、发布 heartbeat、等待业务 sink ACK，然后排空并退出。去掉 --once 可进入交互式演示。演示凭据仅用于本地开发。",
     uploadTitle: "2. 初始化网关", uploadBody: "从解压后的发布包运行以下命令，初始化目录、校验配置并启动网关。CLI 默认读取当前目录的 netbaiot.json。",
-    clientTitle: "3. 连接业务 sink", clientBody: "配置确认型 HTTP webhook 或 Business RPC V4 sink。Business RPC V5 事件窗口需显式启用。应用处理完成后再 ACK，并按 event_id 保证幂等。客户端配置请参考仓库示例。",
+    clientTitle: "3. 连接业务 sink", clientBody: "配置确认型 HTTP webhook 或 Business RPC V4 sink。Business RPC V5 事件窗口需显式启用。应用处理完成后再 ACK，并按 event_id 保证幂等。下方示例从环境变量读取管理与事件连接凭据。",
     deviceTitle: "4. 连接设备", deviceBody: "可使用标准 MQTT 3.1.1、受支持的 MQTT 5.0 配置、分帧 TCP 或已认证 UDP。公网设备 TCP 要求 TLS；UDP 认证不加密载荷。",
     cliTitle: "5. 生产环境准备", cliBody: "使用 netbaiot init --production 生成配置以及独立的设备和管理 TLS 材料。部署前请阅读生产 PKI 文档并配置业务 sink。",
     contractTitle: "运行约束", contract: ["网关将运行时状态保存在有界内存中，重启后从空状态开始。", "EventAccepted 不是业务持久化；消费者必须对 event_id 幂等。", "不会为离线设备存储命令。", "计划内关机等待必达 ACK；强制退出会丢失待处理事件。", "网关为单节点；不支持 MQTT over WebSocket 和共享订阅。"],

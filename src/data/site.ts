@@ -4,7 +4,6 @@ export const site = {
   license: "AGPL-3.0-or-later",
   db: {
     name: "NetbaDB",
-    github: "https://github.com/sskycn/netbadb",
     version: "0.1.0",
     phase: "73+",
     rustToolchain: "1.97.1",
@@ -23,7 +22,6 @@ export const site = {
   },
   iot: {
     name: "NetbaIoT",
-    github: "https://github.com/sskycn/netbaiot",
     version: "0.6.6",
     license: "NetbaIoT Commercial Software License",
     msrv: "1.88.0",

@@ -21,11 +21,10 @@ const { locale, t } = useCopy(Astro.url.pathname);
         <p class="footer-note">{t.chrome.footerBody}</p>
       </div>
       <div>
-        <a href={site.db.github}>sskycn/netbadb</a>
+        <a href={localizePath("/start", locale)}>NetbaDB</a>
         {" · "}
-        <a href={site.iot.github}>sskycn/netbaiot</a>
-        {" · "}NetbaDB: {site.license} · NetbaIoT: <a href={`${site.iot.github}/blob/main/LICENSE`}>{site.iot.license}</a>
-        {" · "}{t.chrome.footerStatic}
+        <a href={localizePath("/iot", locale)}>NetbaIoT</a>
+        {" · "}NetbaDB: <a href={localizePath("/license", locale)}>{site.license}</a> · NetbaIoT: <a href={localizePath("/iot/license", locale)}>{site.iot.license}</a>
       </div>
     </div>
   </div>

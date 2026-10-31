@@ -6,14 +6,14 @@
 
 - [Get started](https://netba.net/start): Embedded netbadb-sdk and remote Protocol v2.
 - [Query language](https://netba.net/query), [architecture](https://netba.net/architecture), [storage](https://netba.net/storage), and [roadmap](https://netba.net/roadmap).
-- [Source](https://github.com/sskycn/netbadb): AGPL-3.0-or-later, MSRV 1.85.
+- [License](https://netba.net/license): AGPL-3.0-or-later. MSRV 1.85.
 
 ## NetbaIoT
 
 - [Overview](https://netba.net/iot): MQTT 3.1.1 and a bounded MQTT 5.0 profile, framed TCP, authenticated UDP, confirmed webhook and Business RPC sinks.
 - [Get started](https://netba.net/iot/start): Run `cargo run --locked -p netbaiot-cli -- demo --once`, then initialize a gateway configuration.
 - [Architecture](https://netba.net/iot/architecture): Bounded memory routing and live sessions.
-- [Source](https://github.com/sskycn/netbaiot): Version 0.6.6, MSRV 1.88, commercial license with a 30-day internal non-production evaluation. Historical AGPL rights apply to their respective copies.
+- Version 0.6.6, MSRV 1.88. See the [commercial license](https://netba.net/iot/license); it permits a 30-day internal non-production evaluation. Historical AGPL rights apply to their respective copies.
 - EventAccepted is not business persistence. Required sinks ACK; retries may duplicate event_id.
 - HTTP is management-only. Commands target online local MQTT or TCP sessions; offline commands are not stored.
 - Planned shutdown waits in memory for required sink ACKs. Forced exit loses pending events; runtime and MQTT state start empty after restart.

@@ -1,6 +1,6 @@
 # Netba 站点
 
-纯静态 Astro 站点，用来展示 [NetbaDB](https://github.com/sskycn/netbadb) 与 [NetbaIoT](https://github.com/sskycn/netbaiot)。
+纯静态 Astro 站点，用来展示 [NetbaDB](/start) 与 [NetbaIoT](/iot)。
 
 构建产物是普通 HTML / CSS，不需要 Node 服务器。
 

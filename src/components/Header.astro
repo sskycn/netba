@@ -8,7 +8,6 @@ const { locale, t } = useCopy(Astro.url.pathname);
 const current = stripLocale(Astro.url.pathname);
 const product = productFromPath(current);
 const subnav = product === "iot" ? iotNav : product === "db" ? dbNav : [];
-const github = product === "iot" ? site.iot.github : site.db.github;
 const brandSuffix = product === "iot" ? "IoT" : product === "db" ? "DB" : "";
 ---
 
@@ -46,7 +45,6 @@ const brandSuffix = product === "iot" ? "IoT" : product === "db" ? "DB" : "";
           );
         })
       }
-      <a class="nav-github" href={github} rel="noreferrer">GitHub</a>
       <LangSwitch />
     </nav>
   </div>
